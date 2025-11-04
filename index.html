@@ -1,160 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="style.css">
-  </head>
-    <title>Alloc</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alloc</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-sm">
-        <div class="container">
-            <a class="navbar-brand brand fw-bold" style="font-size: 28px;" href="/">
-                DJ-<span style="color: #c0d9d9;">Allox</span>
-            </a>
-            
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="" style="font-size: 18px;"><span class="icons"><i class="bi bi-book-half"></i></span> Materi</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="" style="font-size: 18px;"><span class="icons"><i class="bi bi-calculator-fill"></i></span> Simulasi</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="" style="font-size: 18px;"><span class="icons"><i class="bi bi-pencil-fill"></i></span> Latihan</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="" style="font-size: 18px;"><span class="icons"><i class="bi bi-info-circle"></i></span> Profil Kami</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>  
-    <div class="memoalloc-card">
-        <h2>Contiguous Memory Allocation Simulation</h2>
+  <!-- Tempat navbar akan dimuat -->
+  <div id="navbar-container"></div>
 
-        <div class="mb-3">
-        <h5 class="mb-3">Algorithm</h5>
-        <select class="form-select">
-            <option>First-Fit</option>
-            <option>Best-Fit</option>
-            <option>Worst-Fit</option>
-        </select>
-        </div>
+  <div class="memoalloc-card">
+    <h2>Contiguous Memory Allocation Simulation</h2>
 
-        <div class="mb-2 d-flex flex-column">
-            <h5>Partitions</h5>
-            <div class="d-flex align-items-end flex-wrap">
-                <!-- <div class="partition-input">
-                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter Partition Name">
-                </div> -->
-
-                <div class="partition-input">
-                    <input type="number" id="size" name="size" class="form-control" placeholder="Enter Partition Size">
-                </div>
-
-                <button class="circle-btn btn-add">+</button>
-            </div>
-        </div>
-
-        <table class="table align-middle mt-3">
-        <thead class="table">
-            <tr>
-            <td scope="col">Name</td>
-            <td scope="col">Size (KB)</td>
-            <td scope="col">Action</td>
-            </tr>
-        </thead>
-        <tbody id="partitionTableBody">
-            <!-- Baris partisi akan muncul di sini -->
-        </tbody>
-        </table>
-
-        <button class="btn btn-pink mt-3">START SIMULATION</button>
+    <div class="mb-3">
+      <h5 class="mb-3">Algorithm</h5>
+      <select class="form-select">
+        <option>First-Fit</option>
+        <option>Best-Fit</option>
+        <option>Worst-Fit</option>
+      </select>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <div class="mb-2 d-flex flex-column">
+      <h5>Partitions</h5>
+      <div class="d-flex align-items-end flex-wrap">
+        <div class="partition-input">
+          <input type="number" id="size" name="size" class="form-control" placeholder="Enter Partition Size">
+        </div>
+        <button class="circle-btn btn-add">+</button>
+      </div>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
+    <table class="table align-middle mt-3">
+      <thead class="table">
+        <tr>
+          <td>Name</td>
+          <td>Size (KB)</td>
+          <td>Action</td>
+        </tr>
+      </thead>
+      <tbody id="partitionTableBody"></tbody>
+    </table>
 
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const addButton = document.querySelector(".btn-add");
-        // const nameInput = document.getElementById("name");
-        const sizeInput = document.getElementById("size");
-        const tableBody = document.getElementById("partitionTableBody");
+    <button class="btn btn-pink mt-3">START SIMULATION</button>
+  </div>
 
-        function getPartitionName(num) {
-            let name = "";
-            while (num >= 0) {
-                name = String.fromCharCode((num % 26) + 65) + name;
-                num = Math.floor(num / 26) - 1;
-            }
-            return name;
-        }
+  <!-- Tempat footer akan dimuat -->
+  <div id="footer-container"></div>
 
-        function updatePartitionNames() {
-            const rows = tableBody.querySelectorAll("tr");
-            rows.forEach((row, index) => {
-                const nameCell = row.querySelector("td:first-child");
-                nameCell.textContent = getPartitionName(index);
-            });
-        }
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/template.js"></script>
 
-        addButton.addEventListener("click", function() {
-            // const name = nameInput.value.trim();
-            const size = sizeInput.value.trim();
+  <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const addButton = document.querySelector(".btn-add");
+    const sizeInput = document.getElementById("size");
+    const tableBody = document.getElementById("partitionTableBody");
 
-            // if (name === "" || size === "") {
-            //     alert("Please fill in both Name and Size fields!");
-            //     return;
-            // }
+    function getPartitionName(num) {
+      let name = "";
+      while (num >= 0) {
+        name = String.fromCharCode((num % 26) + 65) + name;
+        num = Math.floor(num / 26) - 1;
+      }
+      return name;
+    }
 
-            if (size === "") {
-                alert("Please fill in the Size field!");
-                return;
-            }
+    function updatePartitionNames() {
+      const rows = tableBody.querySelectorAll("tr");
+      rows.forEach((row, index) => {
+        const nameCell = row.querySelector("td:first-child");
+        nameCell.textContent = getPartitionName(index);
+      });
+    }
 
-            const row = document.createElement("tr");
+    addButton.addEventListener("click", function() {
+      const size = sizeInput.value.trim();
+      if (size === "") {
+        alert("Please fill in the Size field!");
+        return;
+      }
 
-            const nameCell = document.createElement("td");
-            row.appendChild(nameCell);
+      const row = document.createElement("tr");
 
-            const sizeCell = document.createElement("td");
-            sizeCell.textContent = size;
-            row.appendChild(sizeCell);
+      const nameCell = document.createElement("td");
+      row.appendChild(nameCell);
 
-            const actionCell = document.createElement("td");
-            actionCell.classList.add("text-center");
+      const sizeCell = document.createElement("td");
+      sizeCell.textContent = size;
+      row.appendChild(sizeCell);
 
-            const deleteBtn = document.createElement("button");
-            deleteBtn.textContent = "×";
-            deleteBtn.classList.add("btn", "btn-danger", "btn-sm", "rounded-circle");
-            deleteBtn.style.width = "28px";
-            deleteBtn.style.height = "28px";
+      const actionCell = document.createElement("td");
+      actionCell.classList.add("text-center");
 
-            deleteBtn.addEventListener("click", function() {
-                row.remove();
-                updatePartitionNames();
-            });
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "×";
+      deleteBtn.classList.add("btn", "btn-danger", "btn-sm", "rounded-circle");
+      deleteBtn.style.width = "28px";
+      deleteBtn.style.height = "28px";
 
-            actionCell.appendChild(deleteBtn);
-            row.appendChild(actionCell);
+      deleteBtn.addEventListener("click", function() {
+        row.remove();
+        updatePartitionNames();
+      });
 
-            tableBody.appendChild(row);
-            updatePartitionNames();
+      actionCell.appendChild(deleteBtn);
+      row.appendChild(actionCell);
 
-            sizeInput.value = "";
-            sizeInput.focus();
-        });
+      tableBody.appendChild(row);
+      updatePartitionNames();
+
+      sizeInput.value = "";
+      sizeInput.focus();
     });
-    </script>
+  });
+  </script>
 </body>
 </html>
