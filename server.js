@@ -1,12 +1,11 @@
-const express = require("express");
-const path = require("path");
+const express = require('express');
 const app = express();
+const port = 3000;
 
-// Set folder public
-app.use(express.static(path.join(__dirname)));
+// Jadikan folder 'public' sebagai folder static
+app.use(express.static('public'));
 
-// Jalankan server di port 3000
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+// Jalankan server
+app.listen(port, () => {
+  console.log(`Server jalan di http://localhost:${port}`);
 });

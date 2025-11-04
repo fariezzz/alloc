@@ -9,6 +9,6 @@ async function loadTemplate(id, file) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadTemplate("navbar-container", "templates/navbar.html");
-  loadTemplate("footer-container", "templates/footer.html");
+  loadTemplate("navbar-container", "./templates/navbar.html");
+ 
 });

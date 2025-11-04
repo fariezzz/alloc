@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alloc</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+  <!-- Tempat navbar akan dimuat -->
+  <div id="navbar-container"></div>
+
+  <div class="memoalloc-card">
+    <h2>Contiguous Memory Allocation Simulation</h2>
+
+    <div class="mb-3">
+      <h5 class="mb-3">Algorithm</h5>
+      <select class="form-select">
+        <option>First-Fit</option>
+        <option>Best-Fit</option>
+        <option>Worst-Fit</option>
+      </select>
+    </div>
+
+    <div class="mb-2 d-flex flex-column">
+      <h5>Partitions</h5>
+      <div class="d-flex align-items-end flex-wrap">
+        <div class="partition-input">
+          <input type="number" id="size" name="size" class="form-control" placeholder="Enter Partition Size">
+        </div>
+        <button class="circle-btn btn-add">+</button>
+      </div>
+    </div>
+
+    <table class="table align-middle mt-3">
+      <thead class="table">
+        <tr>
+          <td>Name</td>
+          <td>Size (KB)</td>
+          <td>Action</td>
+        </tr>
+      </thead>
+      <tbody id="partitionTableBody"></tbody>
+    </table>
+
+    <button class="btn btn-pink mt-3">START SIMULATION</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/template.js"></script>
+
+  <script src="js/script.js"></script>
+</body>
+
+</html>
