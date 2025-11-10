@@ -124,7 +124,7 @@ body {
     color: #fff;
 }
 
-#resultTable td, #resultTable th {
+/* #resultTable td, #resultTable th {
   border: 1px solid #666 !important;
   text-align: center;
   vertical-align: middle;
@@ -133,7 +133,7 @@ body {
 #resultTable i {
   color: #bbb;
   font-size: 0.9em;
-}
+} */
 
 .result-card {
     color: #ffffff;

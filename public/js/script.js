@@ -291,39 +291,38 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         const notAllocated = allocationResult.filter(a => a.partition === "Not Allocated");
+        const allocatedCount = allocationResult.length - notAllocated.length;
         const algorithm = document.querySelector("select.form-select").value;
 
+        const unallocatedList = notAllocated.length > 0
+            ? `<br><b>Proses yang tidak teralokasi:</b> ${notAllocated.map(a => a.process).join(", ")}`
+            : "";
+
+        let algorithmDesc = "";
         if (algorithm === "First-Fit") {
-            explanation.innerHTML = `
+            algorithmDesc = `
                     Algoritma <b>First-Fit</b> memungkinkan proses untuk ditempatkan di blok memori kosong pertama yang ukurannya cukup besar untuk menampung proses tersebut. Pemindaian dimulai dari awal memori dan berhenti segera setelah menemukan ruang yang cukup.
-                    <br><br>
-                    Total blok terbentuk: ${blocks.length}<br>
-                    <ul>
-                    <li>${allocationResult.length - notAllocated.length} proses berhasil dialokasikan.</li>
-                    <li>${notAllocated.length} proses tidak mendapat partisi.</li>
-                    </ul>
                 `;
         } else if (algorithm == "Best-Fit") {
-            explanation.innerHTML = `
+            algorithmDesc = `
                     Algoritma <b>Best-Fit</b> memilih blok terkecil yang masih cukup besar untuk menampung proses. Semua blok diperiksa terlebih dahulu sebelum memilih yang paling sesuai.
-                    <br><br>
-                    Total blok terbentuk: ${blocks.length}<br>
-                    <ul>
-                    <li>${allocationResult.length - notAllocated.length} proses berhasil dialokasikan.</li>
-                    <li>${notAllocated.length} proses tidak mendapat partisi.</li>
-                    </ul>
                 `;
         } else if (algorithm == "Worst-Fit") {
-            explanation.innerHTML = `
+            algorithmDesc = `
                     Algoritma <b>Worst-Fit</b> Memilih blok terbesar yang tersedia untuk menampung proses. Tujuannya adalah menyisakan ruang kosong besar, agar bisa digunakan oleh proses lain di masa mendatang.
-                    <br><br>
-                    Total blok terbentuk: ${blocks.length}<br>
-                    <ul>
-                    <li>${allocationResult.length - notAllocated.length} proses berhasil dialokasikan.</li>
-                    <li>${notAllocated.length} proses tidak mendapat partisi.</li>
-                    </ul>
                 `;
         }
+
+        explanation.innerHTML = `
+            ${algorithmDesc}
+            <br><br>
+            Total blok terbentuk: ${blocks.length}<br>
+            <ul>
+                <li>${allocatedCount} proses berhasil dialokasikan.</li>
+                <li>${notAllocated.length} proses tidak mendapat partisi.</li>
+            </ul>
+            ${unallocatedList}
+        `;
 
         inputCard.classList.add("d-none");
         resultCard.classList.remove("d-none");
