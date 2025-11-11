@@ -165,3 +165,17 @@ td input.form-control-sm:focus {
     outline: none !important;
     box-shadow: 0 0 4px #aaa;
 }
+
+
+.correct {
+  background-color: rgba(50, 120, 80, 0.5) !important;
+}
+.wrong {
+  background-color: rgba(150, 40, 40, 0.5) !important;
+}
+.expected-hint {
+  display: block;
+  color: #d3d3d3;
+  margin-top: 4px;
+  font-style: italic;
+}
