@@ -37,13 +37,15 @@ body {
     border: 1px solid #444;
 }
 
-.form-select, .form-control {
+.form-select,
+.form-control {
     background-color: #3b3b47;
     color: #fff;
     border: none;
 }
 
-.form-select:focus, .form-control:focus {
+.form-select:focus,
+.form-control:focus {
     background-color: #3b3b47;
     color: #fff;
     box-shadow: none;
@@ -64,7 +66,8 @@ body {
     border-radius: 8px;
 }
 
-.btn-pink:hover, .btn-add:hover {
+.btn-pink:hover,
+.btn-add:hover {
     background-color: #F0F5F9;
     color: #2b2b35;
 }
@@ -90,7 +93,8 @@ body {
 
 .btn-remove,
 .btn-danger.rounded-circle {
-    background-color: #ff5c5c !important; /* merah */
+    background-color: #ff5c5c !important;
+    /* merah */
     width: 48px !important;
     height: 48px !important;
     font-size: 24px !important;
@@ -113,7 +117,7 @@ body {
     border-color: white;
 }
 
-.table th, 
+.table th,
 .table td {
     background-color: transparent !important;
     /* border: none !important; */
@@ -146,4 +150,18 @@ body {
     text-align: center;
     font-weight: 700;
     margin-bottom: 30px;
+}
+
+td input.form-control-sm {
+    background-color: #3b3b47 !important;
+    color: #fff !important;
+    border: 1px solid #555 !important;
+    border-radius: 4px;
+    height: 28px;
+    padding: 2px 6px;
+}
+
+td input.form-control-sm:focus {
+    outline: none !important;
+    box-shadow: 0 0 4px #aaa;
 }

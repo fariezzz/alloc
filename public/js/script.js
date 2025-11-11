@@ -79,6 +79,9 @@ document.addEventListener("DOMContentLoaded", function () {
         tableBody.appendChild(row);
         updatePartitionNames();
 
+        // enable inline edit for the newly created size cell
+        enableInlineEdit(sizeCell);
+
         sizeInput.value = "";
         sizeInput.focus();
     }
@@ -157,6 +160,9 @@ document.addEventListener("DOMContentLoaded", function () {
         processTableBody.appendChild(row);
         updateProcessNames();
 
+        // enable inline edit for the newly created size cell
+        enableInlineEdit(sizeCell);
+
         processSizeInput.value = "";
         processSizeInput.focus();
     }
@@ -173,6 +179,51 @@ document.addEventListener("DOMContentLoaded", function () {
         processSizeInput.dataset.keyListener = "true";
     }
 
+    // ==============================
+    // INLINE EDIT FUNCTION
+    // ==============================
+    function enableInlineEdit(cell) {
+        if (!cell) return;
+        // guard if listener already attached
+        if (cell.dataset.inline === "true") return;
+        cell.dataset.inline = "true";
+
+        cell.addEventListener("dblclick", function () {
+            const oldValue = cell.textContent.trim();
+            const input = document.createElement("input");
+            input.type = "number";
+            input.value = oldValue;
+            input.className = "form-control form-control-sm";
+            input.style.width = "100px";
+            input.style.display = "inline-block";
+
+            cell.textContent = "";
+            cell.appendChild(input);
+            input.focus();
+
+            input.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    saveEdit();
+                }
+            });
+
+            input.addEventListener("blur", saveEdit);
+
+            function saveEdit() {
+                const newValue = input.value.trim();
+
+                if (newValue === "" || isNaN(newValue) || Number(newValue) <= 0) {
+                    cell.textContent = oldValue;
+                } else {
+                    cell.textContent = Number(newValue); // save numeric
+                }
+
+                // setelah simpan, update penamaan (kalau perlu)
+                updatePartitionNames();
+                updateProcessNames();
+            }
+        });
+    }
 
     // ==============================
     // PART 3: RESULT HANDLER
@@ -202,7 +253,6 @@ document.addEventListener("DOMContentLoaded", function () {
             let chosenIndex = -1;
 
             if (algorithm === "First-Fit") {
-                // --- FIRST FIT ---
                 for (let i = 0; i < blocks.length; i++) {
                     if (!blocks[i].used && blocks[i].size >= proc.size) {
                         chosenIndex = i;
@@ -212,7 +262,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             else if (algorithm === "Best-Fit") {
-                // --- BEST FIT ---
                 let minDiff = Infinity;
                 for (let i = 0; i < blocks.length; i++) {
                     if (!blocks[i].used && blocks[i].size >= proc.size) {
@@ -226,7 +275,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             else if (algorithm === "Worst-Fit") {
-                // --- WORST FIT ---
                 let maxDiff = -1;
                 for (let i = 0; i < blocks.length; i++) {
                     if (!blocks[i].used && blocks[i].size >= proc.size) {
