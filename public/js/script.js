@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // ==============================
     // PART 1: PARTITION HANDLER
     // ==============================
-
     const addButton = document.getElementById("addPartition");
     const sizeInput = document.getElementById("partitionSize");
     const tableBody = document.getElementById("partitionTableBody");
@@ -38,10 +37,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    addButton.addEventListener("click", function () {
-        const size = sizeInput.value.trim();
-        if (size === "") {
-            alert("Please fill in the Size field!");
+    function addPartition() {
+        const raw = sizeInput.value;
+        if (raw === null) return; // safety
+        const sizeStr = String(raw).trim();
+
+        // Validasi: harus angka positif (boleh 0 kalau mau)
+        const sizeNum = Number(sizeStr);
+        if (sizeStr === "" || !isFinite(sizeNum) || sizeNum <= 0) {
+            alert("Please enter a valid positive number for partition size!");
+            sizeInput.focus();
             return;
         }
 
@@ -51,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
         row.appendChild(nameCell);
 
         const sizeCell = document.createElement("td");
-        sizeCell.textContent = size;
+        sizeCell.textContent = sizeNum;
         row.appendChild(sizeCell);
 
         const actionCell = document.createElement("td");
@@ -76,7 +81,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
         sizeInput.value = "";
         sizeInput.focus();
-    });
+    }
+
+    // attach both click and Enter to the same function
+    addButton.addEventListener("click", addPartition);
+
+    // ensure keydown listener attached only once
+    if (!sizeInput.dataset.keyListener) {
+        sizeInput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                addPartition(); // call directly (no reliance on click())
+            }
+        });
+        sizeInput.dataset.keyListener = "true";
+    }
+
 
     // ==============================
     // PART 2: PROCESS HANDLER
@@ -97,10 +117,14 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    processAddButton.addEventListener("click", function () {
-        const size = processSizeInput.value.trim();
-        if (size === "") {
-            alert("Please fill in the Process Size field!");
+    function addProcess() {
+        const raw = processSizeInput.value;
+        if (raw === null) return;
+        const sizeStr = String(raw).trim();
+        const sizeNum = Number(sizeStr);
+        if (sizeStr === "" || !isFinite(sizeNum) || sizeNum <= 0) {
+            alert("Please enter a valid positive number for process size!");
+            processSizeInput.focus();
             return;
         }
 
@@ -110,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
         row.appendChild(nameCell);
 
         const sizeCell = document.createElement("td");
-        sizeCell.textContent = size;
+        sizeCell.textContent = sizeNum;
         row.appendChild(sizeCell);
 
         const actionCell = document.createElement("td");
@@ -135,7 +159,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
         processSizeInput.value = "";
         processSizeInput.focus();
-    });
+    }
+
+    processAddButton.addEventListener("click", addProcess);
+
+    if (!processSizeInput.dataset.keyListener) {
+        processSizeInput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                addProcess();
+            }
+        });
+        processSizeInput.dataset.keyListener = "true";
+    }
+
 
     // ==============================
     // PART 3: RESULT HANDLER
