@@ -259,35 +259,55 @@ function renderDrag(q) {
   const totalSlots = PARTS.length;
 
   function onDropHandler(ev) {
-    ev.preventDefault();
-    const td = ev.currentTarget;
-    td.classList.remove('drop-hover');
-    const procName = ev.dataTransfer.getData('text/plain');
-    if (!procName) return;
+  ev.preventDefault();
+  const td = ev.currentTarget;
+  td.classList.remove('drop-hover');
+  const procName = ev.dataTransfer.getData('text/plain');
+  if (!procName) return;
 
-    // urutan wajib sesuai (P1, lalu P2, dst)
-    const expectedProc = getNextExpectedProc();
-    if (procName !== expectedProc) {
-      showHint(`💡 Harap masukkan ${expectedProc} terlebih dahulu sebelum ${procName}.`);
-      return;
-    }
-
-    if (td.dataset.proc) {
-      addToPool(td.dataset.proc);
-    }
-
-    const el = pool.querySelector(`[data-proc="${procName}"]`);
-    if (el) el.remove();
-
-    td.textContent = procName;
-    td.dataset.proc = procName;
-    td.classList.add('filled');
-    setTimeout(() => td.classList.remove('filled'), 400);
-
-    // auto-evaluate jika semua terisi
-    const filled = Array.from(document.querySelectorAll('.process-slot')).every(s => s.dataset.proc);
-    if (filled) evaluateDragAnswer();
+  // urutan wajib sesuai (P1, lalu P2, dst)
+  const expectedProc = getNextExpectedProc();
+  if (procName !== expectedProc) {
+    showHint(`💡 Harap masukkan ${expectedProc} terlebih dahulu sebelum ${procName}.`);
+    return;
   }
+
+  // Jika slot sudah berisi proses, jangan ganti langsung
+  if (td.dataset.proc) {
+    showHint(`❗ Slot ini sudah diisi (${td.dataset.proc}). Hapus dulu sebelum mengganti.`);
+    return;
+  }
+
+  // Hapus dari daftar proses di kanan
+  const el = pool.querySelector(`[data-proc="${procName}"]`);
+  if (el) el.remove();
+
+  // Tampilkan proses + tombol hapus (minimalis)
+  td.dataset.proc = procName;
+  td.innerHTML = `
+    <div class="slot-content">
+      <span class="proc-label">${procName}</span>
+      <button class="remove-btn" title="Hapus">✕</button>
+    </div>
+  `;
+  td.classList.add('filled');
+  setTimeout(() => td.classList.remove('filled'), 400);
+
+  // Tambahkan aksi tombol hapus
+  const removeBtn = td.querySelector('.remove-btn');
+  removeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    addToPool(procName);
+    td.innerHTML = '';
+    delete td.dataset.proc;
+  });
+
+  // Evaluasi otomatis jika semua slot terisi
+  const filled = Array.from(document.querySelectorAll('.process-slot')).every(s => s.dataset.proc);
+  if (filled) evaluateDragAnswer();
+ }
+
+
 
   function addToPool(name) {
     if (pool.querySelector(`[data-proc="${name}"]`)) return;
@@ -331,13 +351,6 @@ function renderDrag(q) {
     slot.addEventListener('dragenter', ()=> slot.classList.add('drop-hover'));
     slot.addEventListener('dragleave', ()=> slot.classList.remove('drop-hover'));
     slot.addEventListener('drop', onDropHandler);
-    slot.addEventListener('dblclick', ()=>{
-      if (slot.dataset.proc) {
-        addToPool(slot.dataset.proc);
-        slot.textContent = '';
-        delete slot.dataset.proc;
-      }
-    });
   }
 
   // perhitungan hasil
@@ -450,13 +463,23 @@ function evaluateDragAnswer() {
 
   const map = {};
   for (let i = 0; i < totalSlots; i++) {
-    const slot = document.getElementById(`slot-${i}`);
-    map[i] = slot.dataset.proc || null;
+  const slot = document.getElementById(`slot-${i}`);
+  map[i] = slot.dataset.proc || null;
   }
+
+  // Simpan jawaban user
   userAnswers[index] = map;
 
+  // 🔒 Hapus semua tombol hapus setelah evaluasi
+  document.querySelectorAll('.remove-btn').forEach(btn => btn.remove());
+
+  // Tambahkan indikator bahwa jawaban terkunci (opsional, untuk debugging)
+  console.log("🔒 Slot terkunci, tombol hapus dihapus.");
+
+  // Aktifkan tombol Next
   nextBtn.disabled = false;
-}
+
+  }
 
 
   // restore jawaban sebelumnya (jika ada)
@@ -484,50 +507,50 @@ nextBtn.addEventListener('click', ()=> {
   const q = allQuestions[index];
 
   if (q.type === 'mcq') {
-    // if not yet graded
-    if (userAnswers[index] === null) {
-      // ensure user has chosen something
-      const chosen = userSelected[index];
-      if (chosen === null) {
-        // fallback: check DOM selection
-        const selBtn = root.querySelector('.option-btn.selected');
-        if (selBtn) userSelected[index] = parseInt(selBtn.dataset.idx,10);
-      }
-      if (userSelected[index] === null) {
-        // nothing chosen, do nothing
-        return;
-      }
-
-      // show loading + disable button to prevent double clicks
-      nextBtn.disabled = true;
-      nextBtn.classList.add('processing');
-      const explainWrap = root.querySelector('#explainWrap');
-      if (explainWrap) {
-        explainWrap.innerHTML = `<div class="loading-anim">⏳ Memeriksa jawaban...</div>`;
-      }
-
-      // simulate processing delay
-      setTimeout(() => {
-        nextBtn.classList.remove('processing');
-        // grade and show explanation
-        const selectedIdx = userSelected[index];
-        userAnswers[index] = selectedIdx; // save final answer
-        const container = root.firstElementChild; // renderMCQ created first child as container
-        showMCQExplain(q, selectedIdx, container);
-        // change button to next
-        nextBtn.textContent = (index < total-1) ? "Soal Selanjutnya →" : "Lihat Hasil";
-        nextBtn.disabled = false;
-      }, 900); // 900ms gives a perceptible processing animation
-    } else {
-      // already graded -> go to next
-      if (index < total-1) {
-        index++;
-        renderCurrent();
-      } else {
-        showSummary();
-      }
+  // jika belum dijawab
+  if (userAnswers[index] === null) {
+    // pastikan user memilih opsi
+    const chosen = userSelected[index];
+    if (chosen === null) {
+      const selBtn = root.querySelector('.option-btn.selected');
+      if (selBtn) userSelected[index] = parseInt(selBtn.dataset.idx, 10);
     }
+    if (userSelected[index] === null) return;
+
+    // 🔸 Langsung sembunyikan tombol begitu diklik
+    nextBtn.style.display = 'none';
+
+    // tampilkan animasi loading di area penjelasan
+    const explainWrap = root.querySelector('#explainWrap');
+    if (explainWrap) {
+      explainWrap.innerHTML = `<div class="loading-anim">⏳ Memeriksa jawaban...</div>`;
+    }
+
+    // simulasi proses pemeriksaan (delay 900 ms)
+    setTimeout(() => {
+      // nilai jawaban
+      const selectedIdx = userSelected[index];
+      userAnswers[index] = selectedIdx;
+      const container = root.firstElementChild;
+      showMCQExplain(q, selectedIdx, container);
+
+      // 🔹 tampilkan kembali tombol dengan teks baru
+      nextBtn.textContent = (index < total - 1)
+        ? "Soal Selanjutnya →"
+        : "Lihat Hasil";
+      nextBtn.style.display = 'inline-block';
+      nextBtn.disabled = false;
+    }, 900);
   } else {
+    // sudah dijawab → lanjut ke soal berikutnya
+    if (index < total - 1) {
+      index++;
+      renderCurrent();
+    } else {
+      showSummary();
+    }
+  }
+ }else {
     // drag or other: original behavior (next if last or summary)
     if (index < total-1) {
       index++;
