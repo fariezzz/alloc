@@ -138,97 +138,272 @@
 </section>
 
 
-   <section id="jenis" class="mb-5">
+<section id="jenis" class="mb-5">
   <h2>Jenis Memory Allocation</h2>
   <p>
-    <b>Memory allocation</b> adalah proses menentukan bagian memori mana yang akan digunakan oleh suatu proses.
-    Terdapat dua pendekatan utama: <b>Static Allocation</b> dan <b>Dynamic Allocation</b>.
+    <b>Memory allocation</b> adalah proses penting dalam manajemen memori yang bertujuan untuk menentukan
+    bagian mana dari memori utama (RAM) yang akan digunakan oleh suatu proses.
+    Ketika banyak program dijalankan secara bersamaan, sistem operasi harus dapat
+    mengalokasikan memori secara efisien agar setiap proses mendapat ruang yang cukup
+    tanpa saling mengganggu.
+  </p>
+  <p>
+    Secara umum, terdapat dua pendekatan utama dalam alokasi memori: 
+    <b>Static Allocation</b> dan <b>Dynamic Allocation</b>. 
+    Kedua metode ini memiliki kelebihan dan kekurangan masing-masing
+    tergantung pada jenis sistem dan kebutuhan penggunaannya.
   </p>
 
   <h3>1. Static Allocation (Fixed Partitioning)</h3>
   <p>
-    Pada metode ini, memori utama dibagi menjadi beberapa partisi berukuran tetap sebelum program dijalankan.
-    Setiap partisi hanya dapat menampung satu proses, sehingga jika ukuran proses lebih kecil dari partisi,
-    akan ada ruang kosong yang tidak terpakai.
+    Pada metode <b>static allocation</b>, memori utama dibagi menjadi beberapa partisi
+    berukuran tetap (<i>fixed partitions</i>) sebelum sistem mulai dijalankan.
+    Setiap partisi hanya dapat menampung satu proses pada satu waktu.
+    Misalnya, jika komputer memiliki RAM sebesar 1024 KB dan dibagi menjadi
+    empat partisi masing-masing 256 KB, maka hanya empat proses yang dapat
+    dijalankan secara bersamaan — tidak peduli apakah setiap proses kecil atau besar.
   </p>
+
+  <p>
+    Konsep ini sering digunakan pada sistem batch lama di mana jumlah proses
+    relatif sedikit dan ukuran proses sudah diketahui sebelumnya.
+    Namun, pada sistem modern yang multitasking dan dinamis, metode ini
+    cenderung kurang efisien karena tidak mampu menyesuaikan ukuran partisi
+    dengan kebutuhan proses yang sebenarnya.
+  </p>
+
   <ul>
-    <li><b>Kelebihan:</b> Implementasi mudah dan cocok untuk sistem batch atau sistem kecil.</li>
-    <li><b>Kekurangan:</b> Dapat menyebabkan <b>internal fragmentation</b> karena sisa ruang tidak bisa digunakan oleh proses lain.</li>
+    <li><b>Kelebihan:</b> 
+      <ul>
+        <li>Implementasinya sangat sederhana, mudah dikontrol oleh sistem operasi.</li>
+        <li>Cocok untuk sistem kecil atau sistem tertanam (embedded system).</li>
+        <li>Overhead manajemen rendah karena ukuran partisi tetap.</li>
+      </ul>
+    </li>
+    <li><b>Kekurangan:</b> 
+      <ul>
+        <li>Terjadi <b>internal fragmentation</b> jika ukuran proses lebih kecil dari partisi yang ditempati.</li>
+        <li>Jumlah proses yang bisa berjalan bersamaan terbatas oleh jumlah partisi.</li>
+        <li>Tidak fleksibel, sulit menyesuaikan dengan beban kerja yang berubah-ubah.</li>
+      </ul>
+    </li>
   </ul>
+
+  <div class="alert alert-secondary mt-3">
+    📘 <b>Contoh sederhana:</b> Bayangkan kamu memiliki empat kotak masing-masing 1 liter
+    untuk menampung cairan, tapi kamu ingin menyimpan air 600 ml. 
+    Kotak tetap menampungnya, namun ada 400 ml ruang yang tidak terpakai — 
+    itulah <b>internal fragmentation</b>.
+  </div>
 
   <h3>2. Dynamic Allocation (Variable Partitioning)</h3>
   <p>
-    Berbeda dengan metode statis, ukuran partisi dibuat secara dinamis berdasarkan kebutuhan proses yang datang.
-    Ketika proses selesai, ruang tersebut akan dikembalikan dan dapat digunakan oleh proses lain.
+    Dalam metode <b>dynamic allocation</b>, sistem operasi membuat partisi secara
+    <i>dynamically</i> — sesuai dengan ukuran proses yang akan dijalankan.
+    Tidak ada ukuran tetap untuk partisi; sistem akan menyesuaikan ruang yang dibutuhkan.
+    Jika sebuah proses membutuhkan 150 KB, maka sistem hanya akan memberikan
+    ruang sebesar itu dari area memori kosong yang tersedia.
   </p>
+
+  <p>
+    Pendekatan ini membuat penggunaan memori jauh lebih efisien karena ruang
+    yang tidak terpakai menjadi lebih sedikit. Namun, seiring berjalannya waktu,
+    akan muncul potongan-potongan ruang kosong kecil di antara blok yang terisi —
+    fenomena ini dikenal dengan istilah <b>external fragmentation</b>.
+  </p>
+
   <ul>
-    <li><b>Kelebihan:</b> Lebih fleksibel dan efisien dalam penggunaan ruang memori.</li>
-    <li><b>Kekurangan:</b> Dapat menyebabkan <b>external fragmentation</b> karena ruang kosong terpecah-pecah.</li>
+    <li><b>Kelebihan:</b>
+      <ul>
+        <li>Lebih efisien karena ukuran partisi mengikuti kebutuhan proses.</li>
+        <li>Memungkinkan lebih banyak proses aktif secara bersamaan.</li>
+        <li>Cocok untuk sistem multitasking modern dengan beban dinamis.</li>
+      </ul>
+    </li>
+    <li><b>Kekurangan:</b>
+      <ul>
+        <li>Dapat menyebabkan <b>external fragmentation</b> akibat ruang kosong yang terpecah-pecah.</li>
+        <li>Manajemen memori lebih kompleks dan membutuhkan algoritma tambahan untuk pengalokasian.</li>
+        <li>Proses penataan ulang (<i>compaction</i>) kadang diperlukan untuk menggabungkan ruang kosong.</li>
+      </ul>
+    </li>
   </ul>
 
+  <div class="alert alert-secondary mt-3">
+    📗 <b>Analogi:</b> Metode ini seperti mengisi air ke dalam botol berbagai ukuran.
+    Setiap botol diisi sesuai kebutuhan, tetapi lama-kelamaan meja bisa penuh
+    dengan botol kecil dan besar yang menyisakan ruang-ruang kecil di antaranya —
+    itulah yang disebut <b>external fragmentation</b>.
+  </div>
+
+  <h3>3. Perbandingan Static vs Dynamic Allocation</h3>
+  <div class="table-responsive mt-3">
+    <table class="table table-bordered text-center align-middle">
+      <thead class="table-primary">
+        <tr>
+          <th>Aspek</th>
+          <th>Static Allocation</th>
+          <th>Dynamic Allocation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Ukuran Partisi</td>
+          <td>Tetap, ditentukan saat awal sistem berjalan.</td>
+          <td>Berubah sesuai kebutuhan proses.</td>
+        </tr>
+        <tr>
+          <td>Efisiensi Penggunaan Memori</td>
+          <td>Kurang efisien, banyak ruang kosong tidak terpakai.</td>
+          <td>Lebih efisien karena sesuai ukuran proses.</td>
+        </tr>
+        <tr>
+          <td>Jenis Fragmentasi</td>
+          <td>Internal Fragmentation</td>
+          <td>External Fragmentation</td>
+        </tr>
+        <tr>
+          <td>Kompleksitas Pengelolaan</td>
+          <td>Sederhana</td>
+          <td>Lebih kompleks (perlu algoritma alokasi)</td>
+        </tr>
+        <tr>
+          <td>Cocok Untuk</td>
+          <td>Sistem batch, embedded, atau real-time sederhana</td>
+          <td>Sistem multitasking, sistem operasi modern</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
   <div class="alert alert-info mt-4">
-    💡 <b>Catatan:</b> Sistem operasi modern sudah jarang menggunakan partisi tetap.
-    Sebaliknya, mereka menerapkan konsep <b>paging</b> dan <b>segmentation</b> yang memungkinkan
-    proses disimpan dalam blok-blok kecil dan tidak harus bersebelahan secara fisik di memori.
+    💡 <b>Catatan:</b> Sistem operasi modern seperti Windows, Linux, dan macOS
+    sudah jarang menggunakan partisi tetap. Sebagai gantinya,
+    mereka mengimplementasikan konsep <b>paging</b> dan <b>segmentation</b> 
+    yang memungkinkan proses disimpan dalam blok-blok kecil (<i>pages</i> atau <i>segments</i>)
+    dan tidak harus bersebelahan secara fisik di memori.  
+    Pendekatan ini meningkatkan efisiensi, mengurangi fragmentasi, 
+    serta mendukung fitur seperti <i>virtual memory</i> dan <i>process isolation</i>.
   </div>
 </section>
 
 
-    <!-- Algoritma -->
-    <section id="algoritma" class="mb-5">
-      <h2> Algoritma Pengalokasian Memori</h2>
-      <p>
-        Dalam <b>variable partitioning</b>, sistem operasi harus mencari blok memori kosong
-        (<i>hole</i>) yang cukup besar untuk proses baru. Berikut tiga algoritma yang umum digunakan:
-      </p>
+  <section id="algoritma" class="mb-5">
+  <h2>Algoritma Pengalokasian Memori</h2>
+  <p>
+    Dalam sistem <b>variable partitioning</b>, ukuran partisi tidak tetap — artinya sistem operasi harus
+    menentukan <i>di mana</i> suatu proses baru akan ditempatkan di memori utama. 
+    Karena ruang kosong (<i>hole</i>) dapat muncul di berbagai lokasi akibat proses keluar atau selesai, 
+    dibutuhkan strategi untuk memilih blok memori yang paling sesuai bagi proses baru.
+  </p>
+  <p>
+    Proses pemilihan blok ini dikenal sebagai <b>algoritma pengalokasian memori</b>. 
+    Tiga algoritma yang paling umum digunakan adalah:
+    <b>First-Fit</b>, <b>Best-Fit</b>, dan <b>Worst-Fit</b>.
+  </p>
 
-      <h3> First-Fit</h3>
-      <p>
-        Proses ditempatkan pada blok pertama yang ukurannya cukup besar.
-        Metode ini cepat karena tidak menelusuri seluruh memori.
-      </p>
+  <h3>1. First-Fit</h3>
+  <p>
+    Pada metode <b>First-Fit</b>, sistem operasi akan mencari dari awal area memori
+    hingga menemukan blok kosong pertama yang ukurannya cukup besar untuk menampung proses.
+    Begitu ditemukan, proses langsung ditempatkan di sana tanpa melanjutkan pencarian.
+  </p>
 
-      <h3> Best-Fit</h3>
-      <p>
-        Mencari blok terkecil yang masih cukup besar untuk menampung proses.
-        Tujuannya adalah meminimalkan sisa ruang kosong (fragmentasi eksternal).
-      </p>
+  <ul>
+    <li><b>Kelebihan:</b> Sangat cepat karena tidak menelusuri seluruh memori.</li>
+    <li><b>Kekurangan:</b> Dapat menyebabkan banyak <b>fragmentasi eksternal</b> di bagian awal memori.</li>
+  </ul>
 
-      <h3> Worst-Fit</h3>
-      <p>
-        Memilih blok terbesar untuk menampung proses, agar menyisakan ruang kosong yang besar
-        dan dapat digunakan untuk proses berikutnya.
-      </p>
+  <div class="alert alert-secondary mt-2">
+    📘 <b>Analogi:</b> Seperti mencari tempat duduk pertama yang kosong di bioskop.
+    Cepat mendapat tempat, tapi kursi di depan mungkin banyak tersisa ruang-ruang kecil.
+  </div>
 
-      <div class="table-responsive mt-4">
-        <table class="table table-bordered text-center">
-          <thead class="table-light">
-            <tr>
-              <th>Algoritma</th>
-              <th>Kelebihan</th>
-              <th>Kekurangan</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><b>First-Fit</b></td>
-              <td>Cepat, karena berhenti di blok pertama yang cocok.</td>
-              <td>Bisa menyebabkan fragmentasi di bagian awal memori.</td>
-            </tr>
-            <tr>
-              <td><b>Best-Fit</b></td>
-              <td>Penggunaan memori lebih efisien.</td>
-              <td>Lambat karena harus menelusuri semua blok kosong.</td>
-            </tr>
-            <tr>
-              <td><b>Worst-Fit</b></td>
-              <td>Mempertahankan blok besar untuk proses mendatang.</td>
-              <td>Kurang efisien karena bisa menghasilkan fragmentasi besar.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+  <h3>2. Best-Fit</h3>
+  <p>
+    Algoritma <b>Best-Fit</b> berusaha menggunakan memori seefisien mungkin dengan
+    mencari blok kosong terkecil yang masih cukup besar untuk menampung proses.
+    Sistem menelusuri seluruh daftar blok kosong, memilih yang “paling pas”.
+  </p>
+
+  <ul>
+    <li><b>Kelebihan:</b> Dapat mengurangi sisa ruang tidak terpakai (efisien dalam penggunaan memori).</li>
+    <li><b>Kekurangan:</b> Proses pencarian lebih lambat karena harus memeriksa semua blok.</li>
+  </ul>
+
+  <div class="alert alert-secondary mt-2">
+    📗 <b>Analogi:</b> Seperti mencari tempat parkir yang ukurannya paling pas untuk mobilmu.
+    Hemat ruang, tapi kamu butuh waktu lebih lama untuk menemukannya.
+  </div>
+
+  <h3>3. Worst-Fit</h3>
+  <p>
+    Metode <b>Worst-Fit</b> memilih blok memori terbesar yang tersedia untuk menempatkan proses.
+    Tujuannya adalah agar sisa ruang yang tersisa setelah alokasi masih cukup besar
+    dan bisa digunakan untuk proses lain di kemudian hari.
+  </p>
+
+  <ul>
+    <li><b>Kelebihan:</b> Mempertahankan blok besar yang bisa digunakan oleh proses mendatang.</li>
+    <li><b>Kekurangan:</b> Sering menghasilkan fragmentasi besar dan penggunaan memori yang tidak efisien.</li>
+  </ul>
+
+  <div class="alert alert-secondary mt-2">
+    📙 <b>Analogi:</b> Seperti menaruh koper kecil di kamar paling besar di rumah,
+    agar kamar kecil tetap bisa digunakan nanti — tapi ruang besar jadi terbuang.
+  </div>
+
+  <h3>Perbandingan Tiga Algoritma</h3>
+  <div class="table-responsive mt-3">
+    <table class="table table-bordered text-center align-middle">
+      <thead class="table-primary">
+        <tr>
+          <th>Algoritma</th>
+          <th>Cara Kerja</th>
+          <th>Kelebihan</th>
+          <th>Kekurangan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>First-Fit</b></td>
+          <td>Menempatkan proses pada blok kosong pertama yang cukup besar.</td>
+          <td>Cepat, efisien waktu, implementasi sederhana.</td>
+          <td>Bisa menyebabkan fragmentasi di awal memori.</td>
+        </tr>
+        <tr>
+          <td><b>Best-Fit</b></td>
+          <td>Mencari blok terkecil yang masih cukup besar untuk proses.</td>
+          <td>Penggunaan memori paling efisien, sedikit ruang terbuang.</td>
+          <td>Lambat karena harus menelusuri semua blok kosong.</td>
+        </tr>
+        <tr>
+          <td><b>Worst-Fit</b></td>
+          <td>Memilih blok terbesar untuk menampung proses baru.</td>
+          <td>Mempertahankan blok besar untuk proses berikutnya.</td>
+          <td>Bisa menimbulkan fragmentasi besar dan tidak efisien.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Contoh Ilustrasi Sederhana</h3>
+  <p>
+    Misalkan tersedia tiga blok kosong dengan ukuran <b>100 KB</b>, <b>300 KB</b>, dan <b>200 KB</b>.
+    Sebuah proses baru membutuhkan ruang sebesar <b>180 KB</b>.
+  </p>
+  <ul>
+    <li><b>First-Fit:</b> Proses akan ditempatkan pada blok 300 KB (blok pertama yang cukup besar).</li>
+    <li><b>Best-Fit:</b> Proses akan ditempatkan pada blok 200 KB (blok paling pas).</li>
+    <li><b>Worst-Fit:</b> Proses akan ditempatkan pada blok 300 KB (blok terbesar).</li>
+  </ul>
+
+  <div class="alert alert-info mt-3">
+    💡 <b>Catatan:</b> Tidak ada satu algoritma yang sempurna untuk semua situasi.
+    Sistem operasi modern sering menggunakan kombinasi teknik atau bahkan 
+    algoritma adaptif yang dapat berubah tergantung kondisi beban memori dan pola proses.
+  </div>
+</section>
 
     <!-- Fragmentasi -->
     <section id="fragmentasi" class="mb-5">
