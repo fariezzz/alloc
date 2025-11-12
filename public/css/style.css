@@ -254,3 +254,134 @@ td input.form-control-sm:focus {
       .left-area, .right-area { width:100%; }
       .tables-wrap { gap:12px; }
     }
+
+    /* Tombol animasi & loading */
+.loading-anim {
+  padding: 12px;
+  color: #ddd;
+  font-style: italic;
+  animation: fadeIn 0.4s ease;
+}
+
+button#nextBtn.processing {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Animasi fade-in untuk feedback */
+.explain.animated {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: fadeInExplain 0.5s ease forwards;
+}
+
+@keyframes fadeInExplain {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Animasi loading blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.loading-anim {
+  animation: blink 1s infinite;
+}
+
+/* Transisi halus pada tombol dan opsi */
+.option-btn, #nextBtn {
+  transition: all 0.25s ease;
+}
+
+.option-btn:hover {
+  transform: scale(1.02);
+}
+
+#nextBtn:hover:not(:disabled) {
+  transform: scale(1.04);
+  box-shadow: 0 2px 8px rgba(255,255,255,0.2);
+}
+
+/* ==== Animasi untuk drag & drop ==== */
+
+/* Efek saat elemen sedang diseret */
+.draggable-process {
+  transition: transform 0.2s ease, background-color 0.3s ease;
+}
+.draggable-process:active {
+  transform: scale(1.05);
+  opacity: 0.8;
+}
+
+/* Efek saat slot dihover oleh drag */
+.drop-hover {
+  outline: 3px dashed rgba(120,200,255,0.7);
+  background-color: rgba(80,120,160,0.15);
+  animation: pulseHover 0.8s infinite alternate;
+}
+@keyframes pulseHover {
+  from { outline-color: rgba(120,200,255,0.4); }
+  to { outline-color: rgba(120,200,255,0.8); }
+}
+
+/* Efek saat proses dijatuhkan (drop) */
+@keyframes slotPop {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.process-slot.filled {
+  animation: slotPop 0.3s ease-out;
+}
+
+/* Animasi hasil evaluasi */
+.explain.fade-in {
+  animation: fadeInExplain 0.6s ease forwards;
+}
+@keyframes fadeInExplain {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Slot benar/salah diberi efek nyala singkat */
+@keyframes correctFlash {
+  0% { background-color: rgba(80,200,120,0.2); }
+  50% { background-color: rgba(80,200,120,0.5); }
+  100% { background-color: rgba(80,200,120,0.2); }
+}
+@keyframes wrongFlash {
+  0% { background-color: rgba(220,80,80,0.2); }
+  50% { background-color: rgba(220,80,80,0.5); }
+  100% { background-color: rgba(220,80,80,0.2); }
+}
+.process-slot.correct {
+  animation: correctFlash 0.8s ease;
+}
+.process-slot.wrong {
+  animation: wrongFlash 0.8s ease;
+}
+
+/* ====== STATUS TAMBAHAN UNTUK DRAG ====== */
+.process-slot.neutral {
+  background-color: rgba(150,150,150,0.1);
+}
+
+.waiting-box {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(255, 220, 120, 0.12);
+  border: 1px solid rgba(255, 220, 120, 0.3);
+  color: #ffe9a1;
+  animation: fadeInExplain 0.8s ease forwards;
+}
+
+/* Tambahkan sedikit warna visual agar jelas */
+.process-slot.wrong {
+  animation: wrongFlash 0.8s ease;
+}
+.process-slot.correct {
+  animation: correctFlash 0.8s ease;
+}
+
+
