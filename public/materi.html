@@ -197,18 +197,7 @@
   <script src="../assets/js/template.js"></script>
 
   <script src="js/script.js"></script>
-</body>
-    function showPage(id, event) {
-      // sembunyikan semua section
-      document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
-      // tampilkan section yang dipilih
-      document.getElementById(id).classList.add('active');
-      // atur tombol aktif
-      document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-      // scroll ke atas setiap kali pindah halaman
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+
   </script>
 </body>
 </html>
