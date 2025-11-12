@@ -62,79 +62,139 @@
     </nav>
 
     <!-- Pendahuluan -->
-    <section id="pendahuluan" class="active mb-5">
-      <h2>1. Pengertian dan Fungsi Manajemen Memori</h2>
-      <p>
-        <b>Manajemen Memori</b> merupakan salah satu fungsi penting dalam sistem operasi
-        yang bertugas untuk mengatur penggunaan memori utama (<i>Main Memory</i>) oleh berbagai proses
-        agar sistem berjalan efisien dan stabil. 
-      </p>
+   <section class="materi-section">
+  <h2>Pengertian dan Fungsi Manajemen Memori</h2>
+  <p>
+    <strong>Manajemen Memori</strong> merupakan salah satu komponen terpenting dalam sistem operasi yang berfungsi untuk 
+    mengatur, mengalokasikan, dan memantau penggunaan <em>memori utama</em> (RAM) oleh berbagai proses yang berjalan secara bersamaan. 
+    Tugas ini sangat krusial karena menentukan seberapa efisien dan stabil sebuah sistem dapat beroperasi.
+  </p>
 
-      <h3>Tujuan Utama:</h3>
-      <ul>
-        <li><b>Efisiensi:</b> Memastikan penggunaan RAM secara optimal agar tidak ada ruang yang terbuang.</li>
-        <li><b>Proteksi:</b> Menjaga agar proses tidak saling mengakses data satu sama lain secara ilegal.</li>
-        <li><b>Fleksibilitas:</b> Memungkinkan proses untuk berpindah (swap) tanpa kehilangan data.</li>
-        <li><b>Kinerja:</b> Memastikan CPU selalu memiliki proses untuk dijalankan.</li>
-      </ul>
+  <p>
+    Tanpa manajemen memori yang baik, sistem operasi akan kesulitan mengatur proses yang membutuhkan ruang memori, 
+    menyebabkan <em>crash</em>, lambatnya kinerja, bahkan hilangnya data akibat benturan antar proses. 
+    Oleh karena itu, sistem operasi modern menggunakan berbagai strategi manajemen memori untuk menjamin keamanan, 
+    efisiensi, dan keandalan sistem secara keseluruhan.
+  </p>
 
-      <p>
-        Dalam sistem modern, manajemen memori juga mencakup konsep seperti
-        <b>virtual memory</b>, <b>paging</b>, dan <b>segmentation</b> untuk meningkatkan fleksibilitas dan keamanan.
-      </p>
-    </section>
+  <h3>Tujuan Utama Manajemen Memori</h3>
+  <ul>
+    <li>
+      <strong>1. Efisiensi:</strong> 
+      Memastikan penggunaan RAM dilakukan secara optimal agar tidak ada ruang yang terbuang. 
+      Sistem operasi membagi memori menjadi blok-blok tertentu (partisi) sehingga proses yang membutuhkan ruang kecil 
+      tidak harus memesan memori besar. Ini juga mengurangi fragmentasi dan membantu meningkatkan performa sistem.
+    </li>
+    <li>
+      <strong>2. Proteksi:</strong> 
+      Menjaga agar proses satu tidak dapat mengakses area memori milik proses lain secara ilegal. 
+      Proteksi ini penting untuk mencegah kesalahan fatal, pencurian data, serta menjaga stabilitas sistem. 
+      Biasanya diterapkan melalui mekanisme seperti <em>memory boundaries</em> dan <em>access control</em>.
+    </li>
+    <li>
+      <strong>3. Fleksibilitas:</strong> 
+      Memungkinkan proses berpindah ke memori sekunder (<em>swap space</em>) saat kapasitas utama penuh, 
+      dan kembali lagi ke RAM ketika dibutuhkan. Teknik ini dikenal dengan istilah <em>swapping</em>, 
+      yang memastikan proses tetap dapat berjalan meskipun kapasitas RAM terbatas.
+    </li>
+    <li>
+      <strong>4. Kinerja:</strong> 
+      Menjaga agar CPU selalu memiliki proses untuk dijalankan. Dengan manajemen memori yang efisien, 
+      sistem operasi dapat melakukan <em>multitasking</em> dengan lancar tanpa membuat sistem melambat. 
+      Proses yang aktif dapat terus berpindah dari RAM ke penyimpanan sementara sesuai prioritas.
+    </li>
+  </ul>
 
-    <!-- Jenis Alokasi -->
-    <section id="jenis" class="mb-5">
-      <h2>2. Jenis Memory Allocation</h2>
-      <p>
-        <b>Memory allocation</b> adalah proses menentukan bagian memori mana yang akan digunakan oleh suatu proses.
-        Terdapat dua pendekatan utama: <b>Static Allocation</b> dan <b>Dynamic Allocation</b>.
-      </p>
+  <h3>Konsep-Konsep Penting dalam Manajemen Memori Modern</h3>
+  <p>
+    Dalam sistem operasi modern, manajemen memori telah berkembang dengan mengadopsi berbagai mekanisme canggih 
+    untuk meningkatkan fleksibilitas, keamanan, dan efisiensi. Beberapa konsep penting di antaranya:
+  </p>
+  <ul>
+    <li>
+      <strong>Virtual Memory:</strong> 
+      Konsep ini memungkinkan sistem menjalankan program yang lebih besar dari kapasitas fisik RAM dengan memanfaatkan 
+      ruang penyimpanan sekunder (seperti hard disk atau SSD) sebagai perluasan memori. 
+      Dengan virtual memory, pengguna dapat membuka banyak aplikasi sekaligus tanpa kehabisan ruang RAM.
+    </li>
+    <li>
+      <strong>Paging:</strong> 
+      Teknik ini membagi memori menjadi unit kecil bernama <em>page</em> dan menyimpan data proses dalam bentuk halaman. 
+      Hal ini membuat alokasi dan pengelolaan memori menjadi lebih fleksibel dan mengurangi fragmentasi eksternal.
+    </li>
+    <li>
+      <strong>Segmentation:</strong> 
+      Pendekatan ini membagi memori berdasarkan unit logis seperti fungsi, variabel, atau modul program. 
+      Segmentation memudahkan pengelolaan memori pada tingkat yang lebih konseptual dan meningkatkan keamanan program.
+    </li>
+  </ul>
 
-      <h3>a. Static (Fixed Partitioning)</h3>
-      <p>
-        Memori utama dibagi menjadi partisi berukuran tetap sebelum program dijalankan.
-        Setiap partisi hanya bisa menampung satu proses.
-      </p>
-      <p><b>Kelebihan:</b> Implementasi mudah, cocok untuk sistem kecil atau batch.</p>
-      <p><b>Kekurangan:</b> Terjadi <b>internal fragmentation</b> jika ukuran proses lebih kecil dari partisi.</p>
+  <p>
+    Kesimpulannya, manajemen memori adalah tulang punggung efisiensi sistem operasi. 
+    Dengan mekanisme seperti virtual memory, paging, dan segmentation, sistem dapat bekerja secara stabil, 
+    mendukung multitasking, serta menjaga keamanan data di setiap proses yang berjalan. 
+    Pemahaman tentang manajemen memori sangat penting bagi siapa pun yang mempelajari konsep dasar sistem operasi.
+  </p>
+</section>
 
-      <h3>b. Dynamic (Variable Partitioning)</h3>
-      <p>
-        Partisi dibuat secara dinamis berdasarkan ukuran proses yang masuk.
-        Hal ini memungkinkan pemanfaatan memori yang lebih efisien.
-      </p>
-      <p><b>Kelebihan:</b> Fleksibel, efisien, dan cocok untuk sistem multitasking modern.</p>
-      <p><b>Kekurangan:</b> Dapat terjadi <b>external fragmentation</b>.</p>
 
-      <div class="alert alert-info mt-4">
-        💡 <b>Catatan:</b> Sebagian besar sistem operasi modern tidak lagi menggunakan partisi tetap,
-        melainkan menggunakan konsep <b>paging</b> dan <b>segmentation</b> yang lebih efisien.
-      </div>
-    </section>
+   <section id="jenis" class="mb-5">
+  <h2>Jenis Memory Allocation</h2>
+  <p>
+    <b>Memory allocation</b> adalah proses menentukan bagian memori mana yang akan digunakan oleh suatu proses.
+    Terdapat dua pendekatan utama: <b>Static Allocation</b> dan <b>Dynamic Allocation</b>.
+  </p>
+
+  <h3>1. Static Allocation (Fixed Partitioning)</h3>
+  <p>
+    Pada metode ini, memori utama dibagi menjadi beberapa partisi berukuran tetap sebelum program dijalankan.
+    Setiap partisi hanya dapat menampung satu proses, sehingga jika ukuran proses lebih kecil dari partisi,
+    akan ada ruang kosong yang tidak terpakai.
+  </p>
+  <ul>
+    <li><b>Kelebihan:</b> Implementasi mudah dan cocok untuk sistem batch atau sistem kecil.</li>
+    <li><b>Kekurangan:</b> Dapat menyebabkan <b>internal fragmentation</b> karena sisa ruang tidak bisa digunakan oleh proses lain.</li>
+  </ul>
+
+  <h3>2. Dynamic Allocation (Variable Partitioning)</h3>
+  <p>
+    Berbeda dengan metode statis, ukuran partisi dibuat secara dinamis berdasarkan kebutuhan proses yang datang.
+    Ketika proses selesai, ruang tersebut akan dikembalikan dan dapat digunakan oleh proses lain.
+  </p>
+  <ul>
+    <li><b>Kelebihan:</b> Lebih fleksibel dan efisien dalam penggunaan ruang memori.</li>
+    <li><b>Kekurangan:</b> Dapat menyebabkan <b>external fragmentation</b> karena ruang kosong terpecah-pecah.</li>
+  </ul>
+
+  <div class="alert alert-info mt-4">
+    💡 <b>Catatan:</b> Sistem operasi modern sudah jarang menggunakan partisi tetap.
+    Sebaliknya, mereka menerapkan konsep <b>paging</b> dan <b>segmentation</b> yang memungkinkan
+    proses disimpan dalam blok-blok kecil dan tidak harus bersebelahan secara fisik di memori.
+  </div>
+</section>
+
 
     <!-- Algoritma -->
     <section id="algoritma" class="mb-5">
-      <h2>3. Algoritma Pengalokasian Memori</h2>
+      <h2> Algoritma Pengalokasian Memori</h2>
       <p>
         Dalam <b>variable partitioning</b>, sistem operasi harus mencari blok memori kosong
         (<i>hole</i>) yang cukup besar untuk proses baru. Berikut tiga algoritma yang umum digunakan:
       </p>
 
-      <h3>a. First-Fit</h3>
+      <h3> First-Fit</h3>
       <p>
         Proses ditempatkan pada blok pertama yang ukurannya cukup besar.
         Metode ini cepat karena tidak menelusuri seluruh memori.
       </p>
 
-      <h3>b. Best-Fit</h3>
+      <h3> Best-Fit</h3>
       <p>
         Mencari blok terkecil yang masih cukup besar untuk menampung proses.
         Tujuannya adalah meminimalkan sisa ruang kosong (fragmentasi eksternal).
       </p>
 
-      <h3>c. Worst-Fit</h3>
+      <h3> Worst-Fit</h3>
       <p>
         Memilih blok terbesar untuk menampung proses, agar menyisakan ruang kosong yang besar
         dan dapat digunakan untuk proses berikutnya.
@@ -172,7 +232,7 @@
 
     <!-- Fragmentasi -->
     <section id="fragmentasi" class="mb-5">
-      <h2>4. Fragmentasi Memori</h2>
+      <h2> Fragmentasi Memori</h2>
       <p>
         Fragmentasi adalah kondisi di mana memori tidak dapat digunakan secara optimal
         karena ruang kosong tersebar atau tidak sesuai ukuran proses.
@@ -214,7 +274,7 @@
 
     <!-- Contoh Kasus -->
     <section id="contoh" class="mb-5">
-      <h2>5. Contoh Kasus dan Analisis</h2>
+      <h2> Contoh Kasus dan Analisis</h2>
       <p>
         Diketahui blok memori kosong: <code>100 KB, 500 KB, 200 KB, 300 KB, 600 KB</code><br>
         Proses yang datang: <code>212 KB, 417 KB, 112 KB, 426 KB</code>
