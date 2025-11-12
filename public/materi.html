@@ -14,10 +14,33 @@
 
     section.active {
       display: block;
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .nav-pills .nav-link {
       cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .nav-pills .nav-link.active {
+      background-color: #0d6efd;
+      color: white !important;
+    }
+
+    .nav-pills .nav-link:hover {
+      transform: scale(1.05);
     }
   </style>
 </head>
@@ -27,8 +50,7 @@
   <div id="navbar-container"></div>
 
   <main class="container py-4">
-
-    <h1 class="text-center mb-4">Materi Memory Allocation</h1>
+    <h1 class="text-center mb-4 fw-bold text-primary">Materi Memory Allocation</h1>
 
     <!-- 🔹 Navigasi Sub-Page -->
     <nav class="nav nav-pills justify-content-center mb-4 flex-wrap">
@@ -37,166 +59,188 @@
       <button class="nav-link" onclick="showPage('algoritma', event)">Algoritma</button>
       <button class="nav-link" onclick="showPage('fragmentasi', event)">Fragmentasi</button>
       <button class="nav-link" onclick="showPage('contoh', event)">Contoh</button>
-      <button class="nav-link" onclick="showPage('kesimpulan', event)">Kesimpulan</button>
-      <button class="nav-link" onclick="showPage('referensi', event)">Referensi</button>
     </nav>
 
     <!-- Pendahuluan -->
     <section id="pendahuluan" class="active mb-5">
-      <h2>1. Pengertian dan Tujuan</h2>
+      <h2>1. Pengertian dan Fungsi Manajemen Memori</h2>
       <p>
-        <b>Manajemen Memori</b> adalah komponen sistem operasi yang memastikan sumber daya memori utama
-        dimanfaatkan secara efektif dan efisien untuk mendukung proses yang berjalan.
-        Semua proses harus disimpan di memori utama (RAM) sebelum dapat dieksekusi oleh CPU.
-        Karena kapasitas memori terbatas, sistem operasi bertugas mengatur peletakan proses agar CPU selalu
-        memiliki proses untuk dijalankan tanpa membuang sumber daya.
+        <b>Manajemen Memori</b> merupakan salah satu fungsi penting dalam sistem operasi
+        yang bertugas untuk mengatur penggunaan memori utama (<i>Main Memory</i>) oleh berbagai proses
+        agar sistem berjalan efisien dan stabil. 
       </p>
-      <p>Tujuan utama manajemen memori adalah:</p>
+
+      <h3>Tujuan Utama:</h3>
       <ul>
-        <li><b>Memory Allocation & Deallocation</b>: Mengalokasikan memori untuk proses saat diperlukan dan
-          melepaskannya saat sudah tidak digunakan.</li>
-        <li><b>Protection & Isolation</b>: Mencegah proses saling mengganggu ruang memori satu sama lain.</li>
-        <li><b>Mapping & Address Translation</b>: Menerjemahkan alamat logis (virtual) ke alamat fisik.</li>
-        <li><b>Swapping</b>: Menukar proses antara RAM dan penyimpanan sekunder agar memori selalu tersedia.</li>
+        <li><b>Efisiensi:</b> Memastikan penggunaan RAM secara optimal agar tidak ada ruang yang terbuang.</li>
+        <li><b>Proteksi:</b> Menjaga agar proses tidak saling mengakses data satu sama lain secara ilegal.</li>
+        <li><b>Fleksibilitas:</b> Memungkinkan proses untuk berpindah (swap) tanpa kehilangan data.</li>
+        <li><b>Kinerja:</b> Memastikan CPU selalu memiliki proses untuk dijalankan.</li>
       </ul>
+
+      <p>
+        Dalam sistem modern, manajemen memori juga mencakup konsep seperti
+        <b>virtual memory</b>, <b>paging</b>, dan <b>segmentation</b> untuk meningkatkan fleksibilitas dan keamanan.
+      </p>
     </section>
 
     <!-- Jenis Alokasi -->
     <section id="jenis" class="mb-5">
       <h2>2. Jenis Memory Allocation</h2>
       <p>
-        Memory allocation adalah proses penentuan bagian memori mana yang akan digunakan oleh suatu proses.
-        Secara umum dibagi menjadi dua tipe utama: <b>static (fixed)</b> dan <b>dynamic (variable)</b>.
+        <b>Memory allocation</b> adalah proses menentukan bagian memori mana yang akan digunakan oleh suatu proses.
+        Terdapat dua pendekatan utama: <b>Static Allocation</b> dan <b>Dynamic Allocation</b>.
       </p>
 
       <h3>a. Static (Fixed Partitioning)</h3>
       <p>
-        Pada metode ini, memori utama dibagi menjadi beberapa partisi berukuran tetap ketika sistem dijalankan.
-        Setiap partisi hanya dapat menampung satu proses. Jumlah proses yang dapat berjalan bersamaan
-        dibatasi oleh jumlah partisi.
+        Memori utama dibagi menjadi partisi berukuran tetap sebelum program dijalankan.
+        Setiap partisi hanya bisa menampung satu proses.
       </p>
-      <p><b>Kelebihan:</b> sederhana dan mudah dikelola.</p>
-      <p><b>Kekurangan:</b> dapat terjadi <b>internal fragmentation</b>,
-        yaitu pemborosan memori saat blok yang dialokasikan lebih besar dari kebutuhan proses.</p>
+      <p><b>Kelebihan:</b> Implementasi mudah, cocok untuk sistem kecil atau batch.</p>
+      <p><b>Kekurangan:</b> Terjadi <b>internal fragmentation</b> jika ukuran proses lebih kecil dari partisi.</p>
 
       <h3>b. Dynamic (Variable Partitioning)</h3>
       <p>
-        Pada metode ini, ukuran partisi memori menyesuaikan ukuran proses yang akan masuk. Proses baru
-        mendapat blok memori dengan ukuran sesuai kebutuhannya, sehingga penggunaan memori lebih efisien.
+        Partisi dibuat secara dinamis berdasarkan ukuran proses yang masuk.
+        Hal ini memungkinkan pemanfaatan memori yang lebih efisien.
       </p>
-      <p><b>Kelebihan:</b> lebih fleksibel dan memanfaatkan ruang memori lebih optimal.</p>
-      <p><b>Kekurangan:</b> dapat terjadi <b>external fragmentation</b>,
-        yaitu ruang kosong kecil yang tersebar di antara blok terisi.</p>
+      <p><b>Kelebihan:</b> Fleksibel, efisien, dan cocok untuk sistem multitasking modern.</p>
+      <p><b>Kekurangan:</b> Dapat terjadi <b>external fragmentation</b>.</p>
+
+      <div class="alert alert-info mt-4">
+        💡 <b>Catatan:</b> Sebagian besar sistem operasi modern tidak lagi menggunakan partisi tetap,
+        melainkan menggunakan konsep <b>paging</b> dan <b>segmentation</b> yang lebih efisien.
+      </div>
     </section>
 
     <!-- Algoritma -->
     <section id="algoritma" class="mb-5">
-      <h2>3. Algoritma Contiguous Memory Allocation</h2>
+      <h2>3. Algoritma Pengalokasian Memori</h2>
       <p>
         Dalam <b>variable partitioning</b>, sistem operasi harus mencari blok memori kosong
-        (hole) yang cukup besar untuk proses baru. Tiga algoritma umum digunakan:
+        (<i>hole</i>) yang cukup besar untuk proses baru. Berikut tiga algoritma yang umum digunakan:
       </p>
-      <ul>
-        <li>
-          <b>First-Fit:</b> proses ditempatkan di blok kosong pertama yang cukup besar.
-          <ul>
-            <li><b>Kelebihan:</b> cepat karena berhenti pada blok pertama yang cocok.</li>
-            <li><b>Kekurangan:</b> dapat menyebabkan external fragmentation.</li>
-          </ul>
-        </li>
-        <li>
-          <b>Best-Fit:</b> memilih blok terkecil yang masih cukup besar untuk menampung proses.
-          <ul>
-            <li><b>Kelebihan:</b> meminimalkan fragmentasi eksternal, penggunaan memori lebih efisien.</li>
-            <li><b>Kekurangan:</b> lebih lambat karena harus mencari seluruh daftar blok kosong.</li>
-          </ul>
-        </li>
-        <li>
-          <b>Worst-Fit:</b> memilih blok terbesar yang tersedia agar menyisakan ruang kosong besar
-          untuk proses lain di masa mendatang.
-          <ul>
-            <li><b>Kelebihan:</b> bisa bermanfaat jika proses besar datang kemudian.</li>
-            <li><b>Kekurangan:</b> tidak efisien karena blok besar cepat habis.</li>
-          </ul>
-        </li>
-      </ul>
+
+      <h3>a. First-Fit</h3>
+      <p>
+        Proses ditempatkan pada blok pertama yang ukurannya cukup besar.
+        Metode ini cepat karena tidak menelusuri seluruh memori.
+      </p>
+
+      <h3>b. Best-Fit</h3>
+      <p>
+        Mencari blok terkecil yang masih cukup besar untuk menampung proses.
+        Tujuannya adalah meminimalkan sisa ruang kosong (fragmentasi eksternal).
+      </p>
+
+      <h3>c. Worst-Fit</h3>
+      <p>
+        Memilih blok terbesar untuk menampung proses, agar menyisakan ruang kosong yang besar
+        dan dapat digunakan untuk proses berikutnya.
+      </p>
+
+      <div class="table-responsive mt-4">
+        <table class="table table-bordered text-center">
+          <thead class="table-light">
+            <tr>
+              <th>Algoritma</th>
+              <th>Kelebihan</th>
+              <th>Kekurangan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>First-Fit</b></td>
+              <td>Cepat, karena berhenti di blok pertama yang cocok.</td>
+              <td>Bisa menyebabkan fragmentasi di bagian awal memori.</td>
+            </tr>
+            <tr>
+              <td><b>Best-Fit</b></td>
+              <td>Penggunaan memori lebih efisien.</td>
+              <td>Lambat karena harus menelusuri semua blok kosong.</td>
+            </tr>
+            <tr>
+              <td><b>Worst-Fit</b></td>
+              <td>Mempertahankan blok besar untuk proses mendatang.</td>
+              <td>Kurang efisien karena bisa menghasilkan fragmentasi besar.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <!-- Fragmentasi -->
     <section id="fragmentasi" class="mb-5">
       <h2>4. Fragmentasi Memori</h2>
       <p>
-        Fragmentasi terjadi ketika ruang memori tidak dapat digunakan secara optimal karena pembagian blok
-        yang tidak efisien.
+        Fragmentasi adalah kondisi di mana memori tidak dapat digunakan secara optimal
+        karena ruang kosong tersebar atau tidak sesuai ukuran proses.
       </p>
-      <table class="table table-bordered">
-        <thead class="table-light">
-          <tr>
-            <th>Jenis Fragmentasi</th>
-            <th>Penjelasan</th>
-            <th>Penyebab</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><b>Internal Fragmentation</b></td>
-            <td>Terjadi ketika blok memori yang dialokasikan lebih besar dari kebutuhan proses.</td>
-            <td>Fixed Partitioning</td>
-          </tr>
-          <tr>
-            <td><b>External Fragmentation</b></td>
-            <td>Terjadi ketika ruang kosong tersebar di antara blok-blok yang terisi.</td>
-            <td>Variable Partitioning</td>
-          </tr>
-        </tbody>
-      </table>
+
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle text-center">
+          <thead class="table-light">
+            <tr>
+              <th>Jenis</th>
+              <th>Deskripsi</th>
+              <th>Penyebab</th>
+              <th>Solusi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Internal</b></td>
+              <td>Terjadi saat blok memori yang dialokasikan lebih besar dari kebutuhan proses.</td>
+              <td>Fixed Partitioning</td>
+              <td>Gunakan partisi dinamis atau teknik paging.</td>
+            </tr>
+            <tr>
+              <td><b>External</b></td>
+              <td>Ruang kosong tersebar di antara blok yang terisi sehingga tidak cukup besar untuk proses baru.</td>
+              <td>Variable Partitioning</td>
+              <td>Lakukan <b>compaction</b> atau gunakan <b>non-contiguous allocation</b>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <p>
-        Solusi umum untuk mengurangi fragmentasi eksternal adalah <b>compaction</b>,
-        yaitu menggabungkan ruang kosong menjadi satu blok besar yang berdekatan.
+        Dalam sistem modern, fragmentasi eksternal banyak diatasi dengan
+        teknik <b>paging</b> yang membagi memori menjadi blok-blok kecil (frame) berukuran tetap,
+        sehingga proses tidak perlu menempati ruang bersebelahan.
       </p>
     </section>
 
     <!-- Contoh Kasus -->
     <section id="contoh" class="mb-5">
-      <h2>5. Contoh Kasus</h2>
+      <h2>5. Contoh Kasus dan Analisis</h2>
       <p>
-        Diberikan partisi memori: <code>100 KB, 500 KB, 200 KB, 300 KB, 600 KB</code>.<br>
-        Proses yang masuk: <code>212 KB, 417 KB, 112 KB, 426 KB</code>.
+        Diketahui blok memori kosong: <code>100 KB, 500 KB, 200 KB, 300 KB, 600 KB</code><br>
+        Proses yang datang: <code>212 KB, 417 KB, 112 KB, 426 KB</code>
       </p>
-      <p><b>Tugas:</b> Tentukan hasil alokasi dengan algoritma First-Fit, Best-Fit, dan Worst-Fit.</p>
-      <ul>
-        <li><b>First-Fit:</b> proses ditempatkan di blok kosong pertama yang cukup besar.</li>
-        <li><b>Best-Fit:</b> memilih blok dengan sisa paling kecil setelah alokasi.</li>
-        <li><b>Worst-Fit:</b> memilih blok terbesar untuk setiap proses.</li>
-      </ul>
-    </section>
 
-    <!-- Kesimpulan -->
-    <section id="kesimpulan" class="mb-5">
-      <h2>6. Kesimpulan</h2>
-      <ul>
-        <li><b>Tujuan utama:</b> mengatur penggunaan memori agar efisien, cepat, dan aman.</li>
-        <li><b>Masalah umum:</b> fragmentasi internal & eksternal.</li>
-        <li><b>Solusi modern:</b> teknik <b>paging</b> dan <b>segmentation</b> memungkinkan proses ditempatkan
-          tidak bersebelahan untuk memaksimalkan penggunaan memori.</li>
-      </ul>
-    </section>
+      <div class="alert alert-secondary">
+        <b>Soal:</b> Tentukan hasil alokasi dengan algoritma <b>First-Fit</b>, <b>Best-Fit</b>, dan <b>Worst-Fit</b>.
+      </div>
 
-    <!-- Referensi -->
-    <section id="referensi" class="mb-5">
-      <h2>7. Referensi</h2>
+      <h3>Hasil Alokasi</h3>
       <ul>
-        <li><b>Week 7</b> – Manajemen Memori (6 Oktober 2025).</li>
-        <li><b>Week 9</b> – Contiguous Memory Allocation (17 Oktober 2025).</li>
+        <li><b>First-Fit:</b> Menempatkan proses pada blok pertama yang cukup besar.</li>
+        <li><b>Best-Fit:</b> Menempatkan proses pada blok dengan sisa terkecil.</li>
+        <li><b>Worst-Fit:</b> Menempatkan proses pada blok terbesar yang tersedia.</li>
       </ul>
+
+      <p class="mt-3">
+        Dengan latihan ini, kamu dapat memahami bagaimana strategi berbeda menghasilkan efisiensi berbeda.
+        Implementasi algoritma ini akan kamu temui pada simulasi di halaman <b>Simulasi</b>.
+      </p>
     </section>
 
   </main>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/js/template.js"></script>
-<script src="js/materi.js"></script>
-
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/template.js"></script>
+  <script src="js/materi.js"></script>
 </body>
 </html>
