@@ -404,73 +404,214 @@
     algoritma adaptif yang dapat berubah tergantung kondisi beban memori dan pola proses.
   </div>
 </section>
+<section id="fragmentasi" class="mb-5">
+  <h2>Fragmentasi Memori</h2>
+  <p>
+    <b>Fragmentasi memori</b> adalah kondisi di mana ruang memori tidak dapat digunakan secara optimal karena
+    terdapat bagian-bagian kosong (<i>free space</i>) yang tersebar atau berukuran tidak sesuai dengan kebutuhan proses.
+    Akibatnya, meskipun total ruang kosong masih besar, sistem tidak dapat menampung proses baru yang memerlukan ruang
+    bersebelahan secara kontinu.
+  </p>
 
-    <!-- Fragmentasi -->
-    <section id="fragmentasi" class="mb-5">
-      <h2> Fragmentasi Memori</h2>
-      <p>
-        Fragmentasi adalah kondisi di mana memori tidak dapat digunakan secara optimal
-        karena ruang kosong tersebar atau tidak sesuai ukuran proses.
-      </p>
+  <p>
+    Fragmentasi merupakan masalah umum dalam manajemen memori, terutama pada sistem yang menggunakan
+    <b>contiguous memory allocation</b> (alokasi bersebelahan). 
+    Dalam pendekatan ini, setiap proses harus ditempatkan di satu blok memori yang berurutan,
+    sehingga ruang kosong yang tersebar di antara proses bisa membuat sebagian memori tidak terpakai.
+  </p>
 
-      <div class="table-responsive">
-        <table class="table table-bordered align-middle text-center">
-          <thead class="table-light">
-            <tr>
-              <th>Jenis</th>
-              <th>Deskripsi</th>
-              <th>Penyebab</th>
-              <th>Solusi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><b>Internal</b></td>
-              <td>Terjadi saat blok memori yang dialokasikan lebih besar dari kebutuhan proses.</td>
-              <td>Fixed Partitioning</td>
-              <td>Gunakan partisi dinamis atau teknik paging.</td>
-            </tr>
-            <tr>
-              <td><b>External</b></td>
-              <td>Ruang kosong tersebar di antara blok yang terisi sehingga tidak cukup besar untuk proses baru.</td>
-              <td>Variable Partitioning</td>
-              <td>Lakukan <b>compaction</b> atau gunakan <b>non-contiguous allocation</b>.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  <h3>Jenis-Jenis Fragmentasi</h3>
+  <div class="table-responsive mt-3">
+    <table class="table table-bordered text-center align-middle">
+      <thead class="table-primary">
+        <tr>
+          <th>Jenis</th>
+          <th>Deskripsi</th>
+          <th>Penyebab</th>
+          <th>Solusi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Internal Fragmentation</b></td>
+          <td>
+            Terjadi ketika blok memori yang dialokasikan lebih besar dari kebutuhan proses.
+            Sisa ruang di dalam blok tidak dapat digunakan oleh proses lain.
+          </td>
+          <td>
+            Umumnya disebabkan oleh <b>Fixed Partitioning</b>, di mana ukuran partisi telah ditentukan sebelumnya
+            dan tidak selalu cocok dengan ukuran proses.
+          </td>
+          <td>
+            Gunakan <b>Variable Partitioning</b> atau teknik <b>Paging</b> agar alokasi lebih fleksibel dan efisien.
+          </td>
+        </tr>
+        <tr>
+          <td><b>External Fragmentation</b></td>
+          <td>
+            Terjadi ketika ruang kosong tersebar di antara blok-blok memori yang sudah terisi,
+            sehingga tidak ada blok tunggal yang cukup besar untuk menampung proses baru.
+          </td>
+          <td>
+            Umumnya terjadi pada <b>Variable Partitioning</b> karena proses masuk dan keluar secara dinamis,
+            meninggalkan celah kecil yang terpisah-pisah di antara blok.
+          </td>
+          <td>
+            Solusi umum adalah melakukan <b>Compaction</b> (penggabungan blok kosong secara fisik)
+            atau menggunakan <b>Non-Contiguous Allocation</b> seperti Paging dan Segmentation.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-      <p>
-        Dalam sistem modern, fragmentasi eksternal banyak diatasi dengan
-        teknik <b>paging</b> yang membagi memori menjadi blok-blok kecil (frame) berukuran tetap,
-        sehingga proses tidak perlu menempati ruang bersebelahan.
-      </p>
-    </section>
+  <h3>Penjelasan Lebih Lanjut</h3>
+  <p>
+    Ketika proses selesai dijalankan, ruang memori yang digunakan dikembalikan ke sistem. 
+    Namun, jika proses-proses lain masih berjalan di antara ruang kosong tersebut,
+    maka area kosong tidak bisa langsung digunakan untuk satu proses besar karena terpisah-pisah.
+  </p>
 
-    <!-- Contoh Kasus -->
-    <section id="contoh" class="mb-5">
-      <h2> Contoh Kasus dan Analisis</h2>
-      <p>
-        Diketahui blok memori kosong: <code>100 KB, 500 KB, 200 KB, 300 KB, 600 KB</code><br>
-        Proses yang datang: <code>212 KB, 417 KB, 112 KB, 426 KB</code>
-      </p>
+  <div class="alert alert-secondary mt-3">
+    📘 <b>Contoh Kasus:</b><br>
+    Bayangkan memori seperti deretan kursi bioskop. Beberapa penonton sudah keluar,
+    menyisakan kursi kosong di antara penonton lain. 
+    Total kursi kosong masih banyak, tapi jika satu kelompok besar ingin duduk berdampingan,
+    mereka tidak bisa karena kursi kosongnya tersebar di berbagai tempat.
+  </div>
 
-      <div class="alert alert-secondary">
-        <b>Soal:</b> Tentukan hasil alokasi dengan algoritma <b>First-Fit</b>, <b>Best-Fit</b>, dan <b>Worst-Fit</b>.
-      </div>
+  <h3>Teknik Mengatasi Fragmentasi</h3>
+  <ul>
+    <li><b>Compaction:</b> Menggabungkan blok-blok memori kosong agar menjadi satu area besar yang bersebelahan. Biasanya dilakukan secara berkala oleh sistem operasi.</li>
+    <li><b>Paging:</b> Membagi memori menjadi blok-blok kecil berukuran tetap (<i>frame</i>), dan proses dibagi menjadi <i>page</i> yang dapat ditempatkan di mana saja, sehingga tidak perlu bersebelahan secara fisik.</li>
+    <li><b>Segmentation:</b> Memecah program berdasarkan logika (kode, data, stack, dll.), bukan ukuran tetap, untuk mempermudah manajemen dan fleksibilitas.</li>
+  </ul>
 
-      <h3>Hasil Alokasi</h3>
-      <ul>
-        <li><b>First-Fit:</b> Menempatkan proses pada blok pertama yang cukup besar.</li>
-        <li><b>Best-Fit:</b> Menempatkan proses pada blok dengan sisa terkecil.</li>
-        <li><b>Worst-Fit:</b> Menempatkan proses pada blok terbesar yang tersedia.</li>
-      </ul>
+  <div class="alert alert-info mt-3">
+    💡 <b>Catatan:</b> Pada sistem operasi modern, <b>fragmentasi eksternal</b> hampir sepenuhnya dihilangkan
+    dengan penerapan <b>paging</b> dan <b>segmentation</b>. 
+    Dengan cara ini, memori fisik bisa digunakan lebih efisien tanpa memerlukan ruang bersebelahan.
+  </div>
+</section>
 
-      <p class="mt-3">
-        Dengan latihan ini, kamu dapat memahami bagaimana strategi berbeda menghasilkan efisiensi berbeda.
-        Implementasi algoritma ini akan kamu temui pada simulasi di halaman <b>Simulasi</b>.
-      </p>
-    </section>
+
+ <section id="contoh" class="mb-5">
+  <h2>Contoh Kasus dan Analisis</h2>
+  <p>
+    Untuk memahami perbedaan efisiensi antar algoritma, perhatikan contoh berikut.
+  </p>
+
+  <div class="alert alert-secondary">
+    <b>Diketahui:</b><br>
+    Blok memori kosong → <code>[100 KB, 500 KB, 200 KB, 300 KB, 600 KB]</code><br>
+    Proses yang datang → <code>[212 KB, 417 KB, 112 KB, 426 KB]</code>
+  </div>
+
+  <p>
+    <b>Soal:</b> Tentukan hasil alokasi memori menggunakan tiga algoritma:
+    <b>First-Fit</b>, <b>Best-Fit</b>, dan <b>Worst-Fit</b>.
+  </p>
+
+  <!-- Tombol untuk menampilkan jawaban -->
+  <div class="text-center mb-3">
+    <button id="toggleJawabanBtn" class="btn btn-primary px-4">
+      🔍 Tampilkan Jawaban
+    </button>
+  </div>
+
+  <!-- Jawaban disembunyikan dulu -->
+  <div id="jawabanContainer" style="display: none; animation: fadeIn 0.6s ease;">
+    <h3>Hasil Alokasi Memori</h3>
+    <p>
+      Berikut hasil penempatan proses berdasarkan ketiga algoritma:
+    </p>
+
+    <div class="table-responsive mt-3">
+      <table class="table table-bordered text-center align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Algoritma</th>
+            <th>Langkah Alokasi</th>
+            <th>Sisa Blok Setelah Alokasi</th>
+            <th>Analisis</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>First-Fit</b></td>
+            <td>
+              <ul class="text-start mb-0">
+                <li>212 KB → Blok 500 KB</li>
+                <li>417 KB → Blok 600 KB</li>
+                <li>112 KB → Blok 200 KB</li>
+                <li>426 KB → Tidak cukup (sisa blok: 100 KB, 288 KB, 183 KB)</li>
+              </ul>
+            </td>
+            <td>[100, 288, 183]</td>
+            <td>Cepat, karena berhenti di blok pertama yang cocok, namun fragmentasi muncul di awal memori.</td>
+          </tr>
+
+          <tr>
+            <td><b>Best-Fit</b></td>
+            <td>
+              <ul class="text-start mb-0">
+                <li>212 KB → Blok 300 KB (sisa 88 KB)</li>
+                <li>417 KB → Blok 500 KB (sisa 83 KB)</li>
+                <li>112 KB → Blok 200 KB (sisa 88 KB)</li>
+                <li>426 KB → Blok 600 KB (sisa 174 KB)</li>
+              </ul>
+            </td>
+            <td>[100, 88, 83, 88, 174]</td>
+            <td>Paling efisien dalam penggunaan ruang, namun lebih lambat karena harus mencari blok terkecil yang cukup besar.</td>
+          </tr>
+
+          <tr>
+            <td><b>Worst-Fit</b></td>
+            <td>
+              <ul class="text-start mb-0">
+                <li>212 KB → Blok 600 KB (sisa 388 KB)</li>
+                <li>417 KB → Blok 500 KB (sisa 83 KB)</li>
+                <li>112 KB → Blok 388 KB (sisa 276 KB)</li>
+                <li>426 KB → Tidak cukup (sisa terbesar hanya 276 KB)</li>
+              </ul>
+            </td>
+            <td>[100, 83, 200, 276]</td>
+            <td>Menjaga blok besar tetap tersedia di awal, namun ruang sisa tidak selalu efisien.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="mt-4">Kesimpulan</h3>
+    <ul>
+      <li><b>First-Fit:</b> Paling cepat, tapi fragmentasi awal tinggi.</li>
+      <li><b>Best-Fit:</b> Paling hemat ruang, namun waktu pencarian lebih lama.</li>
+      <li><b>Worst-Fit:</b> Kadang efektif, tapi bisa menghasilkan sisa blok besar yang tidak terpakai optimal.</li>
+    </ul>
+
+    <div class="alert alert-info">
+      💡 <b>Catatan:</b> Pada praktik modern, kombinasi metode seperti <b>Buddy System</b> digunakan
+      untuk menyeimbangkan efisiensi dan kecepatan dalam pengelolaan memori.
+    </div>
+  </div>
+
+  <script>
+    // JavaScript sederhana untuk toggle jawaban
+    document.getElementById("toggleJawabanBtn").addEventListener("click", function () {
+      const jawaban = document.getElementById("jawabanContainer");
+      const btn = document.getElementById("toggleJawabanBtn");
+
+      if (jawaban.style.display === "none") {
+        jawaban.style.display = "block";
+        btn.textContent = "❌ Sembunyikan Jawaban";
+      } else {
+        jawaban.style.display = "none";
+        btn.textContent = "🔍 Tampilkan Jawaban";
+      }
+    });
+  </script>
+</section>
+
 
   </main>
 
