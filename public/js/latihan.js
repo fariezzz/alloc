@@ -124,6 +124,11 @@ const nextBtn = document.getElementById('nextBtn');
 // render current
 function renderCurrent() {
   root.innerHTML = '';
+
+  root.classList.remove("fade-question");
+  void root.offsetWidth;
+  root.classList.add("fade-question");
+  
   progressText.textContent = `Soal ${index+1} dari ${total}`;
   const q = allQuestions[index];
   if (q.type === 'mcq') renderMCQ(q);
@@ -194,17 +199,26 @@ function showMCQExplain(q, selectedIdx, container) {
 
   const div = document.createElement('div');
   div.className = 'explain animated ' + (isCorrect ? 'correct' : 'wrong');
-  const title = isCorrect ? '<strong>✅ Jawaban benar!</strong>' : '<strong>❌ Jawaban salah.</strong>';
-  div.innerHTML = title + `<div style="margin-top:8px;">${q.explain}</div>`;
+  div.innerHTML = `
+    <strong>${isCorrect ? '✅ Jawaban benar!' : '❌ Jawaban salah.'}</strong>
+    <div style="margin-top:8px;">${q.explain}</div>
+  `;
   wrap.appendChild(div);
 
-  // 🔒 Kunci tombol setelah evaluasi & hilangkan animasi
-  container.querySelectorAll('.option-btn').forEach(b => {
-    b.disabled = true;
-    b.classList.add('locked');
+  const optionButtons = container.querySelectorAll('.option-btn');
+  optionButtons.forEach((btn, i) => {
+    if (i === correctIdx) {
+      btn.classList.add('correct-answer');
+    } 
+    else if (i === selectedIdx && selectedIdx !== correctIdx) {
+      btn.classList.add('wrong-answer');
+    }
+    else {
+      btn.classList.add('dimmed-answer');
+    }
   });
-
 }
+
 
 // ----- Drag renderer -----
 function renderDrag(q) {
@@ -553,6 +567,14 @@ nextBtn.addEventListener('click', ()=> {
     }
     if (userSelected[index] === null) return;
 
+    // 🔒 Kunci semua tombol opsi selama proses pemeriksaan (langsung meredup)
+    const optionButtons = root.querySelectorAll('.option-btn');
+    optionButtons.forEach(btn => {
+        btn.disabled = true;
+        btn.classList.add('locked');
+    });
+
+
     // 🔸 Langsung sembunyikan tombol begitu diklik
     nextBtn.style.display = 'none';
 
@@ -604,54 +626,127 @@ function showSummary() {
     const ans = userAnswers[i];
     if (ans !== null && ans === mcqQuestions[i].answer) mcqCorrect++;
   }
+
+  // drag scoring
   let dragCorrectSlots = 0, dragTotalSlots = 0;
   for (let k=0;k<dragQuestions.length;k++){
     const qIdx = mcqQuestions.length + k;
     const q = allQuestions[qIdx];
     const ua = userAnswers[qIdx];
     if (!ua) continue;
-    const expected = (function(){
-      const parts = q.partitions.slice();
-      const procs = q.processes.map(p=>({...p}));
-      const assign = {}; const used = new Array(parts.length).fill(false);
-      if (q.algo === 'First-Fit') {
-        for (const pr of procs){ for (let i=0;i<parts.length;i++){ if (!used[i] && parts[i] >= pr.size){ assign[i]=pr.name; used[i]=true; break; } } }
-      } else if (q.algo === 'Best-Fit') {
-        for (const pr of procs){ let best=-1,bestRem=Infinity; for (let i=0;i<parts.length;i++){ if (!used[i] && parts[i] >= pr.size){ const rem = parts[i]-pr.size; if (rem < bestRem){bestRem=rem; best=i;} } } if (best !== -1){assign[best]=pr.name; used[best]=true;} }
-      } else {
-        for (const pr of procs){ let worst=-1,worstRem=-1; for (let i=0;i<parts.length;i++){ if (!used[i] && parts[i] >= pr.size){ const rem = parts[i]-pr.size; if (rem > worstRem){worstRem=rem; worst=i;} } } if (worst !== -1){assign[worst]=pr.name; used[worst]=true;} }
-      }
-      return assign;
-    })();
+
+    const expected = computeExpectedSummary(q.partitions, q.processes, q.algo);
     for (const sIdx in ua) {
       dragTotalSlots++;
       const assigned = ua[sIdx];
       const expectedProc = expected[sIdx] || null;
-      if ((expectedProc && assigned === expectedProc) || (!expectedProc && !assigned)) dragCorrectSlots++;
+      if ((expectedProc && assigned === expectedProc) || (!expectedProc && !assigned)) {
+        dragCorrectSlots++;
+      }
     }
   }
 
   const totalCorrect = mcqCorrect + dragCorrectSlots;
   const totalPossible = mcqQuestions.length + dragTotalSlots;
   const percent = totalPossible ? Math.round((totalCorrect/totalPossible)*100) : 0;
+  const angle = (percent / 100) * 360;
 
-  root.innerHTML = `<h3>Ringkasan Hasil</h3>
-    <p class="small-muted">MCQ benar: ${mcqCorrect} / ${mcqQuestions.length}</p>
-    <p class="small-muted">Slot drag benar: ${dragCorrectSlots} / ${dragTotalSlots}</p>
-    <div style="margin-top:12px;" class="explain ${percent===100?'correct':'wrong'}">Skor keseluruhan: ${percent}%</div>
-    <div style="margin-top:12px;"><button id="restartBtn" class="btn btn-sm btn-pink">Ulangi Latihan</button></div>`;
+  root.innerHTML = `
+    <div class="result-wrapper">
+      <div class="result-title">Hasil Akhir Latihan</div>
+      <div class="result-subtitle">Berikut ringkasan performa Anda</div>
 
-  document.getElementById('restartBtn').addEventListener('click', ()=> {
+      <div class="score-ring" style="--score-angle:${angle}deg;">
+        <div class="score-text">${percent}%</div>
+      </div>
+
+      <div class="breakdown-box">
+        <strong>📝 Soal Pilihan Ganda</strong>
+        <div class="breakdown-small">${mcqCorrect} benar dari ${mcqQuestions.length} soal</div>
+      </div>
+
+      <div class="breakdown-box">
+        <strong>🧩 Soal Drag & Drop</strong>
+        <div class="breakdown-small">${dragCorrectSlots} benar dari ${dragTotalSlots} slot</div>
+      </div>
+
+      <button id="restartBtn" class="btn-restart">Ulangi Latihan</button>
+    </div>
+  `;
+
+  nextBtn.disabled = true;
+  nextBtn.style.display = 'none';
+  progressText.style.display = "none";
+
+
+  document.getElementById('restartBtn').addEventListener('click', () => {
     index = 0;
     for (let i=0;i<userAnswers.length;i++) userAnswers[i] = null;
     for (let i=0;i<userSelected.length;i++) userSelected[i] = null;
-    for (let k=0;k<3;k++){
+
+    // regen drag questions
+    for (let k=0; k<3; k++){
       allQuestions[mcqQuestions.length + k] = makeMatchingDragQuestion(['First-Fit','Best-Fit','Worst-Fit'][k]);
     }
+
     renderCurrent();
+    progressText.style.display = "block";
+    nextBtn.style.display = 'inline-block';
   });
-  nextBtn.disabled = true;
 }
+
+function computeExpectedSummary(parts, procs, algo){
+  const assign = {};
+  const used = new Array(parts.length).fill(false);
+
+  if (algo === 'First-Fit') {
+    for (const pr of procs){
+      for (let i=0;i<parts.length;i++){
+        if (!used[i] && parts[i] >= pr.size){
+          assign[i] = pr.name;
+          used[i] = true;
+          break;
+        }
+      }
+    }
+  } else if (algo === 'Best-Fit') {
+    for (const pr of procs){
+      let best = -1, bestRem = Infinity;
+      for (let i=0;i<parts.length;i++){
+        if (!used[i] && parts[i] >= pr.size){
+          const rem = parts[i] - pr.size;
+          if (rem < bestRem){
+            bestRem = rem;
+            best = i;
+          }
+        }
+      }
+      if (best !== -1){
+        assign[best] = pr.name;
+        used[best] = true;
+      }
+    }
+  } else {
+    for (const pr of procs){
+      let worst = -1, worstRem = -1;
+      for (let i=0;i<parts.length;i++){
+        if (!used[i] && parts[i] >= pr.size){
+          const rem = parts[i] - pr.size;
+          if (rem > worstRem){
+            worstRem = rem;
+            worst = i;
+          }
+        }
+      }
+      if (worst !== -1){
+        assign[worst] = pr.name;
+        used[worst] = true;
+      }
+    }
+  }
+  return assign;
+}
+
 
 // initial
 renderCurrent();

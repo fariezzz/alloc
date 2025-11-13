@@ -167,6 +167,25 @@ td input.form-control-sm:focus {
 }
 
 
+/* ===== TITLE CLEAN & MINIMAL ===== */
+.quiz-title-clean {
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: #e8f2f4;
+  margin: 0;
+
+  /* memberi ruang agar tidak nempel ke soal */
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+
+  /* garis halus, sangat soft */
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+
+  /* hilangkan efek glow yang terlalu kuat */
+  text-shadow: none;
+}
+
+
 .correct {
   background-color: rgba(50, 120, 80, 0.5) !important;
 }
@@ -175,12 +194,15 @@ td input.form-control-sm:focus {
   background-color: rgba(150, 40, 40, 0.5) !important;
 }
 
+
 .expected-hint {
   display: block;
   color: #d3d3d3;
   margin-top: 4px;
   font-style: italic;
 }
+
+
 
 /* main card */
 .card-quiz {
@@ -602,7 +624,150 @@ button#nextBtn.processing {
   transform: scale(1.1);
 }
 
+/* ==== Animasi saat proses dihapus dari tabel ==== */
+@keyframes fadeOutShrink {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
 
+.process-slot.removing {
+  animation: fadeOutShrink 0.4s ease forwards;
+}
+
+/* ===== Highlight MCQ Evaluation ===== */
+
+.option-btn.correct-answer {
+  background: rgba(60, 160, 100, 0.45) !important;
+  border: 2px solid rgba(120, 255, 170, 0.8) !important;
+  color: #eafff3 !important;
+  opacity: 1 !important;
+  transform: scale(1.02);
+}
+
+.option-btn.wrong-answer {
+  background: rgba(200, 70, 70, 0.45) !important;
+  border: 2px solid rgba(255, 150, 150, 0.85) !important;
+  color: #ffecec !important;
+  opacity: 1 !important;
+  transform: scale(1.02);
+}
+
+.option-btn.dimmed-answer {
+  opacity: 0.45 !important;
+}
+
+/* ===== Result Summary Modern ===== */
+.result-wrapper {
+  margin-top: 20px;
+  padding: 32px;
+  background: rgba(40, 42, 50, 0.85);
+  border-radius: 18px;
+  text-align: center;
+  animation: fadeIn 0.8s ease;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.result-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #F0F5F9;
+  margin-bottom: 20px;
+}
+
+.result-subtitle {
+  font-size: 1rem;
+  color: #bbb;
+  margin-bottom: 24px;
+}
+
+/* progress ring */
+.score-ring {
+  margin: 0 auto 26px auto;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: conic-gradient(#64ffda var(--score-angle), rgba(255,255,255,0.08) 0deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.score-ring::before {
+  content: "";
+  width: 115px;
+  height: 115px;
+  background: #2b2b35;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.score-text {
+  position: absolute;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #64ffda;
+}
+
+/* breakdown */
+.breakdown-box {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 18px;
+  border-radius: 12px;
+  margin: 10px auto;
+  width: 75%;
+  text-align: left;
+  border-left: 4px solid #52616B;
+  animation: slideUp 0.5s ease;
+}
+
+.breakdown-box strong {
+  color: #F0F5F9;
+}
+
+.breakdown-small {
+  color: #ccc;
+  margin-top: 3px;
+}
+
+/* restart button */
+.btn-restart {
+  margin-top: 30px;
+  background: #52616B;
+  color: #d0d0d0;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: .25s ease;
+}
+
+.btn-restart:hover {
+  background: #F0F5F9;
+  color: #2b2b35;
+  transform: scale(1.05);
+}
+
+/* animations */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(15px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.fade-question {
+  animation: slideLeft 0.35s ease;
+}
 
 
 /* Profil */
@@ -896,20 +1061,5 @@ footer.materi-footer {
   border-top: 1px solid rgba(255,255,255,0.08);
 }
 
-/* ==== Animasi saat proses dihapus dari tabel ==== */
-@keyframes fadeOutShrink {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-}
-
-.process-slot.removing {
-  animation: fadeOutShrink 0.4s ease forwards;
-}
 
 
