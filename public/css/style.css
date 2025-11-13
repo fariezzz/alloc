@@ -678,28 +678,37 @@ button#nextBtn.processing {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+
 /* =========================================================
-   ====== STYLING UNTUK HALAMAN MATERI (TANPA DUPLIKASI) ======
+   ====== KHUSUS UNTUK HALAMAN MATERI ======
    ========================================================= */
 
 /* ===== MAIN CARD CONTAINER ===== */
-main.container {
+main.materi-container {
   background: rgba(46, 48, 55, 0.78);
   border-radius: 20px;
   padding: 40px 60px;
   width: 85%;
   max-width: 1100px;
   box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  margin: 0 auto;
 }
 
 /* ===== SECTION STYLE ===== */
-section {
+.materi-section {
   margin-bottom: 50px;
   padding-bottom: 20px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: none;
 }
 
-h2 {
+.materi-section.active {
+  display: block;
+  animation: fadeIn 0.6s ease;
+}
+
+/* ===== HEADING ===== */
+.materi-section h2 {
   color: #F0F5F9;
   font-weight: 700;
   font-size: 1.6rem;
@@ -710,23 +719,26 @@ h2 {
   padding-left: 12px;
 }
 
-h3 {
+.materi-section h3 {
   color: #d0d0d0;
   font-weight: 600;
   margin-top: 20px;
 }
 
-p, ul, li {
+/* ===== TEXT ===== */
+.materi-section p,
+.materi-section ul,
+.materi-section li {
   color: #e6e6e6;
   line-height: 1.7;
   font-size: 0.98rem;
 }
 
-ul {
+.materi-section ul {
   margin-left: 20px;
 }
 
-code {
+.materi-section code {
   background-color: #3b3b47;
   color: #a8dadc;
   padding: 3px 6px;
@@ -735,27 +747,27 @@ code {
 }
 
 /* ===== TABLE STYLE ===== */
-.table {
+.materi-section .table {
   background-color: transparent !important;
   color: #fff !important;
   border-color: rgba(255,255,255,0.3);
 }
 
-.table th,
-.table td {
+.materi-section .table th,
+.materi-section .table td {
   background-color: rgba(255,255,255,0.05) !important;
   color: #fff !important;
   border: 1px solid rgba(255,255,255,0.1) !important;
 }
 
-.table th {
+.materi-section .table th {
   font-weight: 600;
   text-transform: uppercase;
   background-color: rgba(255,255,255,0.1) !important;
 }
 
 /* ===== BLOCKQUOTE / INFO BOX ===== */
-blockquote {
+.materi-section blockquote {
   background-color: rgba(82,97,107,0.4);
   border-left: 5px solid #F0F5F9;
   padding: 14px 20px;
@@ -765,7 +777,7 @@ blockquote {
 }
 
 /* ===== CARD INNER SECTION (ESTETIK) ===== */
-.memoalloc-card {
+.materi-section .memoalloc-card {
   color: #ffffff;
   border-radius: 20px;
   padding: 40px;
@@ -775,82 +787,52 @@ blockquote {
   margin-bottom: 24px;
 }
 
-.memoalloc-card h2 {
+.materi-section .memoalloc-card h2 {
   text-align: center;
   font-weight: 700;
   margin-bottom: 30px;
   color: #F0F5F9;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-  main.container {
-    padding: 30px 20px;
-    width: 90%;
-  }
-
-  h2 {
-    font-size: 1.3rem;
-  }
-
-  p, ul, li {
-    font-size: 0.9rem;
-  }
-}
-
-/* ===== FOOTER ===== */
-footer {
-  text-align: center;
-  color: #aaa;
-  font-size: 0.9rem;
-  padding: 20px;
-  margin-top: 40px;
-  border-top: 1px solid rgba(255,255,255,0.08);
-}
-
-
-
-section {
-  display: none;
-}
-
-section.active {
-  display: block;
-  animation: fadeIn 0.6s ease;
-}
-
+/* ===== ANIMASI ===== */
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(10px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
+/* ===== NAV-PILLS (TAB MATERI) ===== */
 .nav-pills .nav-link {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #e0e0e0;
+  border-radius: 10px;
+  margin: 4px;
+  padding: 10px 18px;
+  transition: all 0.3s ease;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
-}
-
-.nav-pills .nav-link.active {
-  background-color: #0d6efd;
-  color: white !important;
 }
 
 .nav-pills .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.15);
   transform: scale(1.05);
 }
 
-/* =========================================================
-   ====== CUSTOM WARNA TOMBOL UTAMA (OVERRIDE BOOTSTRAP) ======
-   ========================================================= */
+.nav-pills .nav-link.active {
+  background-color: #52616B !important;
+  color: #F0F5F9 !important;
+  font-weight: 600;
+  transform: scale(1.08);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+}
 
+/* ===== TOMBOL UTAMA ===== */
 .btn-primary {
-  background-color: #52616B !important;   /* Ganti dengan warna yang kamu mau */
+  background-color: #52616B !important;
   border-color: #52616B !important;
   color: #f0f0f0 !important;
   font-weight: 600;
@@ -859,37 +841,37 @@ section.active {
 
 .btn-primary:hover,
 .btn-primary:focus {
-  background-color: #F0F5F9 !important;   /* Warna hover */
+  background-color: #F0F5F9 !important;
   border-color: #F0F5F9 !important;
   color: #2b2b35 !important;
   transform: scale(1.05);
 }
 
-/* =========================================================
-   ====== NAVBAR SUB-MATERI (Pendahuluan, Jenis, dst) ======
-   ========================================================= */
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  main.materi-container {
+    padding: 30px 20px;
+    width: 90%;
+  }
 
-/* Gaya dasar tombol nav-pills */
-.nav-pills .nav-link {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: #e0e0e0;
-  border-radius: 10px;
-  margin: 4px;
-  padding: 10px 18px;
-  transition: all 0.3s ease;
+  .materi-section h2 {
+    font-size: 1.3rem;
+  }
+
+  .materi-section p,
+  .materi-section ul,
+  .materi-section li {
+    font-size: 0.9rem;
+  }
 }
 
-/* Efek hover */
-.nav-pills .nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  transform: scale(1.05);
+/* ===== FOOTER ===== */
+footer.materi-footer {
+  text-align: center;
+  color: #aaa;
+  font-size: 0.9rem;
+  padding: 20px;
+  margin-top: 40px;
+  border-top: 1px solid rgba(255,255,255,0.08);
 }
 
-/* Tombol aktif (halaman yang sedang ditampilkan) */
-.nav-pills .nav-link.active {
-  background-color: #52616B !important;  /* abu gelap khas tema */
-  color: #F0F5F9 !important;
-  font-weight: 600;
-  transform: scale(1.08);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
-}
