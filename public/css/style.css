@@ -912,4 +912,30 @@ footer.materi-footer {
   animation: fadeOutShrink 0.4s ease forwards;
 }
 
+.intro-video {
+    margin: 25px 0 15px;
+    padding: 12px 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 4px solid #4da6ff;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    color: #e6e6e6;
+    line-height: 1.6;
+}
+
+
+.algoritma-video {
+    margin-top: 30px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.algoritma-video iframe {
+    width: 100%;
+    max-width: 1000px;
+    height: 500px;
+    border: none;
+    border-radius: 10px;
+}
 
