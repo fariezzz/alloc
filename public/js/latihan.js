@@ -198,8 +198,12 @@ function showMCQExplain(q, selectedIdx, container) {
   div.innerHTML = title + `<div style="margin-top:8px;">${q.explain}</div>`;
   wrap.appendChild(div);
 
-  // disable option buttons after grading
-  container.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  // 🔒 Kunci tombol setelah evaluasi & hilangkan animasi
+  container.querySelectorAll('.option-btn').forEach(b => {
+    b.disabled = true;
+    b.classList.add('locked');
+  });
+
 }
 
 // ----- Drag renderer -----
@@ -293,14 +297,42 @@ function renderDrag(q) {
   td.classList.add('filled');
   setTimeout(() => td.classList.remove('filled'), 400);
 
-  // Tambahkan aksi tombol hapus
-  const removeBtn = td.querySelector('.remove-btn');
-  removeBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    addToPool(procName);
-    td.innerHTML = '';
-    delete td.dataset.proc;
-  });
+    // Tambahkan aksi tombol hapus
+    const removeBtn = td.querySelector('.remove-btn');
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+
+      // Dapatkan nama proses yang dihapus, misalnya "P2"
+      const removedProc = procName;
+      const removedNum = parseInt(removedProc.substring(1)); // 2 dari P2
+
+      // Fungsi bantu untuk hapus dengan animasi
+      function animateRemove(slot, name) {
+        slot.classList.add('removing');
+        setTimeout(() => {
+          slot.classList.remove('removing');
+          slot.innerHTML = '';
+          delete slot.dataset.proc;
+          addToPool(name);
+        }, 380); // sedikit di bawah 0.4s agar sinkron
+      }
+
+      // 🔹 Hapus proses yang diklik
+      animateRemove(td, removedProc);
+
+      // 🔹 Hapus juga semua proses setelahnya (P3, P4, dst) jika sudah di tabel
+      Array.from(document.querySelectorAll('.process-slot')).forEach(slot => {
+        const name = slot.dataset.proc;
+        if (name) {
+          const num = parseInt(name.substring(1));
+          if (num > removedNum) {
+            animateRemove(slot, name);
+          }
+        }
+      });
+    });
+
+
 
   // Evaluasi otomatis jika semua slot terisi
   const filled = Array.from(document.querySelectorAll('.process-slot')).every(s => s.dataset.proc);
@@ -354,66 +386,66 @@ function renderDrag(q) {
   }
 
   // perhitungan hasil
-function computeExpected(parts, procs, algo) {
-  const assign = {}; 
-  const used = new Array(parts.length).fill(false);
-  const waiting = []; // proses yang tidak teralokasi
+  function computeExpected(parts, procs, algo) {
+    const assign = {}; 
+    const used = new Array(parts.length).fill(false);
+    const waiting = []; // proses yang tidak teralokasi
 
-  if (algo === 'First-Fit') {
-    for (const pr of procs) {
-      let placed = false;
-      for (let i = 0; i < parts.length; i++) {
-        if (!used[i] && parts[i] >= pr.size) {
-          assign[i] = pr.name;
-          used[i] = true;
-          placed = true;
-          break;
-        }
-      }
-      if (!placed) waiting.push(pr.name);
-    }
-  } else if (algo === 'Best-Fit') {
-    for (const pr of procs) {
-      let best = -1, bestRem = Infinity;
-      for (let i = 0; i < parts.length; i++) {
-        if (!used[i] && parts[i] >= pr.size) {
-          const rem = parts[i] - pr.size;
-          if (rem < bestRem) {
-            bestRem = rem;
-            best = i;
+    if (algo === 'First-Fit') {
+      for (const pr of procs) {
+        let placed = false;
+        for (let i = 0; i < parts.length; i++) {
+          if (!used[i] && parts[i] >= pr.size) {
+            assign[i] = pr.name;
+            used[i] = true;
+            placed = true;
+            break;
           }
         }
+        if (!placed) waiting.push(pr.name);
       }
-      if (best !== -1) {
-        assign[best] = pr.name;
-        used[best] = true;
-      } else waiting.push(pr.name);
-    }
-  } else { // Worst-Fit
-    for (const pr of procs) {
-      let worst = -1, worstRem = -1;
-      for (let i = 0; i < parts.length; i++) {
-        if (!used[i] && parts[i] >= pr.size) {
-          const rem = parts[i] - pr.size;
-          if (rem > worstRem) {
-            worstRem = rem;
-            worst = i;
+    } else if (algo === 'Best-Fit') {
+      for (const pr of procs) {
+        let best = -1, bestRem = Infinity;
+        for (let i = 0; i < parts.length; i++) {
+          if (!used[i] && parts[i] >= pr.size) {
+            const rem = parts[i] - pr.size;
+            if (rem < bestRem) {
+              bestRem = rem;
+              best = i;
+            }
           }
         }
+        if (best !== -1) {
+          assign[best] = pr.name;
+          used[best] = true;
+        } else waiting.push(pr.name);
       }
-      if (worst !== -1) {
-        assign[worst] = pr.name;
-        used[worst] = true;
-      } else waiting.push(pr.name);
+    } else { // Worst-Fit
+      for (const pr of procs) {
+        let worst = -1, worstRem = -1;
+        for (let i = 0; i < parts.length; i++) {
+          if (!used[i] && parts[i] >= pr.size) {
+            const rem = parts[i] - pr.size;
+            if (rem > worstRem) {
+              worstRem = rem;
+              worst = i;
+            }
+          }
+        }
+        if (worst !== -1) {
+          assign[worst] = pr.name;
+          used[worst] = true;
+        } else waiting.push(pr.name);
+      }
     }
+
+    return { assign, waiting };
   }
-
-  return { assign, waiting };
-}
 
 
   // evaluasi jawaban
-function evaluateDragAnswer() {
+  function evaluateDragAnswer() {
   pBody.querySelectorAll('.process-slot').forEach(s => { 
     s.classList.remove('correct','wrong'); 
     const old=s.querySelector('.expected-hint'); 
@@ -473,8 +505,12 @@ function evaluateDragAnswer() {
   // 🔒 Hapus semua tombol hapus setelah evaluasi
   document.querySelectorAll('.remove-btn').forEach(btn => btn.remove());
 
-  // Tambahkan indikator bahwa jawaban terkunci (opsional, untuk debugging)
-  console.log("🔒 Slot terkunci, tombol hapus dihapus.");
+  // 🔹 Sembunyikan daftar proses setelah evaluasi
+  const processPool = document.querySelector('.right-area');
+  if (processPool) {
+    processPool.style.display = 'none';
+  }
+
 
   // Aktifkan tombol Next
   nextBtn.disabled = false;
