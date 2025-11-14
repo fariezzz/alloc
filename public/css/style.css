@@ -1023,6 +1023,13 @@ main.materi-container {
   cursor: pointer;
 }
 
+.nav-pills {
+  display: flex;
+  justify-content: center;
+  gap: 18px;      /* ⬅️ Ini jarak antar tombol */
+  margin-bottom: 30px;   /* Jarak ke konten bawah */
+}
+
 .nav-pills .nav-link:hover {
   background-color: rgba(255, 255, 255, 0.15);
   transform: scale(1.05);
