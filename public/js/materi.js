@@ -39,18 +39,17 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
- // JavaScript sederhana untuk toggle jawaban
-    document.getElementById("toggleJawabanBtn").addEventListener("click", function () {
-      const jawaban = document.getElementById("jawabanContainer");
-      const btn = document.getElementById("toggleJawabanBtn");
+// JavaScript sederhana untuk toggle jawaban
+document.getElementById("toggleJawabanBtn").addEventListener("click", function () {
+  const jawaban = document.getElementById("jawabanContainer");
+  const btn = document.getElementById("toggleJawabanBtn");
 
-      if (jawaban.style.display === "none") {
-        jawaban.style.display = "block";
-        btn.textContent = "❌ Sembunyikan Jawaban";
-      } else {
-        jawaban.style.display = "none";
-        btn.textContent = "🔍 Tampilkan Jawaban";
-      }
-    });
+  if (jawaban.style.display === "none") {
+    jawaban.style.display = "block";
+    btn.textContent = "❌ Sembunyikan Jawaban";
+  } else {
+    jawaban.style.display = "none";
+    btn.textContent = "🔍 Tampilkan Jawaban";
+  }
+});
 
-    
