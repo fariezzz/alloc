@@ -1,0 +1,3376 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Platform pembelajaran interaktif untuk memahami algoritma memory allocation: First-Fit, Best-Fit, dan Worst-Fit">
+    <meta name="keywords" content="memory allocation, sistem operasi, first-fit, best-fit, worst-fit, algoritma">
+    <meta name="author" content="Memory Allocation Team">
+    <title>Memory Allocation - Platform Pembelajaran Interaktif</title>
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ========================================
+           RESET & BASE STYLES
+           ======================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Color Palette - Modern Tech Theme */
+            --primary-900: #0a0e27;
+            --primary-800: #0f1629;
+            --primary-700: #1a1f3a;
+            --primary-600: #1e2647;
+            --primary-500: #2d3561;
+            
+            --accent-blue-500: #3b82f6;
+            --accent-blue-600: #2563eb;
+            --accent-blue-700: #1d4ed8;
+            
+            --accent-purple-500: #8b5cf6;
+            --accent-purple-600: #7c3aed;
+            
+            --accent-cyan-500: #06b6d4;
+            --accent-cyan-600: #0891b2;
+            
+            --success-500: #10b981;
+            --success-600: #059669;
+            
+            --warning-500: #f59e0b;
+            --warning-600: #d97706;
+            
+            --error-500: #ef4444;
+            --error-600: #dc2626;
+            
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Typography */
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+            
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --spacing-3xl: 4rem;
+            --spacing-4xl: 6rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            --radius-full: 9999px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.5);
+            
+            /* Transitions */
+            --transition-fast: 100ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Z-index layers */
+            --z-dropdown: 1000;
+            --z-sticky: 1020;
+            --z-fixed: 1030;
+            --z-modal-backdrop: 1040;
+            --z-modal: 1050;
+            --z-popover: 1060;
+            --z-tooltip: 1070;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: linear-gradient(135deg, var(--primary-900) 0%, var(--primary-700) 50%, var(--primary-900) 100%);
+            color: var(--gray-100);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* ========================================
+           ANIMATED BACKGROUND WITH PARTICLES
+           ======================================== */
+        .bg-animation {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bg-gradient-layer {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at top, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                        radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+        }
+
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+        }
+
+        .bg-circle-1 {
+            top: 10%;
+            left: 10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+        }
+
+        .bg-circle-2 {
+            bottom: 10%;
+            right: 10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
+        }
+
+        .bg-circle-3 {
+            top: 50%;
+            left: 50%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+        }
+
+        .particles {
+            position: absolute;
+            inset: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: particle-float 15s infinite;
+        }
+
+        @keyframes particle-float {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        /* ========================================
+           UTILITY CLASSES
+           ======================================== */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-xl);
+            position: relative;
+            z-index: 10;
+        }
+
+        .section-spacing {
+            padding: var(--spacing-4xl) 0;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, var(--accent-blue-500), var(--accent-purple-500), var(--accent-cyan-500));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* ========================================
+           HEADER & NAVIGATION
+           ======================================== */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+            background: rgba(10, 14, 39, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+            transition: all var(--transition-base);
+        }
+
+        header.scrolled {
+            background: rgba(10, 14, 39, 0.95);
+            box-shadow: var(--shadow-lg);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-lg) 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            text-decoration: none;
+            color: white;
+            cursor: pointer;
+            transition: transform var(--transition-base);
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-icon {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-blue-600), var(--accent-purple-600));
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+            transition: all var(--transition-base);
+        }
+
+        .logo:hover .logo-icon {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+            transform: scale(1.05);
+        }
+
+        .logo-icon svg {
+            width: 28px;
+            height: 28px;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            font-weight: 600;
+            color: var(--accent-blue-500);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            list-style: none;
+        }
+
+        .nav-links a {
+            position: relative;
+            color: var(--gray-300);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .nav-links a:hover {
+            color: white;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .nav-links a.active {
+            color: white;
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-blue-500), var(--accent-purple-500));
+            border-radius: var(--radius-full);
+            transition: transform var(--transition-base);
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            transform: translateX(-50%) scaleX(1);
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: var(--spacing-sm);
+        }
+
+        .mobile-menu-toggle span {
+            width: 24px;
+            height: 2px;
+            background: white;
+            border-radius: var(--radius-full);
+            transition: all var(--transition-base);
+        }
+
+        .mobile-menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+
+        .mobile-menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+
+        /* ========================================
+           PAGE CONTENT MANAGEMENT
+           ======================================== */
+        .page-content {
+            display: none;
+            opacity: 0;
+        }
+
+        .page-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        /* ========================================
+           HERO SECTION
+           ======================================== */
+        .hero {
+            position: relative;
+            text-align: center;
+            padding: var(--spacing-4xl) 0;
+            min-height: calc(100vh - 100px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--accent-blue-500);
+            margin-bottom: var(--spacing-xl);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-badge svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: var(--spacing-xl);
+            letter-spacing: -2px;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.125rem, 2vw, 1.375rem);
+            color: var(--gray-300);
+            max-width: 700px;
+            margin: 0 auto var(--spacing-2xl);
+            line-height: 1.7;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: var(--spacing-lg);
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            transition: all var(--transition-base);
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: inherit;
+            z-index: -1;
+            transition: transform var(--transition-base);
+        }
+
+        .btn:hover::before {
+            transform: scale(1.05);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue-600), var(--accent-purple-600));
+            color: white;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--accent-blue-500), var(--accent-purple-500));
+            opacity: 0;
+            transition: opacity var(--transition-base);
+            z-index: -1;
+        }
+
+        .btn-primary:hover::after {
+            opacity: 1;
+        }
+
+        .btn-secondary {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue-500);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--accent-blue-500);
+            transform: translateY(-2px);
+        }
+
+        .btn svg {
+            width: 20px;
+            height: 20px;
+            transition: transform var(--transition-base);
+        }
+
+        .btn:hover svg {
+            transform: translateX(3px);
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-3xl);
+            flex-wrap: wrap;
+            margin-top: var(--spacing-2xl);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-blue-500), var(--accent-purple-500));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ========================================
+           MEMORY INFO SECTION - NEW
+           ======================================== */
+        .memory-info-section {
+            padding: var(--spacing-4xl) 0;
+            background: rgba(15, 22, 41, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .memory-info-box {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-3xl);
+            box-shadow: var(--shadow-2xl);
+            text-align: center;
+        }
+
+        .memory-info-title {
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--spacing-xl);
+            color: white;
+        }
+
+        .memory-info-description {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: var(--gray-300);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .memory-info-highlight {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border-left: 4px solid var(--accent-blue-500);
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            margin-top: var(--spacing-2xl);
+        }
+
+        .memory-info-highlight-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-md);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-cyan-500);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .memory-info-highlight-text {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--gray-300);
+        }
+
+        /* ========================================
+           FEATURES SECTION
+           ======================================== */
+        .features {
+            padding: var(--spacing-4xl) 0;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto var(--spacing-3xl);
+        }
+
+        .section-label {
+            display: inline-block;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--accent-blue-500);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: var(--spacing-lg);
+            letter-spacing: -1px;
+        }
+
+        .section-description {
+            font-size: 1.125rem;
+            color: var(--gray-300);
+            line-height: 1.7;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: var(--spacing-xl);
+        }
+
+        .feature-card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
+            opacity: 0;
+            transition: opacity var(--transition-base);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
+        }
+
+        .feature-icon {
+            position: relative;
+            width: 64px;
+            height: 64px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--spacing-xl);
+            transition: all var(--transition-base);
+        }
+
+        .feature-icon-1 {
+            background: linear-gradient(135deg, var(--accent-blue-600), var(--accent-blue-700));
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .feature-icon-2 {
+            background: linear-gradient(135deg, var(--accent-purple-600), var(--accent-purple-500));
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+        }
+
+        .feature-icon-3 {
+            background: linear-gradient(135deg, var(--accent-cyan-600), var(--accent-cyan-500));
+            box-shadow: 0 10px 25px rgba(6, 182, 212, 0.3);
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+        }
+
+        .feature-icon svg {
+            width: 32px;
+            height: 32px;
+            color: white;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+            color: white;
+        }
+
+        .feature-card p {
+            color: var(--gray-400);
+            line-height: 1.7;
+            font-size: 0.9375rem;
+        }
+
+        /* ========================================
+           CTA SECTION
+           ======================================== */
+        .cta {
+            padding: var(--spacing-4xl) 0;
+        }
+
+        .cta-box {
+            position: relative;
+            background: linear-gradient(135deg, var(--accent-blue-600), var(--accent-purple-600));
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-4xl) var(--spacing-3xl);
+            text-align: center;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(59, 130, 246, 0.3);
+        }
+
+        .cta-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        }
+
+        .cta-box h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: var(--spacing-lg);
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-box p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            margin-bottom: var(--spacing-2xl);
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-cta {
+            position: relative;
+            z-index: 1;
+            background: white;
+            color: var(--accent-blue-700);
+            padding: 1.125rem 2.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            border-radius: var(--radius-lg);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ========================================
+           FOOTER
+           ======================================== */
+        footer {
+            background: rgba(10, 14, 39, 0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(59, 130, 246, 0.1);
+            padding: var(--spacing-2xl) 0;
+            margin-top: var(--spacing-4xl);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--spacing-lg);
+        }
+
+        .footer-text {
+            color: var(--gray-400);
+            font-size: 0.9375rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: var(--spacing-xl);
+        }
+
+        .footer-links a {
+            color: var(--gray-400);
+            text-decoration: none;
+            font-size: 0.9375rem;
+            transition: color var(--transition-base);
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-blue-500);
+        }
+
+        .footer-social {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-400);
+            transition: all var(--transition-base);
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--accent-blue-500);
+            color: var(--accent-blue-500);
+            transform: translateY(-3px);
+        }
+
+        .social-link svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* ========================================
+           MATERI STYLES
+           ======================================== */
+        .materi-container,
+        .quiz-container {
+            padding: var(--spacing-3xl) 0;
+            min-height: 100vh;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            color: var(--gray-300);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all var(--transition-base);
+            margin-bottom: var(--spacing-2xl);
+            cursor: pointer;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-blue-500);
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        .materi-header {
+            text-align: center;
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .materi-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-xl);
+            transition: all var(--transition-base);
+        }
+
+        .content-card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .content-card h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-lg);
+            color: var(--accent-blue-500);
+        }
+
+        .content-card h3 {
+            font-size: 1.375rem;
+            font-weight: 600;
+            margin: var(--spacing-xl) 0 var(--spacing-md);
+            color: var(--accent-cyan-500);
+        }
+
+        .content-card p {
+            line-height: 1.8;
+            color: var(--gray-300);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .content-card ul, .content-card ol {
+            margin-left: var(--spacing-xl);
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.8;
+        }
+
+        .content-card li {
+            margin-bottom: var(--spacing-md);
+            color: var(--gray-300);
+        }
+
+        .algorithm-steps {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+            border-left: 4px solid var(--success-500);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1));
+            border-left: 4px solid var(--warning-500);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+            border-radius: var(--radius-lg);
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+        }
+
+        .pros, .cons {
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            border: 2px solid;
+        }
+
+        .pros {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+            border-color: var(--success-500);
+        }
+
+        .cons {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+            border-color: var(--error-500);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-xl) 0;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: var(--spacing-lg);
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-table th {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue-500);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+
+        /* Materi List Styles */
+        .materi-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-xl);
+        }
+
+        .materi-item {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .materi-item:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-blue-500);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .materi-item-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .materi-item h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+            color: white;
+        }
+
+        .materi-item p {
+            color: var(--gray-400);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+        }
+
+        /* ========================================
+           QUIZ STYLES
+           ======================================== */
+        .quiz-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-xl);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .quiz-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-blue-500);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .quiz-icon-large {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .quiz-info {
+            display: flex;
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .quiz-info-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: 0.875rem;
+            color: var(--gray-400);
+        }
+
+        /* Quiz Timer */
+        .quiz-timer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid var(--error-500);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .quiz-timer-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--error-500);
+        }
+
+        .quiz-timer.warning {
+            border-color: var(--error-600);
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        /* ========================================
+           TEAM STYLES
+           ======================================== */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-xl);
+            margin-top: var(--spacing-2xl);
+        }
+
+        .team-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+
+        .team-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--accent-blue-500);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .team-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue-600), var(--accent-purple-600));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--spacing-lg);
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+            transition: all var(--transition-base);
+        }
+
+        .team-card:hover .team-avatar {
+            transform: scale(1.1);
+        }
+
+        .team-role {
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-md);
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--accent-blue-500);
+            margin-top: var(--spacing-sm);
+        }
+
+        .team-description {
+            margin-top: var(--spacing-md);
+            padding-top: var(--spacing-md);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.875rem;
+            color: var(--gray-400);
+            line-height: 1.6;
+        }
+
+        /* ========================================
+           RESPONSIVE DESIGN
+           ======================================== */
+        @media (max-width: 1024px) {
+            :root {
+                font-size: 15px;
+            }
+            
+            .container {
+                padding: 0 var(--spacing-lg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: flex;
+            }
+            
+            .nav-links {
+                position: fixed;
+                top: 80px;
+                right: -100%;
+                width: 280px;
+                height: calc(100vh - 80px);
+                background: rgba(10, 14, 39, 0.98);
+                backdrop-filter: blur(20px);
+                border-left: 1px solid rgba(59, 130, 246, 0.2);
+                flex-direction: column;
+                align-items: stretch;
+                padding: var(--spacing-xl);
+                gap: var(--spacing-md);
+                transition: right var(--transition-base);
+                box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+            }
+            
+            .nav-links.active {
+                right: 0;
+            }
+            
+            .nav-links a {
+                justify-content: flex-start;
+                padding: var(--spacing-lg);
+                border-radius: var(--radius-lg);
+            }
+            
+            .hero {
+                padding: var(--spacing-3xl) 0;
+                min-height: auto;
+            }
+            
+            .hero-cta {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .hero-stats {
+                gap: var(--spacing-xl);
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: var(--spacing-md);
+            }
+        }
+
+        @media (max-width: 480px) {
+            :root {
+                font-size: 14px;
+            }
+            
+            .section-spacing {
+                padding: var(--spacing-3xl) 0;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .cta-box {
+                padding: var(--spacing-2xl) var(--spacing-xl);
+            }
+        }
+
+        /* ========================================
+           SCROLL ANIMATIONS
+           ======================================== */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(15px) scale(0.98);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* ========================================
+           LOADING ANIMATION
+           ======================================== */
+        .loader-wrapper {
+            position: fixed;
+            inset: 0;
+            background: var(--primary-900);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .loader-wrapper.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(59, 130, 246, 0.2);
+            border-top-color: var(--accent-blue-500);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========================================
+           CUSTOM SCROLLBAR
+           ======================================== */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--primary-800);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--accent-blue-600), var(--accent-purple-600));
+            border-radius: var(--radius-full);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--accent-blue-500), var(--accent-purple-500));
+        }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-blue-600) var(--primary-800);
+        }
+
+        /* ========================================
+           SELECTION
+           ======================================== */
+        ::selection {
+            background: rgba(59, 130, 246, 0.3);
+            color: white;
+        }
+
+        ::-moz-selection {
+            background: rgba(59, 130, 246, 0.3);
+            color: white;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loader-wrapper" id="loader">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="bg-gradient-layer"></div>
+        <div class="bg-circle bg-circle-1"></div>
+        <div class="bg-circle bg-circle-2"></div>
+        <div class="bg-circle bg-circle-3"></div>
+        <div class="particles" id="particles"></div>
+    </div>
+
+    <!-- Header -->
+    <header id="header">
+        <div class="container">
+            <nav>
+                <a class="logo" onclick="showHomePage()">
+                    <div class="logo-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        Memory <span>Allocation</span>
+                    </div>
+                </a>
+
+                <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="toggleMobileMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <ul class="nav-links" id="navLinks">
+                    <li>
+                        <a class="active" onclick="showHomePage()">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <a onclick="showMateriListPage()">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            Materi
+                        </a>
+                    </li>
+                    <li>
+                        <a onclick="showQuizPage()">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                            </svg>
+                            Kuis
+                        </a>
+                    </li>
+                    <li>
+                        <a onclick="showTentangPage()">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            Tentang
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Homepage Content -->
+    <div id="homepage-content" class="page-content active">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Platform Pembelajaran Interaktif
+                    </div>
+
+                    <h1>
+                        Pahami <span class="text-gradient">Memory Allocation</span><br>
+                        dengan Visualisasi
+                    </h1>
+
+                    <p class="hero-subtitle">
+                        Belajar konsep manajemen memori dalam sistem operasi melalui simulasi interaktif algoritma First-Fit, Best-Fit, dan Worst-Fit
+                    </p>
+
+                    <div class="hero-cta">
+                        <button class="btn btn-primary" onclick="showMateriListPage()">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            Mulai Belajar
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+
+                        <button class="btn btn-secondary" onclick="showQuizPage()">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            Uji Pengetahuan
+                        </button>
+                    </div>
+
+                    <div class="hero-stats">
+                        <div class="stat-item scroll-reveal">
+                            <div class="stat-number">3</div>
+                            <div class="stat-label">Algoritma</div>
+                        </div>
+                        <div class="stat-item scroll-reveal">
+                            <div class="stat-number">40+</div>
+                            <div class="stat-label">Soal Kuis</div>
+                        </div>
+                        <div class="stat-item scroll-reveal">
+                            <div class="stat-number">100%</div>
+                            <div class="stat-label">Gratis</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Memory Info Section -->
+        <section class="memory-info-section">
+            <div class="container">
+                <div class="memory-info-box scroll-reveal">
+                    <h2 class="memory-info-title">Tentang Manajemen Memori</h2>
+                    <p class="memory-info-description">
+                        Manajemen memori adalah <strong>fungsi fundamental</strong> dari sebuah Sistem Operasi. Tujuannya adalah untuk mengelola memori utama (RAM) secara efisien, mengalokasikan ruang yang aman untuk setiap proses, dan membebaskannya kembali saat tidak lagi diperlukan.
+                    </p>
+                    
+                    <div class="memory-info-highlight">
+                        <div class="memory-info-highlight-title">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                            Platform ini hadir untuk mendemistifikasi proses tersebut
+                        </div>
+                        <p class="memory-info-highlight-text">
+                            Kami mengubah teori alokasi yang abstrak menjadi <strong>simulasi visual interaktif</strong>, memungkinkan Anda untuk memahami dan membandingkan cara kerja setiap algoritma secara langsung.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features section-spacing">
+            <div class="container">
+                <div class="section-header scroll-reveal">
+                    <span class="section-label">Algoritma</span>
+                    <h2 class="section-title">Tiga Metode Alokasi Memori</h2>
+                    <p class="section-description">
+                        Pahami perbedaan fundamental antara ketiga algoritma alokasi memori dinamis yang paling umum digunakan dalam sistem operasi modern.
+                    </p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card scroll-reveal" onclick="showMateriDetail('first-fit')">
+                        <div class="feature-icon feature-icon-1">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <h3>First-Fit Algorithm</h3>
+                        <p>
+                            Strategi alokasi tercepat yang menelusuri memori secara berurutan dan menggunakan blok kosong pertama yang ukurannya cukup.
+                        </p>
+                    </div>
+
+                    <div class="feature-card scroll-reveal" onclick="showMateriDetail('best-fit')">
+                        <div class="feature-icon feature-icon-2">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <h3>Best-Fit Algorithm</h3>
+                        <p>
+                            Fokus pada efisiensi ruang dengan memeriksa seluruh blok memori untuk menemukan blok terkecil yang masih memadai.
+                        </p>
+                    </div>
+
+                    <div class="feature-card scroll-reveal" onclick="showMateriDetail('worst-fit')">
+                        <div class="feature-icon feature-icon-3">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
+                            </svg>
+                        </div>
+                        <h3>Worst-Fit Algorithm</h3>
+                        <p>
+                            Memilih blok terbesar yang tersedia dengan tujuan menyisakan ruang yang cukup besar untuk alokasi berikutnya.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta section-spacing">
+            <div class="container">
+                <div class="cta-box scroll-reveal">
+                    <h2>Siap Menguasai Memory Allocation?</h2>
+                    <p>Mulai perjalanan pembelajaran Anda sekarang dan pahami konsep fundamental sistem operasi</p>
+                    <button class="btn-cta" onclick="showMateriListPage()">
+                        Mulai Sekarang - Gratis!
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Materi List Page -->
+    <div id="materi-list-content" class="page-content">
+        <div class="container materi-container">
+            <a class="back-button" onclick="showHomePage()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Kembali ke Home</span>
+            </a>
+
+            <div class="materi-header">
+                <div class="materi-icon">📚</div>
+                <h1 class="section-title">Daftar Materi</h1>
+                <p class="section-description">
+                    Pilih materi yang ingin Anda pelajari
+                </p>
+            </div>
+
+            <div class="materi-list">
+                <div class="materi-item scroll-reveal" onclick="showMateriDetail('pengantar')">
+                    <div class="materi-item-icon">📖</div>
+                    <h3>Pengantar Manajemen Memori</h3>
+                    <p>Memahami konsep dasar manajemen memori dalam sistem operasi</p>
+                </div>
+
+                <div class="materi-item scroll-reveal" onclick="showMateriDetail('first-fit')">
+                    <div class="materi-item-icon">🔒</div>
+                    <h3>First-Fit Algorithm</h3>
+                    <p>Algoritma alokasi memori tercepat dengan strategi blok pertama</p>
+                </div>
+
+                <div class="materi-item scroll-reveal" onclick="showMateriDetail('best-fit')">
+                    <div class="materi-item-icon">📊</div>
+                    <h3>Best-Fit Algorithm</h3>
+                    <p>Algoritma yang mengoptimalkan penggunaan ruang memori</p>
+                </div>
+
+                <div class="materi-item scroll-reveal" onclick="showMateriDetail('worst-fit')">
+                    <div class="materi-item-icon">⚡</div>
+                    <h3>Worst-Fit Algorithm</h3>
+                    <p>Algoritma yang memilih blok terbesar untuk alokasi</p>
+                </div>
+
+                <div class="materi-item scroll-reveal" onclick="showMateriDetail('perbandingan')">
+                    <div class="materi-item-icon">🔍</div>
+                    <h3>Perbandingan Algoritma</h3>
+                    <p>Analisis komprehensif ketiga algoritma secara berdampingan</p>
+                </div>
+
+                <div class="materi-item scroll-reveal" onclick="showMateriDetail('implementasi')">
+                    <div class="materi-item-icon">💻</div>
+                    <h3>Implementasi & Contoh</h3>
+                    <p>Contoh kasus nyata dan implementasi algoritma</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Materi Detail Content -->
+    <div id="materi-detail-content" class="page-content">
+        <div class="container materi-container">
+            <a class="back-button" onclick="showMateriListPage()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Kembali ke Daftar Materi</span>
+            </a>
+
+            <div id="materi-detail-container">
+                <!-- Content will be inserted here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Content -->
+    <div id="quiz-content" class="page-content">
+        <div class="container quiz-container">
+            <!-- Quiz Menu -->
+            <div id="quiz-menu">
+                <a class="back-button" onclick="showHomePage()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    <span>Kembali ke Home</span>
+                </a>
+
+                <div class="materi-header">
+                    <div class="materi-icon">📝</div>
+                    <h1 class="section-title">Kuis Interaktif</h1>
+                    <p class="section-description">
+                        Uji pemahaman Anda tentang algoritma Memory Allocation
+                    </p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-xl);">
+                    <div class="quiz-card scroll-reveal" onclick="startQuiz('first-fit')">
+                        <div class="quiz-icon-large">🔒</div>
+                        <h3>First-Fit Algorithm</h3>
+                        <p style="color: var(--gray-400); line-height: 1.6;">
+                            10 soal tentang algoritma First-Fit dan karakteristiknya
+                        </p>
+                        <div class="quiz-info">
+                            <div class="quiz-info-item">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>30 detik/soal</span>
+                            </div>
+                            <div class="quiz-info-item">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                <span>10 soal</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-card scroll-reveal" onclick="startQuiz('best-fit')">
+                        <div class="quiz-icon-large">📊</div>
+                        <h3>Best-Fit Algorithm</h3>
+                        <p style="color: var(--gray-400); line-height: 1.6;">
+                            10 soal tentang algoritma Best-Fit dan optimasinya
+                        </p>
+                        <div class="quiz-info">
+                            <div class="quiz-info-item">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>30 detik/soal</span>
+                            </div>
+                            <div class="quiz-info-item">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                <span>10 soal</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-card scroll-reveal" onclick="startQuiz('worst-fit')">
+                        <div class="quiz-icon-large">⚡</div>
+                        <h3>Worst-Fit Algorithm</h3>
+                        <p style="color: var(--gray-400); line-height: 1.6;">
+                            10 soal tentang algoritma Worst-Fit dan penggunaannya
+                        </p>
+                        <div class="quiz-info">
+                            <div class="quiz-info-item">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>30 detik/soal</span>
+                            </div>
+                            <div class="quiz-info-item">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                <span>10 soal</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-card scroll-reveal" onclick="startQuiz('mixed')">
+                        <div class="quiz-icon-large">🎯</div>
+                        <h3>Kuis Campuran</h3>
+                        <p style="color: var(--gray-400); line-height: 1.6;">
+                            15 soal campuran dari semua algoritma untuk tantangan ekstra
+                        </p>
+                        <div class="quiz-info">
+                            <div class="quiz-info-item">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>30 detik/soal</span>
+                            </div>
+                            <div class="quiz-info-item">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                <span>15 soal</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Active View -->
+            <div id="quiz-active" style="display: none;">
+                <a class="back-button" onclick="exitQuiz()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    <span>Keluar Kuis</span>
+                </a>
+
+                <!-- Quiz Timer -->
+                <div class="quiz-timer" id="quiz-timer">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>Waktu Tersisa: <span class="quiz-timer-value" id="timer-value">30</span> detik</span>
+                </div>
+
+                <!-- Quiz Header -->
+                <div class="content-card scroll-reveal">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-lg);">
+                        <div>
+                            <h2 id="quiz-title" style="margin-bottom: var(--spacing-sm);">Kuis First-Fit</h2>
+                            <p style="color: var(--gray-400); margin: 0;">Jawab semua pertanyaan dengan benar</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 2rem; font-weight: 800; color: var(--accent-blue-500);" id="quiz-score">0/10</div>
+                            <div style="font-size: 0.875rem; color: var(--gray-400);">Skor Anda</div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div style="margin-top: var(--spacing-xl);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-sm);">
+                            <span style="font-size: 0.875rem; color: var(--gray-400);">Progres</span>
+                            <span style="font-size: 0.875rem; color: var(--gray-400);" id="quiz-progress-text">1 dari 10</span>
+                        </div>
+                        <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden;">
+                            <div id="quiz-progress-bar" style="width: 10%; height: 100%; background: linear-gradient(90deg, var(--accent-blue-500), var(--accent-purple-500)); transition: width 0.3s ease;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question Card -->
+                <div class="content-card scroll-reveal" id="question-card">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-xl);">
+                        <div style="flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-blue-600), var(--accent-purple-600)); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 800; color: white;">
+                            <span id="question-number">1</span>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3 id="question-text" style="margin: 0; color: white; font-size: 1.25rem; line-height: 1.6;">
+                                <!-- Question text -->
+                            </h3>
+                        </div>
+                    </div>
+
+                    <!-- Answer Options -->
+                    <div id="answer-options" style="display: grid; gap: var(--spacing-md);">
+                        <!-- Options will be inserted here -->
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div style="display: flex; justify-content: space-between; margin-top: var(--spacing-2xl); gap: var(--spacing-md); flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="previousQuestion()" id="btn-prev" disabled>
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                            Sebelumnya
+                        </button>
+                        <button class="btn btn-primary" onclick="nextQuestion()" id="btn-next">
+                            Selanjutnya
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Result View -->
+            <div id="quiz-result" style="display: none;">
+                <a class="back-button" onclick="backToQuizMenu()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    <span>Kembali ke Menu Kuis</span>
+                </a>
+
+                <div class="content-card scroll-reveal" style="text-align: center;">
+                    <div id="result-icon" style="font-size: 5rem; margin-bottom: var(--spacing-xl);">🎉</div>
+                    <h2 id="result-title" style="font-size: 2.5rem; margin-bottom: var(--spacing-md);">Selamat!</h2>
+                    <p id="result-message" style="font-size: 1.25rem; color: var(--gray-300); margin-bottom: var(--spacing-2xl);">
+                        Anda telah menyelesaikan kuis dengan baik
+                    </p>
+
+                    <!-- Score Display -->
+                    <div style="display: inline-block; padding: var(--spacing-2xl); background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1)); border-radius: var(--radius-xl); margin-bottom: var(--spacing-2xl);">
+                        <div style="font-size: 4rem; font-weight: 900; background: linear-gradient(135deg, var(--accent-blue-500), var(--accent-purple-500)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;" id="final-score">0</div>
+                        <div style="font-size: 1rem; color: var(--gray-400); margin-top: var(--spacing-sm);">dari <span id="total-questions">10</span> soal</div>
+                    </div>
+
+                    <!-- Performance Breakdown -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl);">
+                        <div class="stat-card">
+                            <div class="stat-value" style="color: var(--success-500);" id="correct-answers">0</div>
+                            <div class="stat-label">Benar</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" style="color: var(--error-500);" id="wrong-answers">0</div>
+                            <div class="stat-label">Salah</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" style="color: var(--accent-cyan-500);" id="percentage">0%</div>
+                            <div class="stat-label">Persentase</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="retryQuiz()">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Coba Lagi
+                        </button>
+                        <button class="btn btn-secondary" onclick="backToQuizMenu()">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                            Menu Kuis
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Review Answers Section -->
+                <div class="content-card scroll-reveal">
+                    <h3 style="margin-bottom: var(--spacing-xl);">📋 Review Jawaban Anda</h3>
+                    <div id="answer-review">
+                        <!-- Review will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tentang Content -->
+    <div id="tentang-content" class="page-content">
+        <div class="container quiz-container">
+            <a class="back-button" onclick="showHomePage()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Kembali ke Home</span>
+            </a>
+
+            <div class="materi-header">
+                <div class="materi-icon">👥</div>
+                <h1 class="section-title">Tim Kami</h1>
+                <p class="section-description">
+                    Tim profesional di balik platform Memory Allocation
+                </p>
+            </div>
+
+            <div class="team-grid">
+                <div class="team-card scroll-reveal">
+                    <div class="team-avatar">A</div>
+                    <h3>Andi Wijaya</h3>
+                    <div style="color: var(--gray-400); font-size: 0.875rem; margin-bottom: var(--spacing-sm);">NIM: 2106001</div>
+                    <span class="team-role">Project Manager</span>
+                    <div class="team-description">
+                        Bertanggung jawab atas koordinasi tim dan memastikan proyek berjalan sesuai timeline yang ditentukan.
+                    </div>
+                </div>
+
+                <div class="team-card scroll-reveal">
+                    <div class="team-avatar">B</div>
+                    <h3>Budi Hartono</h3>
+                    <div style="color: var(--gray-400); font-size: 0.875rem; margin-bottom: var(--spacing-sm);">NIM: 2106002</div>
+                    <span class="team-role">UI/UX Designer</span>
+                    <div class="team-description">
+                        Merancang interface yang intuitif dan user experience yang optimal untuk platform pembelajaran.
+                    </div>
+                </div>
+
+                <div class="team-card scroll-reveal">
+                    <div class="team-avatar">C</div>
+                    <h3>Citra Lestari</h3>
+                    <div style="color: var(--gray-400); font-size: 0.875rem; margin-bottom: var(--spacing-sm);">NIM: 2106003</div>
+                    <span class="team-role">Front-End Developer</span>
+                    <div class="team-description">
+                        Mengimplementasikan desain ke dalam kode dan memastikan responsivitas di semua perangkat.
+                    </div>
+                </div>
+
+                <div class="team-card scroll-reveal">
+                    <div class="team-avatar">D</div>
+                    <h3>Dewi Anggraini</h3>
+                    <div style="color: var(--gray-400); font-size: 0.875rem; margin-bottom: var(--spacing-sm);">NIM: 2106004</div>
+                    <span class="team-role">Logic Developer</span>
+                    <div class="team-description">
+                        Mengembangkan logika algoritma dan sistem interaktif untuk simulasi memory allocation.
+                    </div>
+                </div>
+
+                <div class="team-card scroll-reveal">
+                    <div class="team-avatar">E</div>
+                    <h3>Eka Prasetyo</h3>
+                    <div style="color: var(--gray-400); font-size: 0.875rem; margin-bottom: var(--spacing-sm);">NIM: 2106005</div>
+                    <span class="team-role">Content Writer</span>
+                    <div class="team-description">
+                        Menyusun materi pembelajaran yang mudah dipahami dan membuat soal-soal kuis yang berkualitas.
+                    </div>
+                </div>
+
+                <div class="team-card scroll-reveal">
+                    <div class="team-avatar">F</div>
+                    <h3>Fajar Nugroho</h3>
+                    <div style="color: var(--gray-400); font-size: 0.875rem; margin-bottom: var(--spacing-sm);">NIM: 2106006</div>
+                    <span class="team-role">Quality Assurance</span>
+                    <div class="team-description">
+                        Melakukan testing menyeluruh untuk memastikan platform bebas dari bug dan berfungsi optimal.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-text">
+                    © 2025 Memory Allocation. Platform Pembelajaran Sistem Operasi.
+                </div>
+                <div class="footer-links">
+                    <a href="#" onclick="showMateriListPage()">Dokumentasi</a>
+                    <a href="#" onclick="showTentangPage()">Tim</a>
+                    <a href="#">Privacy</a>
+                </div>
+                <div class="footer-social">
+                    <a href="#" class="social-link" aria-label="GitHub">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Twitter">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="LinkedIn">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/>
+                            <circle cx="4" cy="4" r="2"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ========================================
+        // INITIALIZATION & UTILITIES
+        // ========================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            setTimeout(() => {
+                const loader = document.getElementById('loader');
+                if (loader) {
+                    loader.classList.add('hidden');
+                }
+            }, 400);
+
+            createParticles();
+            initScrollReveal();
+            initHeaderScroll();
+            updateActiveNavLink();
+        }
+
+        // ========================================
+        // PARTICLE SYSTEM
+        // ========================================
+        
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            if (!particlesContainer) return;
+
+            const particleCount = window.innerWidth < 768 ? 20 : 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // ========================================
+        // SCROLL REVEAL ANIMATIONS
+        // ========================================
+        
+        function initScrollReveal() {
+            const revealElements = document.querySelectorAll('.scroll-reveal');
+            
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -20px 0px'
+            });
+
+            revealElements.forEach(element => {
+                revealObserver.observe(element);
+            });
+        }
+
+        // ========================================
+        // HEADER SCROLL EFFECT
+        // ========================================
+        
+        function initHeaderScroll() {
+            const header = document.getElementById('header');
+            let lastScroll = 0;
+
+            window.addEventListener('scroll', () => {
+                const currentScroll = window.pageYOffset;
+
+                if (currentScroll > 100) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+
+                lastScroll = currentScroll;
+            });
+        }
+
+        // ========================================
+        // NAVIGATION MANAGEMENT
+        // ========================================
+        
+        const pages = {
+            homepage: document.getElementById('homepage-content'),
+            materiList: document.getElementById('materi-list-content'),
+            materiDetail: document.getElementById('materi-detail-content'),
+            quiz: document.getElementById('quiz-content'),
+            tentang: document.getElementById('tentang-content')
+        };
+
+        function hideAllPages() {
+            Object.values(pages).forEach(page => {
+                if (page) page.classList.remove('active');
+            });
+        }
+
+        function showHomePage() {
+            hideAllPages();
+            if (pages.homepage) pages.homepage.classList.add('active');
+            updateActiveNavLink('Home');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            closeMobileMenu();
+        }
+
+        function showMateriListPage() {
+            hideAllPages();
+            if (pages.materiList) pages.materiList.classList.add('active');
+            updateActiveNavLink('Materi');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            closeMobileMenu();
+        }
+
+        function showMateriDetail(topic) {
+            hideAllPages();
+            if (pages.materiDetail) {
+                pages.materiDetail.classList.add('active');
+                loadMateriContent(topic);
+            }
+            updateActiveNavLink('Materi');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            closeMobileMenu();
+        }
+
+        function showQuizPage() {
+            hideAllPages();
+            if (pages.quiz) pages.quiz.classList.add('active');
+            updateActiveNavLink('Kuis');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            closeMobileMenu();
+        }
+
+        function showTentangPage() {
+            hideAllPages();
+            if (pages.tentang) pages.tentang.classList.add('active');
+            updateActiveNavLink('Tentang');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            closeMobileMenu();
+        }
+
+        function updateActiveNavLink(pageName) {
+            const navLinks = document.querySelectorAll('.nav-links a');
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.textContent.trim() === pageName) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // ========================================
+        // MOBILE MENU
+        // ========================================
+        
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const toggle = document.getElementById('mobileMenuToggle');
+            
+            if (navLinks && toggle) {
+                navLinks.classList.toggle('active');
+                toggle.classList.toggle('active');
+            }
+        }
+
+        function closeMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const toggle = document.getElementById('mobileMenuToggle');
+            
+            if (navLinks && toggle) {
+                navLinks.classList.remove('active');
+                toggle.classList.remove('active');
+            }
+        }
+
+        // ========================================
+        // MATERI CONTENT LOADER
+        // ========================================
+        
+        const materiContent = {
+            'pengantar': `
+                <div class="materi-header">
+                    <div class="materi-icon">📖</div>
+                    <h1 class="section-title">Pengantar Manajemen Memori</h1>
+                </div>
+
+                <div class="content-card scroll-reveal">
+                    <h2>📖 Apa itu Manajemen Memori?</h2>
+                    <p>
+                        Manajemen Memori adalah salah satu fungsi inti dari Sistem Operasi (OS). Bayangkan memori (RAM) sebagai sebuah rak buku besar yang kosong. Ketika Anda ingin membaca buku (menjalankan program), OS harus mencari tempat di rak tersebut, meletakkan buku di sana, dan mengingat di mana lokasinya.
+                    </p>
+                    <p>
+                        Tugas OS adalah mengelola "rak" ini secara efisien: mengalokasikan ruang untuk program baru, memastikan program tidak saling tumpang tindih, dan mengambil kembali ruang saat program selesai digunakan.
+                    </p>
+                </div>
+
+                <div class="content-card scroll-reveal">
+                    <h2>🎯 Tujuan Manajemen Memori</h2>
+                    <ul>
+                        <li><strong>Alokasi Memori:</strong> Memberikan ruang memori untuk proses yang membutuhkan</li>
+                        <li><strong>Proteksi:</strong> Mencegah proses mengakses memori proses lain</li>
+                        <li><strong>Optimasi:</strong> Memaksimalkan penggunaan memori yang tersedia</li>
+                        <li><strong>Transparansi:</strong> Membuat proses tidak perlu tahu detail fisik memori</li>
+                    </ul>
+                </div>
+
+                <div class="content-card scroll-reveal">
+                    <h2>⚙️ Konsep Dasar</h2>
+                    <div class="algorithm-steps">
+                        <h3>Fragmentasi Memori</h3>
+                        <p>Fragmentasi terjadi ketika memori kosong tersebar dalam blok-blok kecil yang tidak dapat digunakan secara efektif.</p>
+                        <ul>
+                            <li><strong>Fragmentasi Eksternal:</strong> Ruang kosong total cukup, tapi tersebar</li>
+                            <li><strong>Fragmentasi Internal:</strong> Ruang tidak terpakai dalam blok yang dialokasikan</li>
+                        </ul>
+                    </div>
+                </div>
+            `,
+            'first-fit': `
+                <div class="materi-header">
+                    <div class="materi-icon">🔒</div>
+                    <h1 class="section-title">First-Fit Algorithm</h1>
+                </div>
+
+                <div class="content-card scroll-reveal">
+                    <h2>🔒 First-Fit Algorithm</h2>
+                    <p>
+                        First-Fit adalah algoritma alokasi memori yang paling sederhana dan cepat. Algoritma ini bekerja dengan cara menelusuri daftar blok memori kosong secara berurutan dari awal, kemudian mengalokasikan proses pada <strong>blok kosong pertama</strong> yang ukurannya cukup untuk menampung proses tersebut.
+                    </p>
+                    
+                    <div class="algorithm-steps">
+                        <h3>Langkah-langkah Algoritma:</h3>
+                        <ol>
+                            <li>Mulai dari awal daftar blok memori kosong</li>
+                            <li>Periksa blok pertama: apakah ukurannya ≥ ukuran proses?</li>
+                            <li>Jika YA: Alokasikan proses ke blok tersebut dan <strong>berhenti</strong></li>
+                            <li>Jika TIDAK: Lanjutkan ke blok kosong berikutnya</li>
+                            <li>Ulangi hingga menemukan blok yang sesuai</li>
+                        </ol>
+                    </div>
+
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h3>✅ Kelebihan</h3>
+                            <ul>
+                                <li>Sangat Cepat: Kompleksitas O(n) dengan early termination</li>
+                                <li>Sederhana: Mudah diimplementasikan</li>
+                                <li>Efisien: Tidak perlu sorting</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h3>❌ Kekurangan</h3>
+                            <ul>
+                                <li>Fragmentasi: Banyak blok kecil di awal memori</li>
+                                <li>Tidak Optimal: Mungkin pilih blok yang terlalu besar</li>
+                                <li>Performa Menurun: Jika banyak blok kecil</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card scroll-reveal">
+                    <h2>📝 Contoh Implementasi</h2>
+                    <div class="example-box">
+                        <strong>Contoh Kasus:</strong><br>
+                        Blok Memori: [100KB, 500KB, 200KB, 300KB, 600KB]<br>
+                        Proses yang akan dialokasikan: 212KB<br><br>
+                        <strong>Hasil First-Fit:</strong> Proses dialokasikan ke blok 500KB (blok kedua) karena ini adalah blok PERTAMA yang ukurannya cukup (≥ 212KB).
+                    </div>
+                </div>
+            `,
+            'best-fit': `
+                <div class="materi-header">
+                    <div class="materi-icon">📊</div>
+                    <h1 class="section-title">Best-Fit Algorithm</h1>
+                </div>
+
+                <div class="content-card scroll-reveal">
+                    <h2>📊 Best-Fit Algorithm</h2>
+                    <p>
+                        Best-Fit adalah algoritma yang mencari blok memori terkecil yang masih cukup untuk menampung proses. Tujuannya adalah meminimalkan sisa ruang (waste) dan memaksimalkan efisiensi penggunaan memori.
+                    </p>
+
+                    <div class="algorithm-steps">
+                        <h3>Cara Kerja:</h3>
+                        <ol>
+                            <li>Scan semua blok memori yang tersedia</li>
+                            <li>Cari blok terkecil yang ukurannya ≥ ukuran proses</li>
+                            <li>Alokasikan proses ke blok tersebut</li>
+                        </ol>
+                    </div>
+
+                    <div class="example-box">
+                        <strong>Contoh:</strong> Proses 212KB dengan blok A(100KB), B(500KB), C(200KB), D(300KB) → Dialokasikan ke Blok D (300KB) karena paling kecil yang cukup.
+                    </div>
+
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h3>✅ Kelebihan</h3>
+                            <ul>
+                                <li>Efisiensi Tinggi: Meminimalkan sisa ruang</li>
+                                <li>Fragmentasi Rendah: Lebih sedikit blok sangat kecil</li>
+                                <li>Optimal untuk memori terbatas</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h3>❌ Kekurangan</h3>
+                            <ul>
+                                <li>Lambat: Harus memeriksa semua blok</li>
+                                <li>Kompleks: Memerlukan sorting atau heap</li>
+                                <li>Tiny Fragments: Bisa hasilkan blok sangat kecil</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `,
+            'worst-fit': `
+                <div class="materi-header">
+                    <div class="materi-icon">⚡</div>
+                    <h1 class="section-title">Worst-Fit Algorithm</h1>
+                </div>
+
+                <div class="content-card scroll-reveal">
+                    <h2>⚡ Worst-Fit Algorithm</h2>
+                    <p>
+                        Worst-Fit adalah algoritma yang memilih blok memori terbesar yang tersedia. Tujuannya adalah menyisakan ruang yang cukup besar sehingga masih bisa digunakan untuk proses lain di masa depan.
+                    </p>
+
+                    <div class="algorithm-steps">
+                        <h3>Cara Kerja:</h3>
+                        <ol>
+                            <li>Scan semua blok memori yang tersedia</li>
+                            <li>Cari blok TERBESAR</li>
+                            <li>Alokasikan proses ke blok tersebut</li>
+                        </ol>
+                    </div>
+
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h3>✅ Kelebihan</h3>
+                            <ul>
+                                <li>Sisa blok lebih besar dan berguna</li>
+                                <li>Cocok untuk proses dengan ukuran medium</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h3>❌ Kekurangan</h3>
+                            <ul>
+                                <li>Fragmentasi sangat tinggi</li>
+                                <li>Paling jarang digunakan</li>
+                                <li>Harus memeriksa semua blok</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `,
+            'perbandingan': `
+                <div class="materi-header">
+                    <div class="materi-icon">🔍</div>
+                    <h1 class="section-title">Perbandingan Algoritma</h1>
+                </div>
+
+                <div class="content-card scroll-reveal">
+                    <h2>🔍 Perbandingan Algoritma</h2>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Aspek</th>
+                                <th>First-Fit</th>
+                                <th>Best-Fit</th>
+                                <th>Worst-Fit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Strategi</strong></td>
+                                <td>Blok pertama yang cukup</td>
+                                <td>Blok terkecil yang cukup</td>
+                                <td>Blok terbesar</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Kecepatan</strong></td>
+                                <td>⚡ Tercepat</td>
+                                <td>🐢 Lambat</td>
+                                <td>🐢 Lambat</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Efisiensi</strong></td>
+                                <td>⭐⭐⭐ Sedang</td>
+                                <td>⭐⭐⭐⭐⭐ Tinggi</td>
+                                <td>⭐⭐ Rendah</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Kompleksitas</strong></td>
+                                <td>O(n)</td>
+                                <td>O(n) / O(log n)</td>
+                                <td>O(n) / O(log n)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Fragmentasi</strong></td>
+                                <td>Sedang</td>
+                                <td>Rendah</td>
+                                <td>Tinggi</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Penggunaan</strong></td>
+                                <td>Sangat Umum</td>
+                                <td>Umum</td>
+                                <td>Jarang</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="content-card scroll-reveal">
+                    <h2>💡 Kapan Menggunakan Algoritma Tertentu?</h2>
+                    <div class="algorithm-steps">
+                        <h3>Gunakan First-Fit jika:</h3>
+                        <ul>
+                            <li>Kecepatan adalah prioritas utama</li>
+                            <li>Sistem memiliki memori yang cukup besar</li>
+                            <li>Ukuran proses relatif seragam</li>
+                        </ul>
+                    </div>
+
+                    <div class="algorithm-steps">
+                        <h3>Gunakan Best-Fit jika:</h3>
+                        <ul>
+                            <li>Memori sangat terbatas</li>
+                            <li>Efisiensi penggunaan memori penting</li>
+                            <li>Dapat menggunakan struktur data optimal (heap/tree)</li>
+                        </ul>
+                    </div>
+
+                    <div class="algorithm-steps">
+                        <h3>Gunakan Worst-Fit jika:</h3>
+                        <ul>
+                            <li>Ukuran proses sangat bervariasi</li>
+                            <li>Ingin sisa blok yang besar untuk proses future</li>
+                            <li>Situasi khusus dengan karakteristik workload tertentu</li>
+                        </ul>
+                    </div>
+                </div>
+            `,
+            'implementasi': `
+                <div class="materi-header">
+                    <div class="materi-icon">💻</div>
+                    <h1 class="section-title">Implementasi & Contoh</h1>
+                </div>
+
+                <div class="content-card scroll-reveal">
+                    <h2>💻 Contoh Kasus Nyata</h2>
+                    <div class="example-box">
+                        <h3>Skenario:</h3>
+                        <p>Sebuah sistem memiliki memori dengan blok-blok berikut:</p>
+                        <ul>
+                            <li>Blok 1: 100 KB (Kosong)</li>
+                            <li>Blok 2: 500 KB (Kosong)</li>
+                            <li>Blok 3: 200 KB (Kosong)</li>
+                            <li>Blok 4: 300 KB (Terisi)</li>
+                            <li>Blok 5: 600 KB (Kosong)</li>
+                        </ul>
+                        <p><strong>Proses baru membutuhkan 120 KB memori.</strong></p>
+                    </div>
+
+                    <div class="algorithm-steps">
+                        <h3>Hasil Alokasi:</h3>
+                        <ul>
+                            <li><strong>First-Fit:</strong> Blok 2 (500 KB) - Blok pertama yang cukup</li>
+                            <li><strong>Best-Fit:</strong> Blok 3 (200 KB) - Blok terkecil yang cukup</li>
+                            <li><strong>Worst-Fit:</strong> Blok 5 (600 KB) - Blok terbesar</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-card scroll-reveal">
+                    <h2>🎯 Tips Optimasi</h2>
+                    <ul>
+                        <li><strong>Gunakan Struktur Data Tepat:</strong> Heap untuk Best/Worst-Fit</li>
+                        <li><strong>Compaction:</strong> Gabungkan blok kosong berdekatan</li>
+                        <li><strong>Hybrid Approach:</strong> Kombinasi algoritma untuk kasus berbeda</li>
+                        <li><strong>Memory Pooling:</strong> Alokasikan blok dengan ukuran standar</li>
+                    </ul>
+                </div>
+            `
+        };
+
+        function loadMateriContent(topic) {
+            const container = document.getElementById('materi-detail-container');
+            if (container) {
+                container.innerHTML = materiContent[topic] || '<p>Konten tidak ditemukan</p>';
+                
+                // Re-initialize scroll reveal for new content
+                setTimeout(() => {
+                    initScrollReveal();
+                }, 100);
+            }
+        }
+
+        // ========================================
+        // QUIZ SYSTEM WITH TIMER
+        // ========================================
+        
+        const quizData = {
+            'first-fit': [
+                {
+                    question: "Apa strategi utama dari algoritma First-Fit?",
+                    options: [
+                        "Memilih blok memori terkecil yang cukup",
+                        "Memilih blok memori pertama yang ukurannya cukup",
+                        "Memilih blok memori terbesar yang tersedia",
+                        "Memilih blok memori dengan fragmentasi terendah"
+                    ],
+                    correct: 1,
+                    explanation: "First-Fit memilih blok memori PERTAMA yang ditemukan dengan ukuran yang cukup untuk proses."
+                },
+                {
+                    question: "Apa keuntungan utama dari algoritma First-Fit?",
+                    options: [
+                        "Menghasilkan fragmentasi paling rendah",
+                        "Paling efisien dalam penggunaan memori",
+                        "Paling cepat dalam eksekusi",
+                        "Menghasilkan sisa blok terbesar"
+                    ],
+                    correct: 2,
+                    explanation: "First-Fit adalah algoritma TERCEPAT karena berhenti setelah menemukan blok pertama yang sesuai."
+                },
+                {
+                    question: "Berapa kompleksitas waktu rata-rata dari algoritma First-Fit?",
+                    options: [
+                        "O(1)",
+                        "O(log n)",
+                        "O(n)",
+                        "O(n²)"
+                    ],
+                    correct: 2,
+                    explanation: "First-Fit memiliki kompleksitas O(n) karena harus menelusuri daftar blok secara berurutan."
+                },
+                {
+                    question: "Proses 150 KB perlu dialokasikan. Blok tersedia: 100KB, 200KB, 180KB, 300KB. Ke blok mana First-Fit akan mengalokasikan?",
+options: [
+"100KB",
+"200KB",
+"180KB",
+"300KB"
+],
+correct: 1,
+explanation: "First-Fit memilih blok PERTAMA yang cukup, yaitu 200KB (blok ke-2)."
+},
+{
+question: "Apa kelemahan utama dari First-Fit?",
+options: [
+"Terlalu lambat",
+"Fragmentasi tinggi di awal memori",
+"Sulit diimplementasikan",
+"Membutuhkan memori tambahan"
+],
+correct: 1,
+explanation: "First-Fit cenderung menciptakan banyak blok kecil (fragmentasi) di bagian AWAL memori."
+},
+{
+question: "Kapan First-Fit paling efektif digunakan?",
+options: [
+"Ketika memori sangat terbatas",
+"Ketika kecepatan alokasi adalah prioritas",
+"Ketika fragmentasi harus minimal",
+"Ketika ukuran proses sangat bervariasi"
+],
+correct: 1,
+explanation: "First-Fit paling cocok ketika KECEPATAN alokasi lebih penting daripada efisiensi memori."
+},
+{
+question: "Apakah First-Fit harus memeriksa semua blok memori?",
+options: [
+"Ya, selalu memeriksa semua blok",
+"Tidak, berhenti setelah menemukan blok yang cocok",
+"Ya, untuk memilih yang terbaik",
+"Tidak, hanya memeriksa blok terbesar"
+],
+correct: 1,
+explanation: "First-Fit BERHENTI setelah menemukan blok pertama yang sesuai (early termination)."
+},
+{
+question: "Jika semua blok terlalu kecil, apa yang terjadi dengan First-Fit?",
+options: [
+"Menunggu hingga ada memori tersedia",
+"Menggabungkan beberapa blok kecil",
+"Gagal mengalokasikan (allocation failure)",
+"Menggunakan memori virtual"
+],
+correct: 2,
+explanation: "Jika tidak ada blok yang cukup, First-Fit akan GAGAL mengalokasikan proses."
+},
+{
+question: "Bagaimana First-Fit menangani blok yang lebih besar dari yang dibutuhkan?",
+options: [
+"Menolak dan mencari blok yang lebih kecil",
+"Menggunakan seluruh blok",
+"Membagi blok dan menyisakan ruang kosong",
+"Meminta konfirmasi pengguna"
+],
+correct: 2,
+explanation: "First-Fit MEMBAGI blok besar dan menyisakan ruang kosong untuk alokasi berikutnya."
+},
+{
+question: "Dibandingkan Best-Fit, apa trade-off dari First-Fit?",
+options: [
+"Lebih lambat tapi lebih efisien",
+"Lebih cepat tapi kurang efisien",
+"Sama cepat dan sama efisien",
+"Lebih lambat dan kurang efisien"
+],
+correct: 1,
+explanation: "First-Fit lebih CEPAT tapi KURANG EFISIEN dalam penggunaan memori dibanding Best-Fit."
+}
+],
+'best-fit': [
+{
+question: "Apa strategi utama dari algoritma Best-Fit?",
+options: [
+"Memilih blok memori pertama yang ditemukan",
+"Memilih blok memori terkecil yang masih cukup",
+"Memilih blok memori terbesar yang tersedia",
+"Memilih blok memori secara acak"
+],
+correct: 1,
+explanation: "Best-Fit memilih blok TERKECIL yang masih cukup untuk meminimalkan sisa ruang (waste)."
+},
+{
+question: "Apa tujuan utama dari Best-Fit?",
+options: [
+"Kecepatan alokasi maksimal",
+"Meminimalkan fragmentasi eksternal",
+"Memaksimalkan ukuran blok kosong",
+"Mempercepat dealokasi memori"
+],
+correct: 1,
+explanation: "Best-Fit bertujuan MEMINIMALKAN fragmentasi dengan memilih blok yang paling pas ukurannya."
+},
+{
+question: "Berapa kompleksitas waktu worst-case dari Best-Fit?",
+options: [
+"O(1)",
+"O(log n)",
+"O(n)",
+"O(n log n)"
+],
+correct: 2,
+explanation: "Best-Fit harus memeriksa SEMUA blok untuk menemukan yang terkecil, sehingga O(n)."
+},
+{
+question: "Proses 150KB perlu dialokasikan. Blok: 100KB, 200KB, 180KB, 300KB. Ke mana Best-Fit mengalokasikan?",
+options: [
+"100KB",
+"200KB",
+"180KB",
+"300KB"
+],
+correct: 2,
+explanation: "Best-Fit memilih 180KB karena ini adalah blok TERKECIL yang masih cukup (sisa 30KB)."
+},
+{
+question: "Apa kelemahan utama dari Best-Fit?",
+options: [
+"Terlalu cepat sehingga tidak akurat",
+"Menghasilkan banyak blok sangat kecil (tiny fragments)",
+"Tidak bisa menangani proses besar",
+"Memerlukan memori tambahan yang besar"
+],
+correct: 1,
+explanation: "Best-Fit sering menghasilkan blok-blok SANGAT KECIL yang sulit digunakan kembali."
+},
+{
+question: "Untuk mengoptimalkan Best-Fit, struktur data apa yang sebaiknya digunakan?",
+options: [
+"Array tidak terurut",
+"Linked list",
+"Binary search tree atau heap",
+"Hash table"
+],
+correct: 2,
+explanation: "Binary search tree atau heap dapat mengurangi kompleksitas pencarian menjadi O(log n)."
+},
+{
+question: "Kapan Best-Fit lebih direkomendasikan dibanding First-Fit?",
+options: [
+"Ketika kecepatan adalah prioritas utama",
+"Ketika memori sangat terbatas dan efisiensi penting",
+"Ketika ukuran proses selalu sama",
+"Ketika fragmentasi tidak menjadi masalah"
+],
+correct: 1,
+explanation: "Best-Fit lebih baik ketika MEMORI TERBATAS dan kita perlu memaksimalkan efisiensi."
+},
+{
+question: "Bagaimana Best-Fit menangani situasi dimana dua blok memiliki ukuran yang sama?",
+options: [
+"Menolak alokasi",
+"Memilih blok pertama yang ditemukan",
+"Menggabungkan kedua blok",
+"Memilih secara acak"
+],
+correct: 1,
+explanation: "Jika ada blok dengan ukuran sama, Best-Fit biasanya memilih yang PERTAMA ditemukan."
+},
+{
+question: "Dibandingkan Worst-Fit, apa keunggulan Best-Fit?",
+options: [
+"Lebih cepat",
+"Fragmentasi lebih rendah",
+"Sisa blok lebih besar",
+"Lebih mudah diimplementasikan"
+],
+correct: 1,
+explanation: "Best-Fit menghasilkan FRAGMENTASI LEBIH RENDAH karena memilih blok yang paling pas."
+},
+{
+question: "Apa yang terjadi jika Best-Fit tidak menemukan blok yang cukup?",
+options: [
+"Menunggu hingga ada memori bebas",
+"Menggunakan swap memory",
+"Gagal mengalokasikan (allocation failure)",
+"Memaksa menggunakan blok terkecil"
+],
+correct: 2,
+explanation: "Seperti algoritma lainnya, Best-Fit akan GAGAL jika tidak ada blok yang cukup besar."
+}
+],
+'worst-fit': [
+{
+question: "Apa strategi utama dari algoritma Worst-Fit?",
+options: [
+"Memilih blok memori terkecil",
+"Memilih blok memori pertama",
+"Memilih blok memori terbesar yang tersedia",
+"Memilih blok memori secara acak"
+],
+correct: 2,
+explanation: "Worst-Fit memilih blok TERBESAR dengan harapan sisa ruangnya masih bisa digunakan."
+},
+{
+question: "Apa tujuan utama dari pemilihan blok terbesar di Worst-Fit?",
+options: [
+"Mempercepat proses alokasi",
+"Menyisakan blok kosong yang cukup besar untuk proses lain",
+"Menghindari fragmentasi eksternal",
+"Menghemat memori"
+],
+correct: 1,
+explanation: "Worst-Fit bertujuan agar SISA BLOK masih cukup besar untuk digunakan proses lain."
+},
+{
+question: "Berapa kompleksitas waktu dari algoritma Worst-Fit?",
+options: [
+"O(1)",
+"O(log n)",
+"O(n)",
+"O(n²)"
+],
+correct: 2,
+explanation: "Worst-Fit harus memeriksa SEMUA blok untuk menemukan yang terbesar, kompleksitas O(n)."
+},
+{
+question: "Proses 150KB perlu dialokasikan. Blok: 100KB, 200KB, 180KB, 300KB. Ke mana Worst-Fit mengalokasikan?",
+options: [
+"100KB",
+"200KB",
+"180KB",
+"300KB"
+],
+correct: 3,
+explanation: "Worst-Fit memilih blok TERBESAR yaitu 300KB (sisa 150KB yang besar)."
+},
+{
+question: "Apa kelemahan utama dari Worst-Fit?",
+options: [
+"Terlalu lambat",
+"Fragmentasi eksternal sangat tinggi",
+"Tidak bisa menangani proses kecil",
+"Memerlukan sorting terlebih dahulu"
+],
+correct: 1,
+explanation: "Worst-Fit menghasilkan FRAGMENTASI TERTINGGI di antara ketiga algoritma."
+},
+{
+question: "Kapan Worst-Fit bisa lebih baik dari Best-Fit?",
+options: [
+"Ketika semua proses berukuran sama",
+"Ketika ukuran proses sangat bervariasi (medium dan large)",
+"Ketika memori sangat terbatas",
+"Worst-Fit tidak pernah lebih baik"
+],
+correct: 1,
+explanation: "Worst-Fit bisa lebih baik ketika ukuran proses BERVARIASI, sisa blok besar bisa menampung proses medium."
+},
+{
+question: "Apakah Worst-Fit sering digunakan dalam sistem operasi modern?",
+options: [
+"Ya, paling sering digunakan",
+"Ya, sama populernya dengan First-Fit",
+"Tidak, jarang digunakan karena fragmentasi tinggi",
+"Tidak, sudah tidak digunakan lagi"
+],
+correct: 2,
+explanation: "Worst-Fit JARANG digunakan karena menghasilkan fragmentasi yang sangat tinggi."
+},
+{
+question: "Bagaimana cara mengoptimalkan pencarian blok terbesar di Worst-Fit?",
+options: [
+"Menggunakan array terurut descending",
+"Menggunakan max-heap",
+"Menggunakan hash table",
+"Tidak bisa dioptimalkan"
+],
+correct: 1,
+explanation: "Max-heap dapat mempercepat pencarian blok terbesar dengan kompleksitas O(log n)."
+},
+{
+question: "Dibandingkan First-Fit dan Best-Fit, apa posisi Worst-Fit dalam hal fragmentasi?",
+options: [
+"Paling rendah",
+"Sedang",
+"Paling tinggi",
+"Sama dengan Best-Fit"
+],
+correct: 2,
+explanation: "Worst-Fit menghasilkan FRAGMENTASI PALING TINGGI di antara ketiga algoritma."
+},
+{
+question: "Apa yang terjadi pada blok kosong setelah Worst-Fit mengalokasikan proses?",
+options: [
+"Blok hilang sepenuhnya",
+"Tersisa blok yang relatif besar",
+"Tersisa blok sangat kecil",
+"Tidak ada sisa"
+],
+correct: 1,
+explanation: "Worst-Fit menyisakan blok yang RELATIF BESAR karena memilih dari blok terbesar."
+}
+],
+'mixed': [
+{
+question: "Algoritma mana yang paling cepat dalam eksekusi?",
+options: ["First-Fit", "Best-Fit", "Worst-Fit", "Sama cepat"],
+correct: 0,
+explanation: "First-Fit TERCEPAT karena berhenti setelah menemukan blok pertama yang sesuai."
+},
+{
+question: "Algoritma mana yang menghasilkan fragmentasi paling rendah?",
+options: ["First-Fit", "Best-Fit", "Worst-Fit", "Tergantung situasi"],
+correct: 1,
+explanation: "Best-Fit umumnya menghasilkan FRAGMENTASI TERENDAH karena memilih blok yang paling pas."
+},
+{
+question: "Blok: 100KB, 500KB, 200KB, 300KB. Proses 250KB. First-Fit memilih?",
+options: ["100KB", "500KB", "200KB", "300KB"],
+correct: 1,
+explanation: "First-Fit memilih 500KB (blok ke-2) karena blok PERTAMA yang cukup."
+},
+{
+question: "Dengan kondisi yang sama, Best-Fit memilih?",
+options: ["100KB", "500KB", "200KB", "300KB"],
+correct: 3,
+explanation: "Best-Fit memilih 300KB karena TERKECIL yang masih cukup (sisa 50KB)."
+},
+{
+question: "Dengan kondisi yang sama, Worst-Fit memilih?",
+options: ["100KB", "500KB", "200KB", "300KB"],
+correct: 1,
+explanation: "Worst-Fit memilih 500KB karena TERBESAR (sisa 250KB)."
+},
+{
+question: "Algoritma mana yang paling jarang digunakan?",
+options: ["First-Fit", "Best-Fit", "Worst-Fit", "Semua sama populer"],
+correct: 2,
+explanation: "Worst-Fit PALING JARANG digunakan karena fragmentasi sangat tinggi."
+},
+{
+question: "Struktur data apa yang bisa mempercepat Best-Fit dan Worst-Fit?",
+options: ["Array", "Linked List", "Heap/Tree", "Stack"],
+correct: 2,
+explanation: "Heap atau Tree dapat mengurangi kompleksitas pencarian menjadi O(log n)."
+},
+{
+question: "Apa masalah utama yang ditimbulkan Best-Fit?",
+options: ["Terlalu lambat", "Blok sangat kecil (tiny fragments)", "Memori penuh", "Error allocation"],
+correct: 1,
+explanation: "Best-Fit sering menghasilkan blok-blok SANGAT KECIL yang sulit digunakan."
+},
+{
+question: "Kapan First-Fit paling direkomendasikan?",
+options: ["Memori terbatas", "Kecepatan prioritas", "Fragmentasi rendah penting", "Tidak pernah"],
+correct: 1,
+explanation: "First-Fit cocok ketika KECEPATAN lebih penting dari efisiensi memori."
+},
+{
+question: "Apa keunggulan Worst-Fit?",
+options: ["Tercepat", "Paling efisien", "Sisa blok besar", "Tidak ada fragmentasi"],
+correct: 2,
+explanation: "Worst-Fit menyisakan BLOK BESAR yang mungkin bisa digunakan proses lain."
+},
+{
+question: "Jika semua algoritma tidak menemukan blok yang cukup, apa yang terjadi?",
+options: ["Wait", "Use swap", "Allocation failure", "Compress memory"],
+correct: 2,
+explanation: "Semua algoritma akan mengalami ALLOCATION FAILURE jika tidak ada blok cukup."
+},
+{
+question: "Algoritma mana yang harus memeriksa SEMUA blok?",
+options: ["First-Fit", "Best-Fit dan Worst-Fit", "Worst-Fit saja", "Tidak ada"],
+correct: 1,
+explanation: "Best-Fit dan Worst-Fit harus memeriksa SEMUA blok untuk menemukan yang optimal."
+},
+{
+question: "Kompleksitas waktu First-Fit dengan early termination?",
+options: ["Best: O(1), Worst: O(n)", "Always O(n)", "Always O(1)", "O(log n)"],
+correct: 0,
+explanation: "First-Fit bisa O(1) jika blok pertama cocok, worst-case O(n)."
+},
+{
+question: "Fragmentasi eksternal paling tinggi terjadi pada?",
+options: ["First-Fit", "Best-Fit", "Worst-Fit", "Sama semua"],
+correct: 2,
+explanation: "Worst-Fit menghasilkan FRAGMENTASI TERTINGGI."
+},
+{
+question: "Trade-off utama antara First-Fit dan Best-Fit?",
+options: ["Speed vs Efficiency", "Memory vs Speed", "Simple vs Complex", "Old vs New"],
+correct: 0,
+explanation: "First-Fit lebih CEPAT, Best-Fit lebih EFISIEN dalam penggunaan memori."
+}
+]
+};
+    // Quiz State
+    let currentQuiz = null;
+    let currentQuestionIndex = 0;
+    let userAnswers = [];
+    let score = 0;
+    let quizTimer = null;
+    let timeLeft = 30;
+
+    function startQuiz(quizType) {
+        currentQuiz = quizType;
+        currentQuestionIndex = 0;
+        userAnswers = [];
+        score = 0;
+
+        const questions = [...quizData[quizType]];
+        if (quizType === 'mixed') {
+            shuffleArray(questions);
+        }
+
+        window.currentQuizQuestions = questions;
+
+        document.getElementById('quiz-menu').style.display = 'none';
+        document.getElementById('quiz-active').style.display = 'block';
+        document.getElementById('quiz-result').style.display = 'none';
+
+        const titles = {
+            'first-fit': 'Kuis First-Fit Algorithm',
+            'best-fit': 'Kuis Best-Fit Algorithm',
+            'worst-fit': 'Kuis Worst-Fit Algorithm',
+            'mixed': 'Kuis Campuran - Semua Algoritma'
+        };
+        document.getElementById('quiz-title').textContent = titles[quizType];
+
+        displayQuestion();
+        startTimer();
+    }
+
+    function startTimer() {
+        timeLeft = 30;
+        updateTimerDisplay();
+
+        if (quizTimer) clearInterval(quizTimer);
+
+        quizTimer = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+
+            if (timeLeft <= 10) {
+                document.getElementById('quiz-timer').classList.add('warning');
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(quizTimer);
+                autoSelectAnswer();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const timerElement = document.getElementById('timer-value');
+        if (timerElement) {
+            timerElement.textContent = timeLeft;
+        }
+    }
+
+    function autoSelectAnswer() {
+        // Auto move to next question when time's up
+        const questions = window.currentQuizQuestions;
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            displayQuestion();
+            startTimer();
+        } else {
+            finishQuiz();
+        }
+    }
+
+    function displayQuestion() {
+        const questions = window.currentQuizQuestions;
+        const question = questions[currentQuestionIndex];
+
+        document.getElementById('question-number').textContent = currentQuestionIndex + 1;
+        document.getElementById('question-text').textContent = question.question;
+
+        const total = questions.length;
+        const progress = ((currentQuestionIndex + 1) / total * 100).toFixed(0);
+        document.getElementById('quiz-progress-text').textContent = `${currentQuestionIndex + 1} dari ${total}`;
+        document.getElementById('quiz-progress-bar').style.width = progress + '%';
+        document.getElementById('quiz-score').textContent = `${score}/${total}`;
+
+        const optionsContainer = document.getElementById('answer-options');
+        optionsContainer.innerHTML = '';
+
+        question.options.forEach((option, index) => {
+            const isSelected = userAnswers[currentQuestionIndex] === index;
+            const button = document.createElement('button');
+            button.className = 'quiz-option';
+            button.style.cssText = `
+                padding: var(--spacing-lg);
+                background: ${isSelected ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255, 255, 255, 0.05)'};
+                border: 2px solid ${isSelected ? 'var(--accent-blue-500)' : 'rgba(255, 255, 255, 0.1)'};
+                border-radius: var(--radius-lg);
+                color: white;
+                text-align: left;
+                cursor: pointer;
+                transition: all var(--transition-base);
+                font-size: 1rem;
+                width: 100%;
+            `;
+
+            button.innerHTML = `
+                <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                    <div style="flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: ${isSelected ? 'var(--accent-blue-500)' : 'rgba(255,255,255,0.1)'}; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                        ${String.fromCharCode(65 + index)}
+                    </div>
+                    <div style="flex: 1;">${option}</div>
+                </div>
+            `;
+
+            button.onclick = () => selectAnswer(index);
+            optionsContainer.appendChild(button);
+
+            button.onmouseenter = () => {
+                if (!isSelected) {
+                    button.style.background = 'rgba(255, 255, 255, 0.08)';
+                    button.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                }
+            };
+            button.onmouseleave = () => {
+                if (!isSelected) {
+                    button.style.background = 'rgba(255, 255, 255, 0.05)';
+                    button.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                }
+            };
+        });
+
+        document.getElementById('btn-prev').disabled = currentQuestionIndex === 0;
+        const isLastQuestion = currentQuestionIndex === questions.length - 1;
+        const nextBtn = document.getElementById('btn-next');
+        nextBtn.textContent = isLastQuestion ? 'Selesai' : 'Selanjutnya';
+        nextBtn.onclick = isLastQuestion ? finishQuiz : nextQuestion;
+
+        // Reset timer warning
+        document.getElementById('quiz-timer').classList.remove('warning');
+    }
+
+    function selectAnswer(optionIndex) {
+        const questions = window.currentQuizQuestions;
+        const question = questions[currentQuestionIndex];
+
+        userAnswers[currentQuestionIndex] = optionIndex;
+
+        score = userAnswers.reduce((total, answer, index) => {
+            return total + (answer === questions[index].correct ? 1 : 0);
+        }, 0);
+
+        displayQuestion();
+    }
+
+    function nextQuestion() {
+        const questions = window.currentQuizQuestions;
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            displayQuestion();
+            startTimer();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function previousQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            displayQuestion();
+            startTimer();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function finishQuiz() {
+        if (quizTimer) clearInterval(quizTimer);
+
+        const questions = window.currentQuizQuestions;
+        const total = questions.length;
+        const percentage = ((score / total) * 100).toFixed(0);
+
+        document.getElementById('quiz-active').style.display = 'none';
+        document.getElementById('quiz-result').style.display = 'block';
+
+        document.getElementById('final-score').textContent = score;
+        document.getElementById('total-questions').textContent = total;
+        document.getElementById('correct-answers').textContent = score;
+        document.getElementById('wrong-answers').textContent = total - score;
+        document.getElementById('percentage').textContent = percentage + '%';
+
+        let message, icon;
+        if (percentage >= 90) {
+            message = "Luar biasa! Anda menguasai materi dengan sangat baik!";
+            icon = "🏆";
+        } else if (percentage >= 70) {
+            message = "Bagus! Anda memahami sebagian besar materi dengan baik!";
+            icon = "🎉";
+        } else if (percentage >= 50) {
+            message = "Cukup baik! Masih ada ruang untuk peningkatan.";
+            icon = "👍";
+        } else {
+            message = "Jangan menyerah! Coba pelajari materi lagi dan ulangi kuis.";
+            icon = "💪";
+        }
+
+        document.getElementById('result-message').textContent = message;
+        document.getElementById('result-icon').textContent = icon;
+
+        generateAnswerReview();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function generateAnswerReview() {
+        const questions = window.currentQuizQuestions;
+        const reviewContainer = document.getElementById('answer-review');
+        reviewContainer.innerHTML = '';
+
+        questions.forEach((question, index) => {
+            const userAnswer = userAnswers[index];
+            const isCorrect = userAnswer === question.correct;
+
+            const reviewItem = document.createElement('div');
+            reviewItem.style.cssText = `
+                padding: var(--spacing-xl);
+                background: ${isCorrect ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)'};
+                border-left: 4px solid ${isCorrect ? 'var(--success-500)' : 'var(--error-500)'};
+                border-radius: var(--radius-lg);
+                margin-bottom: var(--spacing-lg);
+            `;
+
+            reviewItem.innerHTML = `
+                <div style="display: flex; align-items: start; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                    <div style="flex-shrink: 0; font-size: 1.5rem;">
+                        ${isCorrect ? '✅' : '❌'}
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: white; margin-bottom: var(--spacing-sm);">
+                            Soal ${index + 1}: ${question.question}
+                        </div>
+                        <div style="color: var(--gray-400); font-size: 0.9375rem; margin-bottom: var(--spacing-sm);">
+                            <strong>Jawaban Anda:</strong> ${userAnswer !== undefined ? question.options[userAnswer] : 'Tidak dijawab'}
+                        </div>
+                        ${!isCorrect ? `
+                            <div style="color: var(--success-500); font-size: 0.9375rem; margin-bottom: var(--spacing-sm);">
+                                <strong>Jawaban Benar:</strong> ${question.options[question.correct]}
+                            </div>
+                        ` : ''}
+                        <div style="color: var(--gray-300); font-size: 0.875rem; margin-top: var(--spacing-md); padding: var(--spacing-md); background: rgba(0,0,0,0.2); border-radius: var(--radius-md);">
+                            💡 <strong>Penjelasan:</strong> ${question.explanation}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            reviewContainer.appendChild(reviewItem);
+        });
+    }
+
+    function retryQuiz() {
+        startQuiz(currentQuiz);
+    }
+
+    function backToQuizMenu() {
+        if (quizTimer) clearInterval(quizTimer);
+        document.getElementById('quiz-menu').style.display = 'block';
+        document.getElementById('quiz-active').style.display = 'none';
+        document.getElementById('quiz-result').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function exitQuiz() {
+        if (confirm('Anda yakin ingin keluar? Progress akan hilang.')) {
+            backToQuizMenu();
+        }
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // ========================================
+    // UTILITY FUNCTIONS
+    // ========================================
+    
+    function showToast(message, duration = 3000) {
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(59, 130, 246, 0.9);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            animation: slideInRight 0.3s ease-out;
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+
+    // ========================================
+    // CONSOLE EASTER EGG
+    // ========================================
+    
+    console.log(
+        '%c🚀 MemoryPro v1.0',
+        'color: #3b82f6; font-size: 24px; font-weight: bold;'
+    );
+    console.log(
+        '%cBuilt with ❤️ by Memory Allocation Team',
+        'color: #8b5cf6; font-size: 14px;'
+    );
+
+    console.log('✨ Website initialized successfully!');
+    console.log('📚 Halaman tersedia: Home, Materi, Quiz, Tentang');
+ </script>
+</body>
+</html>
