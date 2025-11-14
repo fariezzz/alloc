@@ -13,6 +13,64 @@ fetch('templates/navbar.html')
     .catch(error => console.error(error));
 
 document.addEventListener("DOMContentLoaded", function () {
+    // TOAST / NOTIFICATION UTILS
+    function ensureToastContainer() {
+        if (document.getElementById("toast-container")) return;
+        const container = document.createElement("div");
+        container.id = "toast-container";
+        container.style.position = "fixed";
+        container.style.right = "20px";
+        container.style.bottom = "20px";
+        container.style.zIndex = "1080";
+        container.style.display = "flex";
+        container.style.flexDirection = "column";
+        container.style.gap = "10px";
+        document.body.appendChild(container);
+
+        // sedikit CSS tambahan (dark theme friendly)
+        const style = document.createElement("style");
+        style.innerHTML = `
+            #toast-container .toast { min-width: 220px; max-width: 360px; border-radius: 8px; }
+            #toast-container .toast .toast-body { font-size: 14px; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    /**
+     * type: 'success' | 'info' | 'warning' | 'danger'
+     */
+    function showToast(message, type = "info", delay = 3500) {
+        ensureToastContainer();
+        const container = document.getElementById("toast-container");
+
+        const toast = document.createElement("div");
+        const bgClass = type === "success" ? "bg-success" :
+                        type === "warning" ? "bg-warning" :
+                        type === "danger" ? "bg-danger" : "bg-secondary";
+        toast.className = `toast align-items-center text-white ${bgClass}`;
+        toast.setAttribute("role", "alert");
+        toast.setAttribute("aria-live", "assertive");
+        toast.setAttribute("aria-atomic", "true");
+
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+
+        container.appendChild(toast);
+
+        // init bootstrap toast
+        const bsToast = new bootstrap.Toast(toast, { autohide: true, delay });
+        bsToast.show();
+
+        // bersihkan dari DOM saat hidden
+        toast.addEventListener('hidden.bs.toast', () => {
+            toast.remove();
+        });
+    }
+
     // ==============================
     // PART 1: PARTITION HANDLER
     // ==============================
@@ -42,10 +100,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (raw === null) return; // safety
         const sizeStr = String(raw).trim();
 
-        // Validasi: harus angka positif (boleh 0 kalau mau)
+        // Validasi: harus angka positif (boleh > 0)
         const sizeNum = Number(sizeStr);
         if (sizeStr === "" || !isFinite(sizeNum) || sizeNum <= 0) {
-            alert("Please enter a valid positive number for partition size!");
+            showToast("Masukkan ukuran partisi yang valid (angka positif).", "warning");
             sizeInput.focus();
             return;
         }
@@ -71,6 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
         deleteBtn.addEventListener("click", function () {
             row.remove();
             updatePartitionNames();
+            showToast("Partisi dihapus.", "info");
         });
 
         actionCell.appendChild(deleteBtn);
@@ -84,6 +143,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         sizeInput.value = "";
         sizeInput.focus();
+
+        showToast("Partisi berhasil ditambahkan.", "success");
     }
 
     // attach both click and Enter to the same function
@@ -126,7 +187,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const sizeStr = String(raw).trim();
         const sizeNum = Number(sizeStr);
         if (sizeStr === "" || !isFinite(sizeNum) || sizeNum <= 0) {
-            alert("Please enter a valid positive number for process size!");
+            showToast("Masukkan ukuran proses yang valid (angka positif).", "warning");
             processSizeInput.focus();
             return;
         }
@@ -152,6 +213,7 @@ document.addEventListener("DOMContentLoaded", function () {
         deleteBtn.addEventListener("click", function () {
             row.remove();
             updateProcessNames();
+            showToast("Proses dihapus.", "info");
         });
 
         actionCell.appendChild(deleteBtn);
@@ -165,6 +227,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         processSizeInput.value = "";
         processSizeInput.focus();
+
+        showToast("Proses berhasil ditambahkan.", "success");
     }
 
     processAddButton.addEventListener("click", addProcess);
@@ -214,11 +278,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 if (newValue === "" || isNaN(newValue) || Number(newValue) <= 0) {
                     cell.textContent = oldValue;
+                    showToast("Nilai tidak valid — perubahan dibatalkan.", "warning");
                 } else {
-                    cell.textContent = Number(newValue); // save numeric
+                    cell.textContent = Number(newValue);
+                    showToast("Perubahan tersimpan.", "success");
                 }
 
-                // setelah simpan, update penamaan (kalau perlu)
                 updatePartitionNames();
                 updateProcessNames();
             }
@@ -234,7 +299,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const processes = getTableData("processTableBody");
 
         if (partitions.length === 0 || processes.length === 0) {
-            alert("Please add at least one partition and one process!");
+            showToast("Tambahkan setidaknya satu partisi dan satu proses sebelum memulai simulasi.", "warning");
             return;
         }
 
@@ -287,7 +352,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
 
-            // === Proses alokasi ===
             if (chosenIndex !== -1) {
                 const block = blocks[chosenIndex];
                 allocationResult.push({
