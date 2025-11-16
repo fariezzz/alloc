@@ -537,6 +537,19 @@ footer.materi-footer {
   transform: rotateY(180deg);
 }
 
+html, body {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
 
+*::-webkit-scrollbar {
+  display: none;
+}
 

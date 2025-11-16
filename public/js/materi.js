@@ -46,10 +46,10 @@ document.getElementById("toggleJawabanBtn").addEventListener("click", function (
 
   if (jawaban.style.display === "none") {
     jawaban.style.display = "block";
-    btn.textContent = "❌ Sembunyikan Jawaban";
+    btn.textContent = "Sembunyikan Jawaban";
   } else {
     jawaban.style.display = "none";
-    btn.textContent = "🔍 Tampilkan Jawaban";
+    btn.textContent = "Tampilkan Jawaban";
   }
 });
 
