@@ -436,9 +436,9 @@ main.materi-container {
 
 .btn-primary:hover,
 .btn-primary:focus {
-  background-color: #F0F5F9 !important;
-  border-color: #F0F5F9 !important;
-  color: #2b2b35 !important;
+  background-color: #52616B !important;
+  border-color: #52616B !important;
+  color: #f0f0f0 !important;
   transform: scale(1.05);
 }
 
