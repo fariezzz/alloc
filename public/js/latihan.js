@@ -1,121 +1,55 @@
-// ====== Data MCQ (7 soal) ======
-const mcqQuestions = [
-  {
-    type:'mcq',
-    question: "Manakah pernyataan yang tepat mengenai algoritma First-Fit pada alokasi memori?",
-    options: [
-      "Memilih partisi dengan ukuran terkecil yang masih memadai untuk proses.",
-      "Memilih partisi pertama yang cukup besar untuk menampung proses.",
-      "Memilih partisi terbesar yang tersedia untuk proses.",
-      "Selalu membagi partisi menjadi blok yang lebih kecil sebelum alokasi."
-    ],
-    answer: 1,
-    explain: "Pada algoritma First-Fit, proses dialokasikan pada partisi pertama (dari awal daftar) yang memiliki ukuran cukup untuk menampung proses tersebut."
-  },
-  {
-    type:'mcq',
-    question: "Apa yang dimaksud fragmentasi eksternal?",
-    options: [
-      "Ruang kosong kecil yang tersebar di antara blok-blok yang digunakan sehingga menghambat alokasi proses besar.",
-      "Ruang kosong yang berada di dalam blok yang sudah dialokasikan.",
-      "Kehilangan data saat proses berpindah antar partisi.",
-      "Kegagalan sistem operasi dalam mengalokasikan memori karena virtual memory penuh."
-    ],
-    answer: 0,
-    explain: "Fragmentasi eksternal adalah kondisi di mana total ruang kosong cukup tetapi tersebar di beberapa bagian sehingga tidak ada bagian tunggal yang cukup besar untuk menampung proses besar."
-  },
-  {
-    type:'mcq',
-    question: "Apa tujuan utama algoritma Best-Fit?",
-    options: [
-      "Mengurangi fragmentasi internal dengan memilih partisi yang paling kecil namun cukup.",
-      "Mempercepat proses alokasi dengan memilih partisi pertama.",
-      "Mengalokasikan proses ke partisi terakhir saja.",
-      "Memastikan setiap partisi terisi minimal satu proses."
-    ],
-    answer: 0,
-    explain: "Best-Fit memilih partisi dengan ukuran terkecil yang masih cukup untuk proses, bertujuan mengurangi sisa ruang (fragmentasi internal) pada partisi tersebut."
-  },
-  {
-    type:'mcq',
-    question: "Dalam Worst-Fit, partisi yang dipilih biasanya adalah:",
-    options: [
-      "Partisi pertama yang cukup besar.",
-      "Partisi dengan ukuran tepat sama dengan proses.",
-      "Partisi terbesar yang tersedia.",
-      "Partisi terkecil yang masih muat."
-    ],
-    answer: 2,
-    explain: "Worst-Fit memilih partisi terbesar yang tersedia untuk mengalokasikan proses, dengan harapan menyisakan partisi cukup besar untuk proses lain."
-  },
-  {
-    type:'mcq',
-    question: "Jika sebuah proses tidak muat di partisi manapun, sistem biasanya akan:",
-    options: [
-      "Menempatkannya ke partisi terkecil yang ada.",
-      "Membatalkan proses tersebut atau menunggu pembebasan memori (gagal alokasi).",
-      "Membagi proses menjadi beberapa bagian dan menempatkannya di beberapa partisi.",
-      "Secara otomatis menambah ukuran semua partisi."
-    ],
-    answer: 1,
-    explain: "Jika tidak ada partisi yang cukup besar, alokasi akan gagal (proses tidak dialokasikan) hingga ada pembebasan memori atau kebijakan lain diterapkan."
-  },
-  {
-    type:'mcq',
-    question: "Apa kelemahan umum First-Fit dibanding Best-Fit?",
-    options: [
-      "First-Fit cenderung lebih lambat daripada Best-Fit.",
-      "First-Fit menghasilkan lebih banyak fragmentasi internal di bagian awal daftar.",
-      "First-Fit membutuhkan pengurutan partisi sebelum alokasi.",
-      "First-Fit selalu menggunakan partisi terkecil."
-    ],
-    answer: 1,
-    explain: "First-Fit dapat meninggalkan banyak sisa kecil pada partisi awal karena selalu memilih partisi pertama yang cukup, sehingga berpotensi meningkatkan fragmentasi pada bagian awal daftar."
-  },
-  {
-    type:'mcq',
-    question: "Dalam konteks alokasi memori, istilah 'hole' merujuk ke:",
-    options: [
-      "Proses yang sedang dieksekusi.",
-      "Partisi yang sedang dipakai oleh proses.",
-      "Ruang memori kosong (free space) antara blok yang dialokasikan.",
-      "Tabel alokasi memori di sistem operasi."
-    ],
-    answer: 2,
-    explain: "Hole adalah istilah yang digunakan untuk menunjukkan area memori kosong yang tersedia untuk alokasi proses."
-  }
-];
-
 // ====== Drag questions: 3 soal (First-Fit, Best-Fit, Worst-Fit)
 function makeMatchingDragQuestion(algo) {
   const randInt = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
-  const n = randInt(3,5);
+  const n = randInt(4, 6);
   const partitions = [];
   for (let i=0;i<n;i++){
     partitions.push(randInt(120,500));
   }
-  const processes = partitions.map((ps,i)=>{
+  let processes = partitions.map((ps,i)=>{
     const low = Math.max(40, ps - 60);
+    // Buat proses yang ukurannya pas
     const size = Math.min(ps, Math.max(low, Math.floor(ps * (0.7 + Math.random()*0.25))));
-    return { name: 'P'+(i+1), size: size };
+    // Beri nama sementara (akan diganti setelah diacak)
+    return { name: 'temp'+i, size: size };
   });
+
+  processes = shuffleArray(processes);
+
+  processes.forEach((proc, i) => {
+    proc.name = 'P' + (i + 1);
+  });
+
   return { type:'drag', algo: algo, partitions, processes };
 }
 
-const dragQuestions = [
-  makeMatchingDragQuestion('First-Fit'),
-  makeMatchingDragQuestion('Best-Fit'),
-  makeMatchingDragQuestion('Worst-Fit')
-];
+// (BARU) Fungsi untuk mengacak array (Fisher-Yates shuffle)
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
 
-const allQuestions = [...mcqQuestions, ...dragQuestions];
+// (BARU) Fungsi untuk memilih N soal MCQ acak dari bank
+function selectRandomMcqs(bank, num) {
+  const shuffled = shuffleArray([...bank]); // Acak salinan bank soal
+  return shuffled.slice(0, num); // Ambil 'num' soal pertama
+}
+
+
+// (DIMODIFIKASI) Variabel Global
+let allQuestions = []; // Akan diisi oleh setupQuiz()
 let index = 0;
-const total = allQuestions.length;
+const numMcqToSelect = 7; // Tetapkan jumlah soal MCQ
+const numDragToSelect = 3; // Tetapkan jumlah soal Drag
+const total = numMcqToSelect + numDragToSelect; // Total soal tetap (10)
 let isEvaluating = false;
 
-// state
-const userAnswers = new Array(total).fill(null); // final stored answers (for mcq: index; for drag: map)
-const userSelected = new Array(total).fill(null); // temporary selection for MCQ before "Jawab" diklik
+// state (Ini sudah benar, ukurannya tetap 'total')
+const userAnswers = new Array(total).fill(null); 
+const userSelected = new Array(total).fill(null);
 
 // DOM refs
 const root = document.getElementById('quizRoot');
@@ -124,6 +58,86 @@ const nextBtn = document.getElementById('nextBtn');
 const progressWrapper = document.getElementById('progressWrapper');
 const progressBarInner = document.getElementById('progressBarInner');
 
+// (BARU) Fungsi untuk mengatur/mengatur ulang kuis
+function setupQuiz() {
+  // 1. Pilih 7 soal MCQ acak dari bank
+  const activeMcqQuestions = selectRandomMcqs(mcqQuestionBank, numMcqToSelect);
+  
+  // 2. Buat 3 soal Drag baru
+  const activeDragQuestions = [
+    makeMatchingDragQuestion('First-Fit'),
+    makeMatchingDragQuestion('Best-Fit'),
+    makeMatchingDragQuestion('Worst-Fit')
+  ];
+  
+  // 3. Gabungkan keduanya
+  allQuestions = [...activeMcqQuestions, ...activeDragQuestions];
+  
+  // 4. Reset semua state
+  index = 0;
+  userAnswers.fill(null);
+  userSelected.fill(null);
+  
+  // (Pastikan tombol next kembali ke state awal jika diperlukan)
+  nextBtn.disabled = true;
+  nextBtn.style.display = 'inline-block';
+}
+
+function computeExpected(parts, procs, algo) {
+    const assign = {};
+    const used = new Array(parts.length).fill(false);
+    const waiting = [];
+
+    if (algo === 'First-Fit') {
+      for (const pr of procs) {
+        let placed = false;
+        for (let i = 0; i < parts.length; i++) {
+          if (!used[i] && parts[i] >= pr.size) {
+            assign[i] = pr.name;
+            used[i] = true;
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) waiting.push(pr.name);
+      }
+    } else if (algo === 'Best-Fit') {
+      for (const pr of procs) {
+        let best = -1, bestRem = Infinity;
+        for (let i = 0; i < parts.length; i++) {
+          if (!used[i] && parts[i] >= pr.size) {
+            const rem = parts[i] - pr.size;
+            if (rem < bestRem) {
+              bestRem = rem;
+              best = i;
+            }
+          }
+        }
+        if (best !== -1) {
+          assign[best] = pr.name;
+          used[best] = true;
+        } else waiting.push(pr.name);
+      }
+    } else { // Worst-Fit
+      for (const pr of procs) {
+        let worst = -1, worstRem = -1;
+        for (let i = 0; i < parts.length; i++) {
+          if (!used[i] && parts[i] >= pr.size) {
+            const rem = parts[i] - pr.size;
+            if (rem > worstRem) {
+              worstRem = rem;
+              worst = i;
+            }
+          }
+        }
+        if (worst !== -1) {
+          assign[worst] = pr.name;
+          used[worst] = true;
+        } else waiting.push(pr.name);
+      }
+    }
+    return { assign, waiting };
+  }
 
 // render current
 function renderCurrent() {
@@ -557,62 +571,6 @@ function renderDrag(q) {
     return used.length === totalProcesses;
   }
 
-  // compute expected assign + waiting (same logic as main file)
-  function computeExpected(parts, procs, algo) {
-    const assign = {};
-    const used = new Array(parts.length).fill(false);
-    const waiting = [];
-
-    if (algo === 'First-Fit') {
-      for (const pr of procs) {
-        let placed = false;
-        for (let i = 0; i < parts.length; i++) {
-          if (!used[i] && parts[i] >= pr.size) {
-            assign[i] = pr.name;
-            used[i] = true;
-            placed = true;
-            break;
-          }
-        }
-        if (!placed) waiting.push(pr.name);
-      }
-    } else if (algo === 'Best-Fit') {
-      for (const pr of procs) {
-        let best = -1, bestRem = Infinity;
-        for (let i = 0; i < parts.length; i++) {
-          if (!used[i] && parts[i] >= pr.size) {
-            const rem = parts[i] - pr.size;
-            if (rem < bestRem) {
-              bestRem = rem;
-              best = i;
-            }
-          }
-        }
-        if (best !== -1) {
-          assign[best] = pr.name;
-          used[best] = true;
-        } else waiting.push(pr.name);
-      }
-    } else { // Worst-Fit
-      for (const pr of procs) {
-        let worst = -1, worstRem = -1;
-        for (let i = 0; i < parts.length; i++) {
-          if (!used[i] && parts[i] >= pr.size) {
-            const rem = parts[i] - pr.size;
-            if (rem > worstRem) {
-              worstRem = rem;
-              worst = i;
-            }
-          }
-        }
-        if (worst !== -1) {
-          assign[worst] = pr.name;
-          used[worst] = true;
-        } else waiting.push(pr.name);
-      }
-    }
-    return { assign, waiting };
-  }
 
   // Helper: Hapus semua feedback visual (warna, hint) dari tabel
   function clearAllFeedbackVisuals() {
@@ -720,7 +678,10 @@ function renderDrag(q) {
       .map(r => r.textContent.trim().split(" ")[0])
       .filter(x => x !== "-");
     const waitingCorrect = JSON.stringify(userWait) === JSON.stringify(waiting);
-    const allCorrect = (correctCount === PARTS.length) && waitingCorrect;
+
+   const partitionCorrect = slotResults.every(res => res.status !== 'wrong');
+    // Jawaban benar HANYA JIKA (partisi benar) DAN (waiting benar)
+    const allCorrect = partitionCorrect && waitingCorrect;
 
     const waitRows = waitingBody.querySelectorAll('tr');
     const maxLen = Math.max(userWait.length, waiting.length);
@@ -787,15 +748,23 @@ function renderDrag(q) {
 
       // 2. (BARU) Hasil Partisi (dengan list <ul>)
       summaryHtml += `<h3 class="eval-heading">Evaluasi Partisi</h3>`; // Judul Bagian
-      const partitionClass = (correctCount === PARTS.length) ? 'eval-correct' : 'eval-wrong';
+      
+      // (PERBAIKAN) Gunakan variabel 'partitionCorrect' yang sudah dihitung
+      const partitionClass = partitionCorrect ? 'eval-correct' : 'eval-wrong';
+      
       summaryHtml += `<div class="eval-section ${partitionClass}">`; 
       
       summaryHtml += `<div class="eval-subtitle">Urutan proses: P1 → P2 → P3 → ...</div>`;
       
-      if (correctCount === PARTS.length) {
-          summaryHtml += `<strong>✅ Hasil: Benar</strong> (${correctCount}/${PARTS.length} slot).`;
+      // (PERBAIKAN) Gunakan 'partitionCorrect' untuk menentukan teks hasil
+      if (partitionCorrect) {
+          // Hitung jumlah total slot yang 'benar' (terisi atau kosong)
+          const correctSlots = slotResults.filter(res => res.status !== 'wrong').length;
+          summaryHtml += `<strong>✅ Hasil: Benar</strong> (${correctSlots}/${PARTS.length} slot).`;
       } else {
-          summaryHtml += `<strong>❌ Hasil: Salah</strong> (${correctCount} benar dari ${PARTS.length} slot.)`;
+          // Hitung hanya slot yang 'terisi dengan benar'
+          const correctFilledSlots = slotResults.filter(res => res.status === 'correct').length;
+          summaryHtml += `<strong>❌ Hasil: Salah</strong> (${correctFilledSlots} benar dari ${PARTS.length} slot.)`;
           summaryHtml += `<div class="correction-list-title">Detail Kesalahan:</div>`;
           summaryHtml += `<ul class="correction-list">`; // List
           
@@ -1020,119 +989,129 @@ function renderDrag(q) {
 
 
 // global next button behavior (delegator)
-nextBtn.addEventListener('click', ()=> {
+nextBtn.addEventListener('click', () => {
+  // Ambil soal saat ini
   const q = allQuestions[index];
 
   if (q.type === 'mcq') {
-  // jika belum dijawab
-  if (userAnswers[index] === null) {
-    // pastikan user memilih opsi
-    const chosen = userSelected[index];
-    if (chosen === null) {
-      const selBtn = root.querySelector('.option-btn.selected');
-      if (selBtn) userSelected[index] = parseInt(selBtn.dataset.idx, 10);
-    }
-    if (userSelected[index] === null) return;
+    // === LOGIKA UNTUK SOAL PILIHAN GANDA ===
 
-    // 🔒 Kunci semua tombol opsi selama proses pemeriksaan (langsung meredup)
-    const optionButtons = root.querySelectorAll('.option-btn');
-    optionButtons.forEach(btn => {
+    // Jika soal ini belum dijawab (baru menekan "Jawab")
+    if (userAnswers[index] === null) {
+      // Pastikan user memilih opsi
+      const chosen = userSelected[index];
+      if (chosen === null) {
+        const selBtn = root.querySelector('.option-btn.selected');
+        if (selBtn) userSelected[index] = parseInt(selBtn.dataset.idx, 10);
+      }
+      if (userSelected[index] === null) return;
+
+      // Kunci tombol
+      const optionButtons = root.querySelectorAll('.option-btn');
+      optionButtons.forEach(btn => {
         btn.disabled = true;
         btn.classList.add('locked');
-    });
+      });
 
+      // Sembunyikan tombol 'Jawab' & tampilkan loading
+      nextBtn.style.display = 'none';
+      const explainWrap = root.querySelector('#explainWrap');
+      if (explainWrap) {
+        explainWrap.innerHTML = `<div class="loading-anim">⏳ Memeriksa jawaban...</div>`;
+      }
 
-    // 🔸 Langsung sembunyikan tombol begitu diklik
-    nextBtn.style.display = 'none';
+      // Simulasi proses pemeriksaan
+      setTimeout(() => {
+        // Nilai jawaban
+        const selectedIdx = userSelected[index];
+        userAnswers[index] = selectedIdx;
+        const container = root.firstElementChild;
+        showMCQExplain(q, selectedIdx, container);
 
-    // tampilkan animasi loading di area penjelasan
-    const explainWrap = root.querySelector('#explainWrap');
-    if (explainWrap) {
-      explainWrap.innerHTML = `<div class="loading-anim">⏳ Memeriksa jawaban...</div>`;
+        // Tampilkan kembali tombol dengan teks baru
+        // (Kondisi ini sudah benar)
+        nextBtn.textContent = (index < total - 1)
+          ? "Soal Selanjutnya →"
+          : "Lihat Hasil";
+        nextBtn.style.display = 'inline-block';
+        nextBtn.disabled = false;
+      }, 900);
+
+    } else {
+      // Jika soal MCQ sudah dijawab (menekan "Soal Selanjutnya" atau "Lihat Hasil")
+      
+      // (PERBAIKAN DI SINI) Pastikan menggunakan < total - 1
+      if (index < total - 1) {
+        index++;
+        renderCurrent();
+      } else {
+        // Ini adalah soal MCQ terakhir, tampilkan hasil
+        showSummary();
+      }
     }
-
-    // simulasi proses pemeriksaan (delay 900 ms)
-    setTimeout(() => {
-      // nilai jawaban
-      const selectedIdx = userSelected[index];
-      userAnswers[index] = selectedIdx;
-      const container = root.firstElementChild;
-      showMCQExplain(q, selectedIdx, container);
-
-      // 🔹 tampilkan kembali tombol dengan teks baru
-      nextBtn.textContent = (index < total - 1)
-        ? "Soal Selanjutnya →"
-        : "Lihat Hasil";
-      nextBtn.style.display = 'inline-block';
-      nextBtn.disabled = false;
-    }, 900);
+  
   } else {
-    // sudah dijawab → lanjut ke soal berikutnya
+    // === LOGIKA UNTUK SOAL DRAG & DROP (dan tipe lainnya) ===
+    
+    // (PERBAIKAN UTAMA DI SINI)
+    // Cek apakah 'index' KURANG DARI index terakhir (total - 1)
     if (index < total - 1) {
+      // Jika ya, masih ada soal, lanjut
       index++;
       renderCurrent();
     } else {
-      showSummary();
-    }
-  }
- }else {
-    // drag or other: original behavior (next if last or summary)
-    if (index < total-1) {
-      index++;
-      renderCurrent();
-    } else {
+      // Jika tidak (index SUDAH 9), ini adalah klik terakhir. Tampilkan hasil.
       showSummary();
     }
   }
 });
 
-// summary remains same as before
+// (DIMODIFIKASI TOTAL) Ganti fungsi showSummary Anda dengan ini
 function showSummary() {
   let mcqCorrect = 0;
-  for (let i=0;i<mcqQuestions.length;i++){
+  for (let i = 0; i < numMcqToSelect; i++){
     const ans = userAnswers[i];
-    if (ans !== null && ans === mcqQuestions[i].answer) mcqCorrect++;
+    if (ans !== null && ans === allQuestions[i].answer) mcqCorrect++;
   }
 
-  // drag scoring
   let dragCorrectSlots = 0, dragTotalSlots = 0;
-  for (let k=0;k<dragQuestions.length;k++){
-    const qIdx = mcqQuestions.length + k;
+  for (let k = 0; k < numDragToSelect; k++){
+    const qIdx = numMcqToSelect + k;
     const q = allQuestions[qIdx];
     const ua = userAnswers[qIdx];
     if (!ua) continue;
 
-    const expected = computeExpectedSummary(q.partitions, q.processes, q.algo);
+    const { assign: expected } = computeExpected(q.partitions, q.processes, q.algo);
     for (const sIdx in ua) {
-      if (sIdx === "__waiting") continue; // abaikan waiting
+      if (sIdx === "__waiting") continue;
       dragTotalSlots++;
 
       const assigned = ua[sIdx];
       const expectedProc = expected[sIdx] || null;
       if ((expectedProc && assigned === expectedProc) || (!expectedProc && !assigned)) {
-      dragCorrectSlots++;
+        dragCorrectSlots++;
       }
     }
-
   }
 
   const totalCorrect = mcqCorrect + dragCorrectSlots;
-  const totalPossible = mcqQuestions.length + dragTotalSlots;
+  const totalPossible = numMcqToSelect + dragTotalSlots;
   const percent = totalPossible ? Math.round((totalCorrect/totalPossible)*100) : 0;
   const angle = (percent / 100) * 360;
 
+  // (DIUBAH) Render HTML dengan ID baru dan nilai awal 0
   root.innerHTML = `
     <div class="result-wrapper">
       <div class="result-title">Hasil Akhir Latihan</div>
       <div class="result-subtitle">Berikut ringkasan performa Anda</div>
 
-      <div class="score-ring" style="--score-angle:${angle}deg;">
-        <div class="score-text">${percent}%</div>
+      <div class="score-ring" id="finalScoreRing" style="--score-angle: 0deg;">
+        <div class="score-text" id="finalScoreText">0%</div>
       </div>
 
       <div class="breakdown-box">
         <strong>📝 Soal Pilihan Ganda</strong>
-        <div class="breakdown-small">${mcqCorrect} benar dari ${mcqQuestions.length} soal</div>
+        <div class="breakdown-small">${mcqCorrect} benar dari ${numMcqToSelect} soal</div>
       </div>
 
       <div class="breakdown-box">
@@ -1149,73 +1128,63 @@ function showSummary() {
   if (progressWrapper) progressWrapper.style.display = 'none';
 
 
-  document.getElementById('restartBtn').addEventListener('click', () => {
-    index = 0;
-    for (let i=0;i<userAnswers.length;i++) userAnswers[i] = null;
-    for (let i=0;i<userSelected.length;i++) userSelected[i] = null;
-
-    // regen drag questions
-    for (let k=0; k<3; k++){
-      allQuestions[mcqQuestions.length + k] = makeMatchingDragQuestion(['First-Fit','Best-Fit','Worst-Fit'][k]);
-    }
-
-    renderCurrent();
-    nextBtn.style.display = 'inline-block';
-  });
-}
-
-function computeExpectedSummary(parts, procs, algo){
-  const assign = {};
-  const used = new Array(parts.length).fill(false);
-
-  if (algo === 'First-Fit') {
-    for (const pr of procs){
-      for (let i=0;i<parts.length;i++){
-        if (!used[i] && parts[i] >= pr.size){
-          assign[i] = pr.name;
-          used[i] = true;
-          break;
-        }
-      }
-    }
-  } else if (algo === 'Best-Fit') {
-    for (const pr of procs){
-      let best = -1, bestRem = Infinity;
-      for (let i=0;i<parts.length;i++){
-        if (!used[i] && parts[i] >= pr.size){
-          const rem = parts[i] - pr.size;
-          if (rem < bestRem){
-            bestRem = rem;
-            best = i;
-          }
-        }
-      }
-      if (best !== -1){
-        assign[best] = pr.name;
-        used[best] = true;
-      }
-    }
-  } else {
-    for (const pr of procs){
-      let worst = -1, worstRem = -1;
-      for (let i=0;i<parts.length;i++){
-        if (!used[i] && parts[i] >= pr.size){
-          const rem = parts[i] - pr.size;
-          if (rem > worstRem){
-            worstRem = rem;
-            worst = i;
-          }
-        }
-      }
-      if (worst !== -1){
-        assign[worst] = pr.name;
-        used[worst] = true;
-      }
-    }
+  const resultWrapper = root.querySelector('.result-wrapper');
+  if (resultWrapper) {
+      // Perintahkan browser untuk scroll ke elemen ini
+      resultWrapper.scrollIntoView({
+          behavior: 'smooth', // Animasi scroll halus
+          block: 'start'      // Sejajarkan bagian atas elemen dengan viewport
+      });
   }
-  return assign;
+
+  // --- (BARU) Logika Animasi ---
+  
+  const scoreRing = document.getElementById('finalScoreRing');
+  const scoreText = document.getElementById('finalScoreText');
+  // Durasi animasi (dalam milidetik). 
+  // Harus sama dengan durasi 'transition' di CSS (misal: 1s -> 1000ms)
+  const animationDuration = 2000; 
+  
+  // 1. Animasi Angka (Teks Persentase)
+  let startValue = 0;
+  const endValue = percent;
+  const intervalTime = Math.max(16, animationDuration / endValue); // Waktu per langkah
+
+  if (endValue > 0) {
+      const counter = setInterval(() => {
+        startValue += 1;
+        if (startValue >= endValue) {
+          startValue = endValue; // Pastikan pas
+          clearInterval(counter);
+        }
+        scoreText.textContent = `${startValue}%`;
+      }, intervalTime);
+  } else {
+      scoreText.textContent = `0%`;
+  }
+
+  // 2. Animasi Progress Bar (Lingkaran)
+  // Beri browser 'jeda' sesaat (10ms) untuk merender HTML di atas
+  // sebelum kita mengubah style-nya. Ini akan memicu transisi CSS.
+  setTimeout(() => {
+    if (scoreRing) {
+      scoreRing.style.setProperty('--score-angle', `${angle}deg`);
+    }
+  }, 10);
+  
+  // --- Akhir Logika Animasi ---
+
+  document.getElementById('restartBtn').addEventListener('click', () => {
+    // (BARU) Saat restart, reset juga angle agar animasi bisa jalan lagi
+    const ring = document.getElementById('finalScoreRing');
+    if (ring) ring.style.setProperty('--score-angle', '0deg');
+    
+    setupQuiz(); 
+    renderCurrent(); 
+  });
 }
 
 
 // initial
+setupQuiz();
 renderCurrent();
