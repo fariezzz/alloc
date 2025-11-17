@@ -111,6 +111,7 @@ const dragQuestions = [
 const allQuestions = [...mcqQuestions, ...dragQuestions];
 let index = 0;
 const total = allQuestions.length;
+let isEvaluating = false;
 
 // state
 const userAnswers = new Array(total).fill(null); // final stored answers (for mcq: index; for drag: map)
@@ -121,6 +122,7 @@ const root = document.getElementById('quizRoot');
 const progressText = document.getElementById('progressText');
 const nextBtn = document.getElementById('nextBtn');
 
+
 // render current
 function renderCurrent() {
   root.innerHTML = '';
@@ -130,6 +132,7 @@ function renderCurrent() {
   root.classList.add("fade-question");
   
   progressText.textContent = `Soal ${index+1} dari ${total}`;
+
   const q = allQuestions[index];
   if (q.type === 'mcq') renderMCQ(q);
   else renderDrag(q);
@@ -195,16 +198,78 @@ function showMCQExplain(q, selectedIdx, container) {
   const correctIdx = q.answer;
   const isCorrect = selectedIdx === correctIdx;
   const wrap = container.querySelector('#explainWrap');
-  wrap.innerHTML = '';
+  wrap.innerHTML = ''; // Bersihkan wrapper
 
-  const div = document.createElement('div');
-  div.className = 'explain animated ' + (isCorrect ? 'correct' : 'wrong');
-  div.innerHTML = `
-    <strong>${isCorrect ? '✅ Jawaban benar!' : '❌ Jawaban salah.'}</strong>
-    <div style="margin-top:8px;">${q.explain}</div>
+  // 1. Buat div status sederhana (yang akan langsung terlihat)
+  const simpleStatusDiv = document.createElement('div');
+  simpleStatusDiv.className = 'simple-status animated ' + (isCorrect ? 'correct' : 'wrong');
+  simpleStatusDiv.innerHTML = `
+    <span>${isCorrect ? '✅ Jawaban benar!' : '❌ Jawaban salah.'}</span>
+    <button class="btn-toggle-detail">Lihat Analisis Jawaban</button>
   `;
-  wrap.appendChild(div);
 
+  // ================== PEROMBAKAN KOTAK DETAIL ==================
+  
+  // 2. (BARU) Buat div penjelasan detail (yang akan tersembunyi)
+  const detailExplainDiv = document.createElement('div');
+  detailExplainDiv.className = 'explain animated ' + (isCorrect ? 'correct' : 'wrong');
+  detailExplainDiv.id = 'mcqDetailExplain'; // ID unik untuk di-toggle
+  detailExplainDiv.style.display = 'none'; // Sembunyikan secara default
+
+  // Ambil teks jawaban untuk ditampilkan
+  const userAnsText = q.options[selectedIdx];
+  const correctAnsText = q.options[correctIdx];
+
+  // (BARU) Bangun HTML yang rapi menggunakan style yang sudah ada
+  let detailHtml = '<h3 class="eval-heading">Analisis Jawaban</h3>';
+
+  // Bagian 1: Jawaban Anda
+  detailHtml += `
+    <div class="eval-section ${isCorrect ? 'eval-correct' : 'eval-wrong'}">
+      <strong>Jawaban Anda:</strong>
+      <div class="mcq-detail-text">${userAnsText}</div>
+    </div>
+  `;
+
+  // Bagian 2: Jawaban Benar (hanya tampil jika Anda salah)
+  if (!isCorrect) {
+    detailHtml += `
+      <div class="eval-section eval-correct">
+        <strong>Jawaban Benar:</strong>
+        <div class="mcq-detail-text">${correctAnsText}</div>
+      </div>
+    `;
+  }
+
+  // Bagian 3: Penjelasan (selalu tampil)
+  detailHtml += `
+    <div class="eval-section eval-neutral">
+      <strong>Penjelasan:</strong>
+      <div class="mcq-detail-text">${q.explain}</div>
+    </div>
+  `;
+  
+  detailExplainDiv.innerHTML = detailHtml;
+  // ================ AKHIR PEROMBAKAN ================
+
+  // 3. Tambahkan keduanya ke wrapper
+  wrap.appendChild(simpleStatusDiv);
+  wrap.appendChild(detailExplainDiv);
+
+  // 4. (BARU) Tambahkan event listener ke tombol toggle
+  simpleStatusDiv.querySelector('.btn-toggle-detail').addEventListener('click', (e) => {
+      const detailBox = container.querySelector('#mcqDetailExplain'); 
+      const btn = e.target;
+      if (detailBox.style.display === 'none') {
+          detailBox.style.display = 'block';
+          btn.textContent = 'Sembunyikan Analisis';
+      } else {
+          detailBox.style.display = 'none';
+          btn.textContent = 'Lihat Analisis Jawaban';
+      }
+  });
+
+  // Logika untuk mewarnai tombol opsi (ini tidak berubah)
   const optionButtons = container.querySelectorAll('.option-btn');
   optionButtons.forEach((btn, i) => {
     if (i === correctIdx) {
@@ -327,22 +392,41 @@ function renderDrag(q) {
   function addToWaiting(procName, skipCascade=false) {
     const procObj = PROCS.find(p=>p.name===procName);
     if (!procObj) return;
-    // remove placeholder if exists
-    if (waitingBody.children.length === 1 && waitingBody.children[0].textContent === '-') waitingBody.innerHTML = '';
+    
     // remove from pool if present
     const el = pool.querySelector(`[data-proc="${procName}"]`);
     if (el) el.remove();
     // create row
     const row = document.createElement('tr');
-    row.innerHTML = `<td style="display:flex;justify-content:space-between;align-items:center;">
-      ${procName} (${procObj.size} KB)
-      <button class="remove-wait-btn" title="Hapus">✕</button>
+    row.innerHTML = `<td class="process-slot"> 
+      <div class="slot-content">
+        <span class="proc-label">${procName} (${procObj.size} KB)</span>
+        <button class="remove-btn" title="Hapus">✕</button>
+      </div>
     </td>`;
     // remove handler -> cascading delete from this proc onward
-    row.querySelector('.remove-wait-btn').addEventListener('click', () => {
+    row.querySelector('.remove-btn').addEventListener('click', () => {
       cascadeRemoveFrom(procName);
     });
-    waitingBody.appendChild(row);
+
+    const placeholderRow = Array.from(waitingBody.querySelectorAll('tr')).find(r => r.textContent.trim() === '-');
+
+    if (placeholderRow) {
+      // 2. Sisipkan baris proses baru TEPAT SEBELUM placeholder
+      waitingBody.insertBefore(row, placeholderRow);
+    } else {
+      // 3. Fallback (jika placeholder tidak ada, tambahkan baris & placeholder baru)
+      waitingBody.appendChild(row);
+      waitingBody.insertAdjacentHTML('beforeend', '<tr><td>-</td></tr>');
+    }
+
+    const tdSlot = row.querySelector('.process-slot');
+    if (tdSlot) {
+      tdSlot.classList.add('filled');
+      tdSlot.addEventListener('animationend', () => {
+        tdSlot.classList.remove('filled');
+      }, { once: true });
+    }
 
     // after adding, check filled status
     refreshNextButtonState();
@@ -351,18 +435,56 @@ function renderDrag(q) {
   // cascade removal: remove procName and any later-numbered processes (both in partitions and waiting)
   function cascadeRemoveFrom(procName) {
     const removedNum = parseInt(procName.substring(1));
+    const animationDuration = 400; // 0.4s from latihan.css
+
     // remove from partitions
     Array.from(document.querySelectorAll('.process-slot')).forEach(slot=>{
       const name = slot.dataset.proc;
       if (name) {
         const num = parseInt(name.substring(1));
         if (num >= removedNum) {
-          // animate removal (keep simple)
+          
           delete slot.dataset.proc;
-          slot.innerHTML = '';
+          slot.classList.add('removing'); 
+          
+          setTimeout(() => {
+            // return removed processes (>= removedNum) to pool...
+            for (let k = removedNum; k <= totalProcesses; k++) {
+              const nm = 'P' + k;
+              if (!pool.querySelector(`[data-proc="${nm}"]`)) {
+                const presentInSlots = Array.from(document.querySelectorAll('.process-slot'))
+                  .some(s => s.dataset.proc === nm);
+                
+                // Cek apakah masih ada di waiting body
+                const presentInWait = Array.from(document.querySelectorAll('#waitingBody tr'))
+                  .some(r => r.textContent.trim().split(" ")[0] === nm);
+                  
+                if (!presentInSlots && !presentInWait) addToPool(nm);
+              }
+            }
+            
+            // LOGIKA BARU: Pastikan placeholder ada jika tidak ada proses lain
+            const remainingRows = Array.from(waitingBody.querySelectorAll('tr'));
+            const processRows = remainingRows.filter(r => r.textContent.trim() !== '-');
+
+            // Jika tidak ada baris proses SAMA SEKALI, 
+            // dan juga tidak ada placeholder, tambahkan placeholder.
+            if (processRows.length === 0) {
+                const hasPlaceholder = remainingRows.some(r => r.textContent.trim() === '-');
+                if (!hasPlaceholder) {
+                    waitingBody.innerHTML = '<tr><td>-</td></tr>';
+                }
+            }
+            
+            refreshNextButtonState();
+            clearAllFeedbackVisuals();
+
+          }, animationDuration + 10); 
+          // ================ AKHIR BLOK PENGGANTI ================
         }
       }
     });
+
     // remove from waiting
     const waitRows = Array.from(document.querySelectorAll('#waitingBody tr'));
     waitRows.forEach(row=>{
@@ -372,27 +494,45 @@ function renderDrag(q) {
       if (name === '-') return;
       const num = parseInt(name.substring(1));
       if (num >= removedNum) {
-        row.remove();
+        
+        const slotInWait = row.querySelector('.process-slot');
+        if (slotInWait) {
+            slotInWait.classList.add('removing'); 
+        }
+        
+        setTimeout(() => {
+            row.remove();
+        }, animationDuration);
       }
     });
-    // return removed processes (>= removedNum) to pool (in increasing order)
-    for (let k = removedNum; k <= totalProcesses; k++) {
-      const nm = 'P' + k;
-      // ensure it's not present in pool already
-      if (!pool.querySelector(`[data-proc="${nm}"]`)) {
-        // but only add if nm is not present in any slot or waiting
-        const presentInSlots = Array.from(document.querySelectorAll('.process-slot'))
-          .some(s => s.dataset.proc === nm);
-        const presentInWait = Array.from(document.querySelectorAll('#waitingBody tr'))
-          .some(r => r.textContent.trim().split(" ")[0] === nm);
-        if (!presentInSlots && !presentInWait) addToPool(nm);
+
+    setTimeout(() => {
+      // return removed processes (>= removedNum) to pool (in increasing order)
+      for (let k = removedNum; k <= totalProcesses; k++) {
+        const nm = 'P' + k;
+        // ensure it's not present in pool already
+        if (!pool.querySelector(`[data-proc="${nm}"]`)) {
+          // but only add if nm is not present in any slot or waiting
+          const presentInSlots = Array.from(document.querySelectorAll('.process-slot'))
+            .some(s => s.dataset.proc === nm);
+          // Cek waiting body SETELAH delay
+          const presentInWait = Array.from(document.querySelectorAll('#waitingBody tr'))
+            .some(r => r.textContent.trim().split(" ")[0] === nm);
+          if (!presentInSlots && !presentInWait) addToPool(nm);
+        }
       }
-    }
-    // if waiting empty put placeholder
-    if (waitingBody.children.length === 0) waitingBody.innerHTML = '<tr><td>-</td></tr>';
-    refreshNextButtonState();
-    // clear previous feedback (so evaluation will re-run only when filled)
-    feedback.innerHTML = '';
+      
+      // if waiting empty put placeholder
+      // Cek waiting body SETELAH delay
+      if (waitingBody.children.length === 0) {
+        waitingBody.innerHTML = '<tr><td>-</td></tr>';
+      }
+      
+      refreshNextButtonState();
+      // clear previous feedback (so evaluation will re-run only when filled)
+      clearAllFeedbackVisuals();
+
+    }, animationDuration + 10); 
   }
 
   // slot remove with cascading behavior: same as cascadeRemoveFrom(slotProc)
@@ -410,11 +550,22 @@ function renderDrag(q) {
     // remove from pool
     const el = pool.querySelector(`[data-proc="${procName}"]`);
     if (el) el.remove();
+
+    const procObj = PROCS.find(p=>p.name===procName);
+    if (!procObj) return
+
     slotElem.dataset.proc = procName;
+
     slotElem.innerHTML = `<div class="slot-content">
-      <span class="proc-label">${procName}</span>
+      <span class="proc-label">${procName} (${procObj.size} KB)</span>
       <button class="remove-btn" title="Hapus">✕</button>
     </div>`;
+
+    slotElem.classList.add('filled');
+    slotElem.addEventListener('animationend', () => {
+        slotElem.classList.remove('filled');
+    }, { once: true });
+
     attachSlotRemove(slotElem, procName);
     refreshNextButtonState();
   }
@@ -482,93 +633,276 @@ function renderDrag(q) {
     return { assign, waiting };
   }
 
-  // Evaluate and show feedback (called only when allPlaced())
-  function evaluateAndShow() {
-    // clear previous visuals
-    pBody.querySelectorAll('.process-slot').forEach(s => {
-      s.classList.remove('correct','wrong','neutral');
-      const old = s.querySelector('.expected-hint'); if (old) old.remove();
-    });
-
-    const { assign, waiting } = computeExpected(PARTS, PROCS, q.algo);
-
-    // evaluate partitions
-    let correctCount = 0;
-    for (let i=0;i<PARTS.length;i++) {
-      const slot = document.getElementById(`slot-${i}`);
-      const user = slot.dataset.proc || null;
-      const expected = assign[i] || null;
-      if (expected && user === expected) {
-        slot.classList.add('correct'); correctCount++;
-      } else if (!expected && !user) {
-        slot.classList.add('neutral');
-      } else {
-        slot.classList.add('wrong');
-        const hint = document.createElement('div');
-        hint.className = 'expected-hint';
-        hint.textContent = `→ seharusnya: ${expected || '-'}`;
-        slot.appendChild(hint);
+  // Helper: Hapus semua feedback visual (warna, hint) dari tabel
+  function clearAllFeedbackVisuals() {
+    // 1. Hapus dari tabel partisi
+    root.querySelectorAll('.process-slot').forEach(s => {
+      s.classList.remove('correct', 'wrong', 'neutral');
+      const oldHints = s.querySelectorAll('.expected-hint');
+      oldHints.forEach(hint => hint.remove());
+      
+      // Pastikan konten slot (jika disembunyikan) muncul kembali
+      const content = s.querySelector('.slot-content');
+      if (content) {
+        content.style.display = ''; 
       }
-    }
-
-    // evaluate waiting list (order matters)
-    const userWait = Array.from(document.querySelectorAll('#waitingBody tr'))
-      .map(r => r.textContent.trim().split(" ")[0])
-      .filter(x => x !== "-");
-
-    // determine waiting correctness (must match exactly in order)
-    const waitingCorrect = JSON.stringify(userWait) === JSON.stringify(waiting);
-
-
-
-    // visual feedback for waiting area
-    if (waitingCorrect) {
-    waitingBody.style.background = 'rgba(34, 61, 34, 0.4)';
-} else {
-    waitingBody.style.background = 'rgba(61, 34, 34, 0.4)';
-}
-
-
-    // create explanation box similar to previous behavior
-    const totalSlots = PARTS.length;
-    const pct = Math.round((correctCount / totalSlots) * 100);
-   // BUAT TEKS HASIL (AMAN)
-let html = `<strong>Hasil: ${correctCount} slot benar dari ${totalSlots} slot.</strong>
-  <div style="margin-top:8px;">Algoritma ${q.algo} memproses urutan P1 → P2 → P3 → ...</div>`;
-
-if (!waitingCorrect && waiting.length > 0) {
-  html += `<div class="waiting-box"><strong>Urutan waiting salah:</strong> ${userWait.join(', ')}</div>`;
-} else if (waiting.length > 0) {
-  html += `<div class="waiting-box"><strong>Waiting benar:</strong> ${waiting.join(', ')}</div>`;
-}
-
-
-    const explainDiv = document.createElement('div');
-    explainDiv.className = 'explain fade-in ' + (pct === 100 ? 'correct' : (pct >= 60 ? 'neutral' : 'wrong'));
-    explainDiv.innerHTML = html;
-
+    });
+    
+    // 2. Hapus dari tabel waiting
+    waitingBody.style.background = '';
+    
+    // 3. Hapus kotak feedback utama
     feedback.innerHTML = '';
-    feedback.appendChild(explainDiv);
+  }
 
-    // store mapping for summary: map slotIndex -> procName OR null; plus waiting stored via userAnswers
-    const map = {};
-    for (let i=0;i<totalSlots;i++){
-      const s = document.getElementById(`slot-${i}`);
-      map[i] = s.dataset.proc || null;
-    }
-    // also store waiting under a special key
-    map.__waiting = userWait;
-    userAnswers[index] = map;
+ // Evaluate and show feedback (called only when allPlaced())
+  function evaluateAndShow() {
+    if (isEvaluating) return; // 1. Jika sedang evaluasi, hentikan
+    isEvaluating = true;      // 2. Aktifkan kunci
 
-    // remove remove-btns to lock answers (and hide pool)
+    // 1. Bersihkan visual sebelumnya MENGGUNAKAN HELPER
+    clearAllFeedbackVisuals();
+
+    // 2. Langsung kunci UI (sembunyikan pool & hapus tombol)
     document.querySelectorAll('.remove-btn').forEach(btn => btn.remove());
-    document.querySelectorAll('.remove-wait-btn').forEach(btn => btn.remove());
     const procArea = document.querySelector('.right-area');
     if (procArea) procArea.style.display = 'none';
 
-    // enable next button & set label
-    nextBtn.disabled = false;
-    nextBtn.textContent = (index < total - 1) ? "Soal Selanjutnya →" : "Lihat Hasil";
+    // Ambil jawaban benar
+    const { assign, waiting } = computeExpected(PARTS, PROCS, q.algo);
+
+    // 3. Hitung hasil partisi terlebih dahulu
+    const slotResults = [];
+    let correctCount = 0;
+    
+    for (let i = 0; i < PARTS.length; i++) {
+      const slot = document.getElementById(`slot-${i}`);
+      const user = slot.dataset.proc || null; 
+      const expected = assign[i] || null; 
+      
+      let status = 'neutral';
+      let hintText = 'kosong'; 
+      let waitHint = false; 
+
+      if (expected && user === expected) {
+        status = 'correct';
+        correctCount++;
+        hintText = user;
+      } else if (!expected && !user) {
+        status = 'neutral';
+        hintText = 'kosong';
+      } else { 
+        status = 'wrong';
+        if (expected) {
+          hintText = expected; 
+          if (user && user !== expected && waiting.includes(user)) {
+            waitHint = true; 
+          }
+        } else if (user && waiting.includes(user)) {
+          hintText = 'Waiting';
+        } else {
+          hintText = 'kosong'; 
+        }
+      }
+      slotResults.push({ 
+        status, 
+        expected: hintText, 
+        waitHint: waitHint, 
+        userProc: user 
+      });
+    }
+
+    // 4. Terapkan hasil (visual) PARTISI secara bertahap
+    const animDelay = 150; // Jeda 150ms antar slot
+    slotResults.forEach((res, i) => {
+      setTimeout(() => {
+        const slot = document.getElementById(`slot-${i}`);
+        slot.classList.add(res.status); 
+        
+        if (res.status === 'wrong') {
+          const hint = document.createElement('div');
+          hint.className = 'expected-hint';
+          hint.textContent = `→ seharusnya: ${res.expected}`;
+          slot.appendChild(hint); 
+
+          if (res.waitHint) {
+            const waitIndicator = document.createElement('div');
+            waitIndicator.className = 'expected-hint waiting-indicator';
+            waitIndicator.textContent = `(${res.userProc} seharusnya Waiting)`;
+            slot.appendChild(waitIndicator);
+          }
+        }
+      }, i * animDelay); // Penundaan bertingkat
+    });
+
+    const userWait = Array.from(document.querySelectorAll('#waitingBody tr'))
+      .map(r => r.textContent.trim().split(" ")[0])
+      .filter(x => x !== "-");
+    const waitingCorrect = JSON.stringify(userWait) === JSON.stringify(waiting);
+    const allCorrect = (correctCount === PARTS.length) && waitingCorrect;
+
+    const waitRows = waitingBody.querySelectorAll('tr');
+    const maxLen = Math.max(userWait.length, waiting.length);
+
+    for (let i = 0; i < maxLen; i++) {
+        const animTime = (slotResults.length + i) * animDelay; // Lanjutkan animasi
+        const row = waitRows[i];
+        const userProc = userWait[i] || null;
+        const expectedProc = waiting[i] || null;
+
+        setTimeout(() => {
+            if (!row) return; // Jika user tidak mengisi sebanyak yang seharusnya
+            const td = row.querySelector('.process-slot');
+            if (!td) return;
+
+            if (userProc === expectedProc) {
+                td.classList.add(userProc ? 'correct' : 'neutral');
+            } else {
+                td.classList.add('wrong');
+                const hintText = expectedProc || 'kosong';
+                const hint = document.createElement('div');
+                hint.className = 'expected-hint';
+                hint.textContent = `→ seharusnya: ${hintText}`;
+                td.appendChild(hint);
+            }
+        }, animTime);
+    }
+
+    const totalAnimTime = (slotResults.length + maxLen) * animDelay + 100;
+    
+    setTimeout(() => {
+      // (Warna latar tabel waiting list)
+      if (waitingCorrect) {
+        waitingBody.style.background = 'rgba(34, 61, 34, 0.4)';
+      } else {
+        waitingBody.style.background = 'rgba(61, 34, 34, 0.4)';
+      }
+
+      // --- KOTAK 1: STATUS SEDERHANA (Langsung Terlihat) ---
+      // (Tidak berubah, ini sudah benar)
+      const simpleStatusDiv = document.createElement('div');
+      simpleStatusDiv.className = 'simple-status ' + (allCorrect ? 'correct' : 'wrong');
+      simpleStatusDiv.innerHTML = `
+        <span>${allCorrect ? '✅ Jawaban Benar!' : '❌ Jawaban Salah!'}</span>
+        <button id="toggleDetailBtn" class="btn-toggle-detail">Lihat Evaluasi Detail</button>
+      `;
+
+      // --- KOTAK 2: EVALUASI DETAIL (Tersembunyi) ---
+      // (BARU) Struktur HTML yang lebih detail
+      let summaryHtml = '';
+
+      // 1. (BARU) Penjelasan Logika Algoritma
+      let algoExplain = '';
+      if (q.algo === 'First-Fit') {
+          algoExplain = 'Mencari partisi pertama dari atas yang cukup (>= ukuran proses).';
+      } else if (q.algo === 'Best-Fit') {
+          algoExplain = 'Mencari partisi terkecil yang masih cukup, untuk meminimalkan sisa.';
+      } else { // Worst-Fit
+          algoExplain = 'Mencari partisi terbesar yang tersedia, untuk menyisakan sisa besar.';
+      }
+      summaryHtml += `<div class="eval-algo-explain">
+                        <strong>Logika ${q.algo}:</strong> ${algoExplain}
+                      </div>`;
+
+      // 2. (BARU) Hasil Partisi (dengan list <ul>)
+      summaryHtml += `<h3 class="eval-heading">Evaluasi Partisi</h3>`; // Judul Bagian
+      const partitionClass = (correctCount === PARTS.length) ? 'eval-correct' : 'eval-wrong';
+      summaryHtml += `<div class="eval-section ${partitionClass}">`; 
+      
+      summaryHtml += `<div class="eval-subtitle">Urutan proses: P1 → P2 → P3 → ...</div>`;
+      
+      if (correctCount === PARTS.length) {
+          summaryHtml += `<strong>✅ Hasil: Benar</strong> (${correctCount}/${PARTS.length} slot).`;
+      } else {
+          summaryHtml += `<strong>❌ Hasil: Salah</strong> (${correctCount} benar dari ${PARTS.length} slot.)`;
+          summaryHtml += `<div class="correction-list-title">Detail Kesalahan:</div>`;
+          summaryHtml += `<ul class="correction-list">`; // List
+          
+          for (let i = 0; i < slotResults.length; i++) {
+              const res = slotResults[i];
+              if (res.status === 'wrong') {
+                  const partName = `Part${i + 1}`;
+                  const userAnswer = res.userProc || 'Kosong'; 
+                  const expectedAnswer = res.expected; 
+                  summaryHtml += `<li>
+                                    <strong>${partName}:</strong> 
+                                    Anda menjawab <span>${userAnswer}</span>, seharusnya <span>${expectedAnswer}</span>.
+                                  </li>`;
+              }
+          }
+          summaryHtml += `</ul>`; // Tutup List
+      }
+      summaryHtml += `</div>`; // Tutup eval-section
+
+      // 3. (BARU) Hasil Waiting (logika lama, tampilan baru)
+      summaryHtml += `<h3 class="eval-heading">Evaluasi Waiting List</h3>`; // Judul Bagian
+      
+      let waitSummary = ''; 
+      if (waitingCorrect) {
+          waitSummary = `<div class="eval-section eval-correct">
+                           <strong>✅ Hasil: Benar</strong> ${waiting.length > 0 ? `(${waiting.join(', ')})` : '(Kosong)'}
+                         </div>`;
+      } else {
+          // Gunakan kembali logika .wait-detail yang sudah jelas
+          const userWaitText = userWait.length > 0 ? userWait.join(', ') : 'Kosong';
+          const expectedWaitText = waiting.length > 0 ? waiting.join(', ') : 'Kosong';
+          const forgotten = waiting.filter(proc => !userWait.includes(proc));
+
+          waitSummary = `<div class="eval-section eval-wrong">
+                           <strong>❌ Hasil: Salah</strong>
+                           <div class="wait-detail">Jawaban Anda: <strong>${userWaitText}</strong></div>
+                           <div class="wait-detail">Seharusnya: <strong>${expectedWaitText}</strong></div>`;
+          if (forgotten.length > 0) {
+              waitSummary += `<div class="wait-detail missed">❗ Proses <strong>${forgotten.join(', ')}</strong> tidak dimasukkan.</div>`;
+          }
+          waitSummary += `</div>`;
+      }
+      summaryHtml += waitSummary; // Tambahkan bagian waiting
+      // (Akhir dari pembuatan HTML)
+
+      // Buat div utamanya (KOTAK 2)
+      const evaluationDiv = document.createElement('div');
+      evaluationDiv.className = 'explain fade-in ' + (allCorrect ? 'correct' : 'wrong');
+      evaluationDiv.id = 'detailedEvaluation';
+      evaluationDiv.style.display = 'none';
+      evaluationDiv.innerHTML = summaryHtml;
+      
+      // Tampilkan kedua kotak
+      feedback.innerHTML = '';      
+      feedback.appendChild(simpleStatusDiv); // Tampilkan KOTAK 1
+      feedback.appendChild(evaluationDiv);   // Tampilkan KOTAK 2 (tersembunyi)
+
+      // Event Listener (Tidak berubah)
+      document.getElementById('toggleDetailBtn').addEventListener('click', (e) => {
+          const detailBox = document.getElementById('detailedEvaluation');
+          const btn = e.target;
+          if (detailBox.style.display === 'none') {
+              detailBox.style.display = 'block';
+              btn.textContent = 'Sembunyikan Detail';
+          } else {
+              detailBox.style.display = 'none';
+              btn.textContent = 'Lihat Evaluasi Detail';
+          }
+      });
+
+      // 7. Simpan jawaban (Tidak berubah)
+      const map = {};
+      for (let i=0;i<PARTS.length;i++){
+        const s = document.getElementById(`slot-${i}`);
+        map[i] = s.dataset.proc || null;
+      }
+      map.__waiting = userWait;
+      userAnswers[index] = map;
+
+      // 8. Aktifkan tombol next (Tidak berubah)
+      nextBtn.disabled = false;
+      nextBtn.textContent = (index < total - 1) ? "Soal Selanjutnya →" : "Lihat Hasil";
+
+      // 9. Lepaskan kunci (Tidak berubah)
+      isEvaluating = false; 
+
+    }, totalAnimTime);
+    // ================ AKHIR BLOK PENGGANTI ================
   }
 
   // when any change occurs, refresh nextBtn state (locked until all placed)
@@ -578,7 +912,7 @@ if (!waitingCorrect && waiting.length > 0) {
       evaluateAndShow();
     } else {
       nextBtn.disabled = true;
-      feedback.innerHTML = '';
+      clearAllFeedbackVisuals();
       // restore pool display if hidden
       const procArea = document.querySelector('.right-area');
       if (procArea) procArea.style.display = 'block';
@@ -619,7 +953,6 @@ if (!waitingCorrect && waiting.length > 0) {
 
     // place into slot
     placeIntoSlot(td, procName);
-    refreshNextButtonState();
   }
 
   // show small hint message
@@ -659,7 +992,6 @@ if (!waitingCorrect && waiting.length > 0) {
       return;
     }
     addToWaiting(procName);
-    refreshNextButtonState();
   });
 
   // restore previous answer if exists
@@ -698,7 +1030,7 @@ if (!waitingCorrect && waiting.length > 0) {
   } else {
     // ensure next button disabled until filled
     nextBtn.disabled = true;
-    nextBtn.textContent = (index < total - 1) ? "Jawab" : "Jawab";
+    nextBtn.textContent = (index < total - 1) ? "Soal Selanjutnya →" : "Lihat Hasil";
   }
 }
 
@@ -790,16 +1122,16 @@ function showSummary() {
     if (!ua) continue;
 
     const expected = computeExpectedSummary(q.partitions, q.processes, q.algo);
-   for (const sIdx in ua) {
-  if (sIdx === "__waiting") continue; // abaikan waiting
-  dragTotalSlots++;
+    for (const sIdx in ua) {
+      if (sIdx === "__waiting") continue; // abaikan waiting
+      dragTotalSlots++;
 
-  const assigned = ua[sIdx];
-  const expectedProc = expected[sIdx] || null;
-  if ((expectedProc && assigned === expectedProc) || (!expectedProc && !assigned)) {
-    dragCorrectSlots++;
-  }
-}
+      const assigned = ua[sIdx];
+      const expectedProc = expected[sIdx] || null;
+      if ((expectedProc && assigned === expectedProc) || (!expectedProc && !assigned)) {
+      dragCorrectSlots++;
+      }
+    }
 
   }
 

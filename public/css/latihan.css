@@ -44,6 +44,8 @@ body {
   color: #d3d3d3;
   margin-top: 4px;
   font-style: italic;
+  opacity: 0; 
+  animation: fadeInExplain 0.5s ease 0.2s forwards; 
 }
 
 
@@ -290,7 +292,7 @@ button#nextBtn.processing {
 /* Transisi halus pada tombol dan opsi */
 .option-btn,
 #nextBtn {
-  transition: all 0.25s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .option-btn:hover {
@@ -415,6 +417,10 @@ button#nextBtn.processing {
   border: 1px solid rgba(255, 220, 120, 0.3);
   color: #ffe9a1;
   animation: fadeInExplain 0.8s ease forwards;
+}
+
+#waitingBody {
+  transition: background-color 0.5s ease;
 }
 
 /* Tambahkan sedikit warna visual agar jelas */
@@ -629,3 +635,195 @@ button#nextBtn.processing {
 .fade-question {
   animation: slideLeft 0.35s ease;
 }
+
+.waiting-indicator {
+  color: #ffd580; 
+  font-size: 0.85em;
+  margin-top: 2px;
+  font-style: italic;
+}
+
+/* ============ TAMBAHKAN INI DI AKHIR FILE CSS ============ */
+
+/* Box khusus untuk feedback waiting list */
+.explain-waiting {
+  margin-top: 12px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  /* Garis pemisah dari feedback partisi di atasnya */
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Detail di dalam box waiting (jika salah) */
+.wait-detail {
+  font-size: 0.9em;
+  margin-top: 6px;
+  margin-left: 10px;
+  color: #eee;
+}
+
+.wait-detail strong {
+   color: #fff;
+}
+
+/* Detail khusus untuk proses yang 'missed' */
+.wait-detail.missed {
+  color: #ffc2c2; /* Warna teks merah muda */
+  font-weight: 600;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255, 180, 180, 0.3);
+}
+
+/* Kelas 'neutral' untuk box 'explain' (belum ada) */
+.explain.neutral {
+  background: rgba(120, 120, 120, 0.14);
+  border: 1px solid rgba(120, 120, 120, 0.25);
+  color: #e0e0e0;
+}
+
+/* Sembunyikan style lama yang tidak dipakai lagi */
+.waiting-box, .waiting-indicator-missed {
+  display: none;
+}
+
+/* ============ TAMBAHKAN INI DI AKHIR FILE CSS ============ */
+
+/* Kotak status sederhana (Benar/Salah) */
+.simple-status {
+  padding: 14px 18px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 1.05rem;
+  animation: fadeInExplain 0.5s ease forwards;
+}
+
+.simple-status.correct {
+  background: rgba(56, 141, 90, 0.14);
+  border: 1px solid rgba(56, 141, 90, 0.25);
+  color: #dff7e6;
+}
+
+.simple-status.wrong {
+  background: rgba(182, 58, 58, 0.12);
+  border: 1px solid rgba(182, 58, 58, 0.22);
+  color: #ffe6e6;
+}
+
+/* Tombol untuk toggle detail */
+.btn-toggle-detail {
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.btn-toggle-detail:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.eval-algo-explain {
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px;
+  font-style: italic;
+  color: #ccc;
+}
+.eval-algo-explain strong {
+  color: #e0e0e0;
+  font-style: normal;
+}
+
+/* (BARU) Judul (H3) untuk setiap bagian (Partisi / Waiting) */
+.eval-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e8f2f4;
+  margin: 20px 0 8px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+/* Sembunyikan heading pertama jika itu yg pertama muncul */
+.eval-heading:first-of-type {
+  margin-top: 0;
+}
+
+/* (BARU) Teks sub-info (seperti "Urutan proses...") */
+.eval-subtitle {
+  font-size: 0.85em;
+  font-style: italic;
+  color: #bbb;
+  margin-bottom: 10px;
+}
+
+/* (BARU) Judul untuk daftar koreksi (Detail Kesalahan:) */
+.correction-list-title {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: #ddd;
+  margin-top: 14px;
+  margin-bottom: 6px;
+}
+
+/* (BARU) List untuk detail kesalahan partisi */
+.correction-list {
+  list-style-type: none;
+  padding-left: 10px;
+  margin-bottom: 0;
+}
+.correction-list li {
+  font-size: 0.9em;
+  color: #eee;
+  margin-bottom: 4px;
+}
+/* (BARU) Highlight jawaban user/benar di list */
+.correction-list li span {
+  font-weight: 600;
+  color: #fff;
+  background-color: rgba(0,0,0,0.2);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+/* (LAMA, tapi penting) Mengatur ulang style .wait-detail 
+   karena kita masih menggunakannya di bagian waiting */
+.eval-section .wait-detail {
+  font-size: 0.9em;
+  margin-top: 6px;
+  margin-left: 0; /* reset dari style lama jika ada */
+  color: #eee;
+}
+.eval-section .wait-detail.missed {
+  color: #ffc2c2;
+  font-weight: 600;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255, 180, 180, 0.3);
+}
+
+.mcq-detail-text {
+  font-size: 0.95em;
+  margin-top: 6px;
+  color: #eee;
+  line-height: 1.4;
+}
+
+/* (BARU) Tambahkan style neutral untuk .eval-section 
+   (dipakai untuk kotak "Penjelasan") */
+.eval-section.eval-neutral {
+  background-color: rgba(120, 120, 120, 0.1);
+  border-left-color: #999;
+  color: #ddd;
+}
+.eval-section.eval-neutral strong {
+  color: #e0e0e0;
+}
+
