@@ -14,15 +14,21 @@
 <body>
   <div id="navbar-container"></div>
 
-  <div class="card-quiz">
+ <div class="card-quiz">
     <div class="top-row">
       <div>
         <h2 class="quiz-title-clean">Latihan Interaktif: Alokasi Memori</h2>
       </div>
-      <div style="text-align:right">
+      
+      <div class="progress-wrapper" id="progressWrapper">
         <div class="progress-text" id="progressText">Soal 1 dari 10</div>
+        
+        <div class="progress-bar-container">
+          <div class="progress-bar-inner" id="progressBarInner"></div>
+        </div>
+        
       </div>
-    </div>
+      </div>
 
     <div id="quizRoot" class="question-area"></div>
 

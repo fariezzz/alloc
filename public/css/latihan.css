@@ -827,3 +827,37 @@ button#nextBtn.processing {
   color: #e0e0e0;
 }
 
+/* ===== (BARU) Progress Bar ===== */
+
+/* Wrapper untuk teks dan bar */
+.progress-wrapper {
+  width: 200px; /* Atur lebar agar konsisten */
+  text-align: right;
+  /* (BARU) Pastikan transisi mulus saat hide/show */
+  transition: opacity 0.3s ease; 
+}
+
+/* Sesuaikan jarak teks progres yang sudah ada */
+.progress-text {
+  font-weight: 600;
+  margin-bottom: 6px; /* Beri jarak ke bar */
+}
+
+/* Latar/Track dari progress bar */
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden; /* Penting agar inner bar tidak tumpah */
+}
+
+/* Bar yang terisi (warna hijau) */
+.progress-bar-inner {
+  width: 0%; /* Mulai dari 0 */
+  height: 100%;
+  background-color: #64ffda; /* Warna cerah yang sudah ada di .score-text */
+  border-radius: 4px;
+  /* (PENTING) Animasi saat ganti soal */
+  transition: width 0.4s ease; 
+}

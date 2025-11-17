@@ -121,6 +121,8 @@ const userSelected = new Array(total).fill(null); // temporary selection for MCQ
 const root = document.getElementById('quizRoot');
 const progressText = document.getElementById('progressText');
 const nextBtn = document.getElementById('nextBtn');
+const progressWrapper = document.getElementById('progressWrapper');
+const progressBarInner = document.getElementById('progressBarInner');
 
 
 // render current
@@ -132,6 +134,14 @@ function renderCurrent() {
   root.classList.add("fade-question");
   
   progressText.textContent = `Soal ${index+1} dari ${total}`;
+
+  if (progressBarInner) { 
+    // Hitung persentase progres. (index 0 -> soal 1)
+    const percent = ((index + 1) / total) * 100;
+    progressBarInner.style.width = percent + '%';
+  }
+  // (BARU) Pastikan wrapper terlihat (jika sebelumnya disembunyikan oleh summary)
+  if (progressWrapper) progressWrapper.style.display = 'block';
 
   const q = allQuestions[index];
   if (q.type === 'mcq') renderMCQ(q);
@@ -446,41 +456,7 @@ function renderDrag(q) {
           
           delete slot.dataset.proc;
           slot.classList.add('removing'); 
-          
-          setTimeout(() => {
-            // return removed processes (>= removedNum) to pool...
-            for (let k = removedNum; k <= totalProcesses; k++) {
-              const nm = 'P' + k;
-              if (!pool.querySelector(`[data-proc="${nm}"]`)) {
-                const presentInSlots = Array.from(document.querySelectorAll('.process-slot'))
-                  .some(s => s.dataset.proc === nm);
-                
-                // Cek apakah masih ada di waiting body
-                const presentInWait = Array.from(document.querySelectorAll('#waitingBody tr'))
-                  .some(r => r.textContent.trim().split(" ")[0] === nm);
-                  
-                if (!presentInSlots && !presentInWait) addToPool(nm);
-              }
-            }
-            
-            // LOGIKA BARU: Pastikan placeholder ada jika tidak ada proses lain
-            const remainingRows = Array.from(waitingBody.querySelectorAll('tr'));
-            const processRows = remainingRows.filter(r => r.textContent.trim() !== '-');
-
-            // Jika tidak ada baris proses SAMA SEKALI, 
-            // dan juga tidak ada placeholder, tambahkan placeholder.
-            if (processRows.length === 0) {
-                const hasPlaceholder = remainingRows.some(r => r.textContent.trim() === '-');
-                if (!hasPlaceholder) {
-                    waitingBody.innerHTML = '<tr><td>-</td></tr>';
-                }
-            }
-            
-            refreshNextButtonState();
-            clearAllFeedbackVisuals();
-
-          }, animationDuration + 10); 
-          // ================ AKHIR BLOK PENGGANTI ================
+    
         }
       }
     });
@@ -527,6 +503,11 @@ function renderDrag(q) {
       if (waitingBody.children.length === 0) {
         waitingBody.innerHTML = '<tr><td>-</td></tr>';
       }
+
+      Array.from(document.querySelectorAll('.process-slot.removing')).forEach(slot => {
+          slot.innerHTML = ''; // Hapus kontennya
+          slot.classList.remove('removing'); // Hapus kelas animasinya
+      });
       
       refreshNextButtonState();
       // clear previous feedback (so evaluation will re-run only when filled)
@@ -1165,7 +1146,7 @@ function showSummary() {
 
   nextBtn.disabled = true;
   nextBtn.style.display = 'none';
-  progressText.style.display = "none";
+  if (progressWrapper) progressWrapper.style.display = 'none';
 
 
   document.getElementById('restartBtn').addEventListener('click', () => {
@@ -1179,7 +1160,6 @@ function showSummary() {
     }
 
     renderCurrent();
-    progressText.style.display = "block";
     nextBtn.style.display = 'inline-block';
   });
 }
