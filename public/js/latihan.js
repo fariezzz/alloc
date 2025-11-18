@@ -40,7 +40,7 @@ function selectRandomMcqs(bank, num) {
 
 
 // (DIMODIFIKASI) Variabel Global
-let isAdminLoggedIn = false; // Status mode admin (petunjuk)
+let isAdminLoggedIn = false; 
 let currentDragProcs = [];
 let currentDragTotal = 0;
 let allQuestions = []; // Akan diisi oleh setupQuiz()
@@ -84,9 +84,8 @@ function setupQuiz() {
   // (Pastikan tombol next kembali ke state awal jika diperlukan)
   nextBtn.disabled = true;
   nextBtn.style.display = 'inline-block';
-  isAdminLoggedIn = false;
-  // (BARU) Update UI tombolnya juga
-  if (document.getElementById("adminBtn")) { // Cek jika tombol ada
+
+ if (document.getElementById("adminBtn") || document.getElementById("adminToolbar")) { 
      updateAdminButtonUI(); 
   }
 }
@@ -156,7 +155,6 @@ function renderCurrent() {
     if (isAdminLoggedIn) {
       adminBtn.style.display = 'inline-flex';
     } else {
-      // Jika BELUM login, tombol login (🔑) HANYA tampil di Soal 1
       if (index === 0) {
         adminBtn.style.display = 'inline-flex';
       } else {
@@ -182,6 +180,10 @@ function renderCurrent() {
   const q = allQuestions[index];
   if (q.type === 'mcq') renderMCQ(q);
   else renderDrag(q);
+
+  if (isAdminLoggedIn) {
+    renderAdminToolbar();
+  }
 
   // default nextBtn state - actual behavior is handled in global click handler below
   // nextBtn enabled/disabled will be controlled per-render
@@ -934,28 +936,61 @@ function renderDrag(q) {
     setTimeout(()=>{ hintBox.style.opacity = '0'; }, 1500);
   }
 
-  // attach slot events
-  for (let i=0;i<totalSlots;i++){
-    const slot = document.getElementById(`slot-${i}`);
-    slot.addEventListener('dragover', e=> e.preventDefault());
-    slot.addEventListener('dragenter', ()=> slot.classList.add('drop-hover'));
-    slot.addEventListener('dragleave', ()=> slot.classList.remove('drop-hover'));
-    slot.addEventListener('drop', onDropHandler);
-  }
+      // attach slot events
+      for (let i=0;i<totalSlots;i++){
+        const slot = document.getElementById(`slot-${i}`);
+        slot.addEventListener('dragover', e=> e.preventDefault());
+        slot.addEventListener('dragenter', ()=> slot.classList.add('drop-hover'));
+        slot.addEventListener('dragleave', ()=> slot.classList.remove('drop-hover'));
+        slot.addEventListener('drop', onDropHandler);
+      }
 
-  // waiting drop zone events
-  waitingBody.addEventListener('dragover', e=> e.preventDefault());
-  waitingBody.addEventListener('drop', e=>{
+      // waiting drop zone events
+          waitingBody.addEventListener('dragenter', e => {
+        e.preventDefault();
+        waitingBody.classList.add('drop-hover');
+      });
+
+ 
+    waitingBody.addEventListener('dragover', e => {
+      e.preventDefault();
+      // Pastikan class tetap ada (untuk menjaga konsistensi browser)
+      if (!waitingBody.classList.contains('drop-hover')) {
+          waitingBody.classList.add('drop-hover');
+      }
+      return false;
+    });
+
+    waitingBody.addEventListener('dragleave', e => {
+      // PENTING: Cek apakah kursor benar-benar keluar dari elemen waitingBody
+      // (bukan hanya masuk ke elemen anak/teks di dalamnya)
+      if (e.relatedTarget && !waitingBody.contains(e.relatedTarget)) {
+        waitingBody.classList.remove('drop-hover');
+      }
+    });
+
+  
+    waitingBody.addEventListener('drop', e => {
     e.preventDefault();
+    
+    // Hapus highlight visual
+    waitingBody.classList.remove('drop-hover');
+
     const procName = e.dataTransfer.getData('text/plain');
     if (!procName) return;
+
     const expected = getNextExpectedProc();
+    
+    // Validasi urutan
     if (procName !== expected) {
       showToastHint(`Harap masukkan <strong>${expected}</strong> terlebih dahulu.`, 'info');
       return;
     }
+    
+    // Masukkan ke dalam tabel
     addToWaiting(procName);
   });
+
 
   // restore previous answer if exists
   if (userAnswers[index]) {
@@ -1157,36 +1192,45 @@ function showSummary() {
   
   const scoreRing = document.getElementById('finalScoreRing');
   const scoreText = document.getElementById('finalScoreText');
-  // Durasi animasi (dalam milidetik). 
-  // Harus sama dengan durasi 'transition' di CSS (misal: 1s -> 1000ms)
-  const animationDuration = 1000; 
-  
-  // 1. Animasi Angka (Teks Persentase)
-  let startValue = 0;
-  const endValue = percent;
-  const intervalTime = Math.max(16, animationDuration / endValue); // Waktu per langkah
 
-  if (endValue > 0) {
-      const counter = setInterval(() => {
-        startValue += 1;
-        if (startValue >= endValue) {
-          startValue = endValue; // Pastikan pas
-          clearInterval(counter);
-        }
-        scoreText.textContent = `${startValue}%`;
-      }, intervalTime);
-  } else {
-      scoreText.textContent = `0%`;
+  const duration = 2000; // Durasi total 2 detik (bisa diubah)
+  const startVal = 0;
+  const endVal = percent; // Nilai akhir (0 - 100)
+  const endAngle = angle; // Sudut akhir (0 - 360)
+  
+  let startTime = null;
+
+  function easeOutExpo(x) {
+    return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
   }
 
-  // 2. Animasi Progress Bar (Lingkaran)
-  // Beri browser 'jeda' sesaat (10ms) untuk merender HTML di atas
-  // sebelum kita mengubah style-nya. Ini akan memicu transisi CSS.
-  setTimeout(() => {
-    if (scoreRing) {
-      scoreRing.style.setProperty('--score-angle', `${angle}deg`);
+  // 4. Loop Animasi
+  function animate(currentTime) {
+    if (!startTime) startTime = currentTime;
+    const timeElapsed = currentTime - startTime;
+    
+    // Hitung progres waktu (0.0 sampai 1.0)
+    let progress = Math.min(timeElapsed / duration, 1);
+    
+    // Terapkan efek easing pada progres
+    const easedProgress = easeOutExpo(progress);
+
+    // Update Angka (Sinkron)
+    const currentScore = Math.round(easedProgress * endVal);
+    if (scoreText) scoreText.textContent = `${currentScore}%`;
+
+    // Update Lingkaran (Sinkron)
+    const currentAngle = easedProgress * endAngle;
+    if (scoreRing) scoreRing.style.setProperty('--score-angle', `${currentAngle}deg`);
+
+    // Lanjutkan animasi jika belum selesai
+    if (progress < 1) {
+      requestAnimationFrame(animate);
     }
-  }, 10);
+  }
+
+  // Mulai Animasi
+  requestAnimationFrame(animate);
   
   // --- Akhir Logika Animasi ---
 
@@ -1282,95 +1326,162 @@ function showToastHint(message, type = 'info') {
 function updateAdminButtonUI() {
   const adminBtn = document.getElementById("adminBtn");
   if (!adminBtn) return;
-  const adminIcon = adminBtn.querySelector('i'); 
-  if (!adminIcon) return; 
 
   if (isAdminLoggedIn) {
-    // Mode Admin Aktif (Petunjuk)
-    adminIcon.classList.remove('bi-shield-lock-fill');
-    adminIcon.classList.add('bi-lightbulb-fill'); 
-    adminBtn.title = "Tampilkan Petunjuk";
-    
-    // (BARU) Gunakan class, BUKAN inline style
-    adminBtn.classList.add('admin-active'); 
-
+    // Jika login, sembunyikan tombol kunci kecil, tampilkan toolbar
+    adminBtn.style.display = 'none'; 
+    renderAdminToolbar();
   } else {
-    // Mode Admin Nonaktif (Login)
-    adminIcon.classList.remove('bi-lightbulb-fill');
-    adminIcon.classList.add('bi-shield-lock-fill'); 
-    adminBtn.title = "Aktifkan Mode Petunjuk";
-    
-    // (BARU) Gunakan class, BUKAN inline style
+    // Jika logout, tampilkan tombol kunci, hapus toolbar
+    adminBtn.style.display = 'inline-flex';
     adminBtn.classList.remove('admin-active');
+    
+    const toolbar = document.getElementById('adminToolbar');
+    if (toolbar) toolbar.remove();
   }
 }
 
 
-function showAdminHint() {
-  // Pastikan kita masih dalam mode admin
-  if (!isAdminLoggedIn) return; 
+function renderAdminToolbar() {
+  // Cek jika toolbar sudah ada agar tidak duplikat
+  if (document.getElementById('adminToolbar')) return;
+
+  const toolbar = document.createElement('div');
+  toolbar.id = 'adminToolbar';
+  toolbar.className = 'admin-toolbar';
   
+  toolbar.innerHTML = `
+    <div class="admin-badge"><i class="bi bi-shield-lock-fill"></i> Admin Mode</div>
+    
+    <button class="admin-tool-btn solve" title="Auto Solve (Jawab Otomatis)" onclick="adminAutoSolve()">
+      <i class="bi bi-magic"></i>
+    </button>
+    
+    <button class="admin-tool-btn reset" title="Reset Soal Ini" onclick="adminResetQuestion()">
+      <i class="bi bi-arrow-counterclockwise"></i>
+    </button>
+
+    <button class="admin-tool-btn skip" title="Force Next (Lewati)" onclick="adminForceNext()">
+      <i class="bi bi-skip-forward-fill"></i>
+    </button>
+    
+    <div style="width:1px; height:20px; background:rgba(255,255,255,0.2); margin:0 5px;"></div>
+    
+    <button class="admin-tool-btn logout" title="Logout" onclick="adminLogout()">
+      <i class="bi bi-box-arrow-right"></i>
+    </button>
+  `;
+
+  document.body.appendChild(toolbar);
+}
+
+function adminLogout() {
+  isAdminLoggedIn = false;
+  const toolbar = document.getElementById('adminToolbar');
+  if (toolbar) toolbar.remove();
+  
+  showToastHint("Anda telah keluar dari Mode Admin.", "info");
+  updateAdminButtonUI();
+  renderCurrent();
+}
+
+function adminResetQuestion() {
+  userAnswers[index] = null;
+  userSelected[index] = null;
+  renderCurrent();
+  adminBtn.style.display = 'none';
+  showToastHint("Soal berhasil direset.", "info");
+}
+
+function adminForceNext() {
+  if (index < total - 1) {
+    index++;
+    renderCurrent();
+    adminBtn.style.display = 'none';
+  } else {
+    showSummary();
+  }
+}
+
+function adminAutoSolve() {
   const q = allQuestions[index];
-  
-  // Helper untuk membersihkan hint sebelumnya
-  document.querySelectorAll('.admin-hint-pulse').forEach(el => {
-    el.classList.remove('admin-hint-pulse');
-  });
-  
-  const HINT_DURATION = 2500; // 2.5 detik
 
   if (q.type === 'mcq') {
-    const correctIndex = q.answer;
-    const targetButton = root.querySelectorAll('.option-btn')[correctIndex];
+    // 1. Set jawaban yang dipilih ke jawaban yang benar
+    userSelected[index] = q.answer;
     
-    if (targetButton) {
-      targetButton.classList.add('admin-hint-pulse');
-      targetButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-      setTimeout(() => {
-        targetButton.classList.remove('admin-hint-pulse');
-      }, HINT_DURATION);
+    // 2. Update UI visual (klik tombolnya secara programatik)
+    const opts = document.querySelectorAll('.option-btn');
+    if (opts[q.answer]) {
+      // Hapus seleksi lama
+      opts.forEach(b => b.classList.remove('selected'));
+      // Pilih yang benar
+      opts[q.answer].classList.add('selected');
+    }
+
+    // 3. Trigger tombol 'Jawab'
+    const nBtn = document.getElementById('nextBtn');
+    if (nBtn) {
+      nBtn.disabled = false;
+      nBtn.click(); // Ini akan memicu logika penilaian di event listener global
     }
 
   } else if (q.type === 'drag') {
-    const nextCorrectProcName = getNextExpectedProc(); 
-
-    if (!nextCorrectProcName) {
-      if (allPlaced()) {
-         nextBtn.classList.add('admin-hint-pulse');
-         setTimeout(() => nextBtn.classList.remove('admin-hint-pulse'), HINT_DURATION);
-      }
-      return;
-    }
+   
+    renderCurrent(); 
     
-    const { partitions, processes, algo } = q;
-    const { assign, waiting } = computeExpected(partitions, processes, algo);
-
-    let targetElement = null;
-
-    if (waiting.includes(nextCorrectProcName)) {
-      targetElement = document.getElementById('waitingBody');
-    } else {
-      for (const slotIndex in assign) {
-        if (assign[slotIndex] === nextCorrectProcName) {
-          targetElement = document.getElementById(`slot-${slotIndex}`);
-          break;
-        }
+    const { assign, waiting } = computeExpected(q.partitions, q.processes, q.algo);
+    
+    for (const slotIdx in assign) {
+      const procName = assign[slotIdx];
+      const slot = document.getElementById(`slot-${slotIdx}`);
+      
+      if (slot) {
+         const procObj = q.processes.find(p => p.name === procName);
+         // Buat tampilan slot terisi
+         slot.dataset.proc = procName;
+         slot.innerHTML = `<div class="slot-content">
+            <span class="proc-label">${procName} (${procObj.size} KB)</span>
+            <button class="remove-btn" title="Hapus">✕</button>
+          </div>`;
       }
     }
 
-    if (targetElement) {
-      targetElement.classList.add('admin-hint-pulse');
-      targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-      setTimeout(() => {
-        if (targetElement) {
-           targetElement.classList.remove('admin-hint-pulse');
-        }
-      }, HINT_DURATION);
+    const waitingBody = document.getElementById('waitingBody');
+    waitingBody.innerHTML = ''; 
+    
+    waiting.forEach(procName => {
+        const procObj = q.processes.find(p => p.name === procName);
+        const row = document.createElement('tr');
+        row.innerHTML = `<td class="process-slot filled"> 
+          <div class="slot-content">
+            <span class="proc-label">${procName} (${procObj.size} KB)</span>
+            <button class="remove-btn" title="Hapus">✕</button>
+          </div>
+        </td>`;
+        waitingBody.appendChild(row);
+    });
+    
+    const rightArea = document.querySelector('.right-area');
+    if (rightArea) rightArea.style.display = 'none';
+    
+    const nBtn = document.getElementById('nextBtn');
+    nBtn.disabled = false;
+    
+    // Trik: Kita simpan manual ke state userAnswers agar logika 'click' berhasil
+    const map = {};
+    for (let i=0; i<q.partitions.length; i++){
+        map[i] = assign[i] || null;
     }
+    map.__waiting = waiting;
+    
+    
+    nBtn.click();
   }
 }
+
+
+
 
 
 const adminBtn = document.getElementById("adminBtn");
@@ -1455,7 +1566,7 @@ if (adminBtn) {
     
     if (user === ADMIN_USER && pass === ADMIN_PASS) {
       // --- Login Sukses ---
-      messageBox.textContent = "Login Berhasil. Mode Petunjuk diaktifkan.";
+      messageBox.textContent = "Login Berhasil. Mode Admin diaktifkan.";
       messageBox.className = 'success'; // Terapkan class sukses
       messageBox.style.display = 'block';
 
