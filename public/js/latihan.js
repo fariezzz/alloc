@@ -1524,14 +1524,6 @@ if (adminBtn) {
   }
 
   adminBtn.addEventListener("click", () => {
-    
-    // --- Jika sudah login, klik tombol ini akan MENUNJUKKAN HINT ---
-    if (isAdminLoggedIn) {
-      showAdminHint();
-      return;
-    }
-
-    // --- Jika belum login, tampilkan MODAL LOGIN ---
     showLoginModal();
   });
 
@@ -1578,7 +1570,6 @@ if (adminBtn) {
         hideLoginModal();
         isAdminLoggedIn = true;
         updateAdminButtonUI(); 
-        showAdminHint();
 
         // Aktifkan tombol lagi untuk penggunaan di masa depan
         loginBtn.disabled = false; 
