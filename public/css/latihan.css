@@ -556,7 +556,7 @@ button#nextBtn.processing {
   justify-content: center;
   position: relative;
 
-  transition: --score-angle 2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: --score-angle 1s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .score-ring::before {
@@ -869,3 +869,354 @@ button#nextBtn.processing {
   /* (PENTING) Animasi saat ganti soal */
   transition: width 0.4s ease; 
 }
+
+/* ============ Tombol Admin Minimalis ============ */
+.admin-btn-minimal {
+  background: transparent;
+  border: none;
+  width: 34px; 
+  height: 34px;
+  border-radius: 50%;
+  padding: 0; 
+  margin-right: 4px; 
+  font-size: 1.1rem; 
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center; 
+  justify-content: center;
+  transition: all 0.2s ease-out;
+
+  /* (BARU) State default (logged out): ikon putih transparan */
+  color: #fff; 
+  opacity: 0.3;
+}
+
+/* 2. (BARU) Style saat logged in (class dari JS) */
+.admin-btn-minimal.admin-active {
+  /* Menggantikan state default: ikon hijau/cyan terang */
+  color: #64ffda; 
+  opacity: 1.0; 
+}
+
+/* 3. (BARU) Style saat HOVER (berlaku untuk keduanya) */
+.admin-btn-minimal:hover {
+  opacity: 1.0; /* Selalu 100% opacity saat hover */
+  transform: scale(1.05); 
+  background-color: rgba(255, 255, 255, 0.15); 
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); 
+  
+  /* (PENTING) Paksa warna ikon menjadi putih terang saat hover */
+  color: #f8f8f8; 
+}
+
+/* Pastikan sejajar saat tombol Next muncul/hilang */
+.mt-3.d-flex.justify-content-end {
+  align-items: center;
+}
+
+/* ============ (BARU) Admin Hint Pulse ============ */
+@keyframes adminPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(100, 255, 218, 0.7);
+    background-color: rgba(100, 255, 218, 0.1);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(100, 255, 218, 0);
+    background-color: rgba(100, 255, 218, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(100, 255, 218, 0);
+    background-color: rgba(100, 255, 218, 0.1);
+  }
+}
+
+/* Terapkan ke elemen yang kita tuju */
+.admin-hint-pulse {
+  position: relative; 
+  z-index: 10; 
+  border-radius: 8px; /* Samakan dengan style elemen */
+  animation: adminPulse 1.5s infinite;
+  scroll-margin-top: 100px; /* Jarak saat di-scroll-to */
+}
+
+/* Khusus untuk tabel agar lebih rapi */
+td.admin-hint-pulse {
+  border-radius: 0; /* Hapus radius untuk sel tabel */
+}
+
+/* Khusus untuk tombol next */
+#nextBtn.admin-hint-pulse {
+   animation: adminPulse 1.5s infinite;
+}
+
+/* ============ (BARU) Modal Login Admin Kustom ============ */
+
+.admin-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(43, 43, 53, 0.85); /* Latar belakang gelap */
+  backdrop-filter: blur(5px); /* Efek blur modern */
+  
+  display: none; /* Sembunyi secara default */
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  
+  /* Animasi fade-in */
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.admin-modal-overlay.visible {
+  display: flex;
+  opacity: 1;
+}
+
+.admin-modal-box {
+  background: rgba(46, 48, 55, 0.95); /* Warna kartu kuis */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 380px;
+  color: #fff;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  
+  /* Animasi slide-down */
+  transform: translateY(-20px);
+  transition: transform 0.2s ease-out;
+}
+
+.admin-modal-overlay.visible .admin-modal-box {
+  transform: translateY(0);
+}
+
+.admin-modal-box h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #e8f2f4;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.admin-modal-desc {
+  font-size: 0.9rem;
+  color: #bbb;
+  margin-bottom: 16px;
+}
+
+.admin-form-group {
+  margin-bottom: 14px;
+}
+
+.admin-form-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: #ccc;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.admin-form-control {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.admin-form-control:focus {
+  outline: none;
+  border-color: #64ffda; /* Warna highlight */
+  box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.2);
+}
+
+.admin-modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-modal-batal,
+.btn-modal-login {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-modal-batal {
+  background-color: #52616B; /* Warna abu-abu */
+  color: #d0d0d0;
+}
+.btn-modal-batal:hover {
+  background-color: #6a7c87;
+}
+
+.btn-modal-login {
+  background-color: #64ffda; /* Warna highlight */
+  color: #2b2b35; /* Teks gelap */
+}
+.btn-modal-login:hover {
+  background-color: #fff;
+  transform: scale(1.03);
+}
+
+#adminModalMessage {
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 14px;
+  display: none; /* Sembunyi by default */
+  border: 1px solid transparent;
+  animation: fadeInExplain 0.3s ease; /* Gunakan animasi yang sudah ada */
+}
+
+#adminModalMessage.error {
+  background-color: rgba(220, 53, 69, 0.2);
+  border-color: rgba(220, 53, 69, 0.5);
+  color: #f8d7da; /* Merah */
+}
+
+#adminModalMessage.success {
+  background-color: rgba(100, 255, 218, 0.15);
+  border-color: rgba(100, 255, 218, 0.5);
+  color: #64ffda; /* Hijau/Cyan */
+}
+
+/* ============ (BARU) Ikon Show/Hide Password ============ */
+
+.admin-password-wrapper {
+  position: relative;
+}
+
+.admin-toggle-pass {
+  position: absolute;
+  top: 50%;
+  right: 15px; /* (Disesuaikan) Jarak ikon dari kanan */
+  transform: translateY(-50%);
+  cursor: pointer;
+  user-select: none; 
+  font-size: 1.1rem; /* (Disesuaikan) Ukuran ikon */
+  color: #999;
+  transition: color 0.2s ease;
+  
+  /* (Dihapus) Padding tidak diperlukan untuk ikon */
+}
+
+.admin-toggle-pass:hover {
+  color: #fff;
+}
+
+/* Sesuaikan input agar teks tidak tertimpa ikon */
+.admin-password-wrapper .admin-form-control {
+  padding-right: 40px; /* (Disesuaikan) Beri ruang untuk ikon */
+}
+
+/* ============ (BARU) Ikon Status & Loading ============ */
+
+/* 1. Animasi putar untuk ikon loading */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 2. Style untuk ikon loading di dalam .loading-anim */
+.loading-anim .spin-icon {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+  font-size: 1.1rem;
+  vertical-align: middle;
+  margin-top: -2px;
+}
+
+/* 3. Style untuk ikon status di dalam .simple-status */
+.status-icon {
+  font-size: 1.1rem; 
+  margin-right: 8px; /* Jarak dari teks */
+  vertical-align: middle; 
+  margin-top: -2px; /* Penyesuaian vertikal */
+}
+
+/* 4. Beri warna ikon sesuai status (menggunakan warna yang sudah ada) */
+.simple-status.correct .status-icon {
+  color: #64ffda; /* Warna highlight hijau/cyan */
+}
+
+.simple-status.wrong .status-icon {
+  color: #ff8080; /* Warna highlight merah */
+}
+
+/* (BARU) Beri warna ikon 'missed' di dalam detail evaluasi */
+.wait-detail.missed .status-icon {
+  color: #ffc2c2; /* Samakan dengan warna teks 'missed' */
+  font-size: 0.9em; /* Sedikit lebih kecil agar pas */
+}
+
+.card-quiz .toast-container {
+      max-width: 100%;
+    }
+
+    /* Ganti style default Bootstrap toast agar pas dengan tema */
+    .toast {
+      background-color: rgba(60, 63, 73, 0.95); /* Latar belakang toast */
+      color: #f0f0f0; /* Teks putih */
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      border-radius: 8px;
+    }
+
+    .toast-header {
+      background-color: rgba(70, 73, 83, 0.9);
+      color: #fff;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Tombol close 'x' */
+    .toast-header .btn-close {
+      filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    /* --- Varian Warna --- */
+
+    /* Kuning (Info/Hint) */
+    .toast.toast-info-dark .toast-header {
+      background-color: rgba(255, 193, 7, 0.2);
+      color: #ffd580;
+      border-bottom-color: rgba(255, 193, 7, 0.3);
+    }
+    .toast.toast-info-dark .toast-body {
+      color: #ffe9a1;
+      font-weight: 500;
+    }
+
+    /* Merah (Warning/Error) */
+    .toast.toast-warning-dark .toast-header {
+      background-color: rgba(220, 53, 69, 0.2);
+      color: #f8d7da;
+      border-bottom-color: rgba(220, 53, 69, 0.3);
+    }
+    .toast.toast-warning-dark .toast-body {
+      color: #ffe6e6;
+      font-weight: 500;
+    }
+
+    /* Ikon di dalam toast header */
+    .toast-header .status-icon {
+       margin-right: 0px;
+       font-size: 0.9rem;
+    }
+
+    #globalToastContainer {
+      max-width: 100%;
+    }

@@ -40,6 +40,9 @@ function selectRandomMcqs(bank, num) {
 
 
 // (DIMODIFIKASI) Variabel Global
+let isAdminLoggedIn = false; // Status mode admin (petunjuk)
+let currentDragProcs = [];
+let currentDragTotal = 0;
 let allQuestions = []; // Akan diisi oleh setupQuiz()
 let index = 0;
 const numMcqToSelect = 7; // Tetapkan jumlah soal MCQ
@@ -81,6 +84,11 @@ function setupQuiz() {
   // (Pastikan tombol next kembali ke state awal jika diperlukan)
   nextBtn.disabled = true;
   nextBtn.style.display = 'inline-block';
+  isAdminLoggedIn = false;
+  // (BARU) Update UI tombolnya juga
+  if (document.getElementById("adminBtn")) { // Cek jika tombol ada
+     updateAdminButtonUI(); 
+  }
 }
 
 function computeExpected(parts, procs, algo) {
@@ -142,6 +150,20 @@ function computeExpected(parts, procs, algo) {
 // render current
 function renderCurrent() {
   root.innerHTML = '';
+
+  const adminBtn = document.getElementById("adminBtn");
+  if (adminBtn) {
+    if (isAdminLoggedIn) {
+      adminBtn.style.display = 'inline-flex';
+    } else {
+      // Jika BELUM login, tombol login (🔑) HANYA tampil di Soal 1
+      if (index === 0) {
+        adminBtn.style.display = 'inline-flex';
+      } else {
+        adminBtn.style.display = 'none';
+      }
+    }
+  }
 
   root.classList.remove("fade-question");
   void root.offsetWidth;
@@ -227,8 +249,13 @@ function showMCQExplain(q, selectedIdx, container) {
   // 1. Buat div status sederhana (yang akan langsung terlihat)
   const simpleStatusDiv = document.createElement('div');
   simpleStatusDiv.className = 'simple-status animated ' + (isCorrect ? 'correct' : 'wrong');
+  const icon = isCorrect ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
+  const text = isCorrect ? 'Jawaban benar!' : 'Jawaban salah.';
+  
   simpleStatusDiv.innerHTML = `
-    <span>${isCorrect ? '✅ Jawaban benar!' : '❌ Jawaban salah.'}</span>
+    <span>
+      <i class="bi ${icon} status-icon"></i> ${text}
+    </span>
     <button class="btn-toggle-detail">Lihat Analisis Jawaban</button>
   `;
 
@@ -358,6 +385,9 @@ function renderDrag(q) {
   const PROCS = q.processes.map(p=>({...p}));
   const totalProcesses = PROCS.length;
 
+  currentDragProcs = PROCS;
+  currentDragTotal = totalProcesses;
+
   // build partition rows
   PARTS.forEach((size,i)=>{
     const tr = document.createElement('tr');
@@ -379,24 +409,7 @@ function renderDrag(q) {
   const totalSlots = PARTS.length;
   const waitingBody = document.getElementById('waitingBody');
 
-  // helper: get ordered list of current used process names (by position)
-  function getUsedListOrdered() {
-    // used in partitions by slot index order
-    const usedPart = Array.from(document.querySelectorAll('.process-slot'))
-      .map(s => s.dataset.proc)
-      .filter(Boolean);
-    // used in waiting keep order of rows (top->down)
-    const usedWait = Array.from(document.querySelectorAll('#waitingBody tr'))
-      .map(r => r.textContent.trim().split(" ")[0])
-      .filter(x => x !== "-");
-    return usedPart.concat(usedWait);
-  }
-
-  // helper: next expected proc name based on (partisi + waiting) count
-  function getNextExpectedProc() {
-    const usedCount = getUsedListOrdered().length;
-    return PROCS[usedCount]?.name || null;
-  }
+  
 
   // add back to pool if not present
   function addToPool(name) {
@@ -565,12 +578,6 @@ function renderDrag(q) {
     refreshNextButtonState();
   }
 
-  // check whether all processes are placed (either in slots or waiting)
-  function allPlaced() {
-    const used = getUsedListOrdered();
-    return used.length === totalProcesses;
-  }
-
 
   // Helper: Hapus semua feedback visual (warna, hint) dari tabel
   function clearAllFeedbackVisuals() {
@@ -722,10 +729,16 @@ function renderDrag(q) {
 
       // --- KOTAK 1: STATUS SEDERHANA (Langsung Terlihat) ---
       // (Tidak berubah, ini sudah benar)
+      // (BARU) Tentukan ikon dan teks berdasarkan status
+      const icon = allCorrect ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
+      const text = allCorrect ? 'Jawaban Benar!' : 'Jawaban Salah!';
+
       const simpleStatusDiv = document.createElement('div');
       simpleStatusDiv.className = 'simple-status ' + (allCorrect ? 'correct' : 'wrong');
       simpleStatusDiv.innerHTML = `
-        <span>${allCorrect ? '✅ Jawaban Benar!' : '❌ Jawaban Salah!'}</span>
+        <span>
+          <i class="bi ${icon} status-icon"></i> ${text}
+        </span>
         <button id="toggleDetailBtn" class="btn-toggle-detail">Lihat Evaluasi Detail</button>
       `;
 
@@ -760,11 +773,11 @@ function renderDrag(q) {
       if (partitionCorrect) {
           // Hitung jumlah total slot yang 'benar' (terisi atau kosong)
           const correctSlots = slotResults.filter(res => res.status !== 'wrong').length;
-          summaryHtml += `<strong>✅ Hasil: Benar</strong> (${correctSlots}/${PARTS.length} slot).`;
+          summaryHtml += `<strong><i class="bi bi-check-circle-fill status-icon"></i> Hasil: Benar</strong> (${correctSlots}/${PARTS.length} slot).`;
       } else {
           // Hitung hanya slot yang 'terisi dengan benar'
           const correctFilledSlots = slotResults.filter(res => res.status === 'correct').length;
-          summaryHtml += `<strong>❌ Hasil: Salah</strong> (${correctFilledSlots} benar dari ${PARTS.length} slot.)`;
+          summaryHtml += `<strong><i class="bi bi-x-circle-fill status-icon"></i> Hasil: Salah</strong> (${correctFilledSlots} benar dari ${PARTS.length} slot.)`;
           summaryHtml += `<div class="correction-list-title">Detail Kesalahan:</div>`;
           summaryHtml += `<ul class="correction-list">`; // List
           
@@ -790,7 +803,7 @@ function renderDrag(q) {
       let waitSummary = ''; 
       if (waitingCorrect) {
           waitSummary = `<div class="eval-section eval-correct">
-                           <strong>✅ Hasil: Benar</strong> ${waiting.length > 0 ? `(${waiting.join(', ')})` : '(Kosong)'}
+                           <strong><i class="bi bi-check-circle-fill status-icon"></i> Hasil: Benar</strong> ${waiting.length > 0 ? `(${waiting.join(', ')})` : '(Kosong)'}
                          </div>`;
       } else {
           // Gunakan kembali logika .wait-detail yang sudah jelas
@@ -798,12 +811,12 @@ function renderDrag(q) {
           const expectedWaitText = waiting.length > 0 ? waiting.join(', ') : 'Kosong';
           const forgotten = waiting.filter(proc => !userWait.includes(proc));
 
-          waitSummary = `<div class="eval-section eval-wrong">
-                           <strong>❌ Hasil: Salah</strong>
+         waitSummary = `<div class="eval-section eval-wrong">
+                           <strong><i class="bi bi-x-circle-fill status-icon"></i> Hasil: Salah</strong>
                            <div class="wait-detail">Jawaban Anda: <strong>${userWaitText}</strong></div>
                            <div class="wait-detail">Seharusnya: <strong>${expectedWaitText}</strong></div>`;
           if (forgotten.length > 0) {
-              waitSummary += `<div class="wait-detail missed">❗ Proses <strong>${forgotten.join(', ')}</strong> tidak dimasukkan.</div>`;
+              waitSummary += `<div class="wait-detail missed"><i class="bi bi-exclamation-triangle-fill status-icon"></i> Proses <strong>${forgotten.join(', ')}</strong> tidak dimasukkan.</div>`;
           }
           waitSummary += `</div>`;
       }
@@ -879,13 +892,13 @@ function renderDrag(q) {
 
     const expected = getNextExpectedProc();
     if (procName !== expected) {
-      showHint(`💡 Harap masukkan ${expected} terlebih dahulu sebelum ${procName}.`);
+      showToastHint(`Harap masukkan <strong>${expected}</strong> terlebih dahulu sebelum ${procName}.`, 'info');
       return;
     }
 
     // if already filled
     if (td.dataset.proc) {
-      showHint(`❗ Slot ini sudah diisi (${td.dataset.proc}). Hapus dulu sebelum mengganti.`);
+      showToastHint(`Slot ini sudah diisi (<strong>${td.dataset.proc}</strong>). Hapus dulu sebelum mengganti.`, 'warning');
       return;
     }
 
@@ -916,7 +929,7 @@ function renderDrag(q) {
       hintBox.style.fontStyle = 'italic';
       wrapper.insertBefore(hintBox, feedback);
     }
-    hintBox.textContent = msg;
+    hintBox.innerHTML = msg;
     hintBox.style.opacity = '1';
     setTimeout(()=>{ hintBox.style.opacity = '0'; }, 1500);
   }
@@ -938,7 +951,7 @@ function renderDrag(q) {
     if (!procName) return;
     const expected = getNextExpectedProc();
     if (procName !== expected) {
-      showHint(`💡 Harap masukkan ${expected} terlebih dahulu.`);
+      showToastHint(`Harap masukkan <strong>${expected}</strong> terlebih dahulu.`, 'info');
       return;
     }
     addToWaiting(procName);
@@ -1017,7 +1030,7 @@ nextBtn.addEventListener('click', () => {
       nextBtn.style.display = 'none';
       const explainWrap = root.querySelector('#explainWrap');
       if (explainWrap) {
-        explainWrap.innerHTML = `<div class="loading-anim">⏳ Memeriksa jawaban...</div>`;
+        explainWrap.innerHTML = `<div class="loading-anim"><i class="bi bi-arrow-repeat spin-icon"></i> Memeriksa jawaban...</div>`;
       }
 
       // Simulasi proses pemeriksaan
@@ -1127,6 +1140,9 @@ function showSummary() {
   nextBtn.style.display = 'none';
   if (progressWrapper) progressWrapper.style.display = 'none';
 
+  const adminBtn = document.getElementById("adminBtn");
+  if (adminBtn) adminBtn.style.display = 'none';
+
 
   const resultWrapper = root.querySelector('.result-wrapper');
   if (resultWrapper) {
@@ -1143,7 +1159,7 @@ function showSummary() {
   const scoreText = document.getElementById('finalScoreText');
   // Durasi animasi (dalam milidetik). 
   // Harus sama dengan durasi 'transition' di CSS (misal: 1s -> 1000ms)
-  const animationDuration = 2000; 
+  const animationDuration = 1000; 
   
   // 1. Animasi Angka (Teks Persentase)
   let startValue = 0;
@@ -1184,6 +1200,310 @@ function showSummary() {
   });
 }
 
+function getUsedListOrdered() {
+  // used in partitions by slot index order
+  const usedPart = Array.from(document.querySelectorAll('.process-slot'))
+    .map(s => s.dataset.proc)
+    .filter(Boolean);
+  // used in waiting keep order of rows (top->down)
+  const usedWait = Array.from(document.querySelectorAll('#waitingBody tr'))
+    .map(r => r.textContent.trim().split(" ")[0])
+    .filter(x => x !== "-");
+  return usedPart.concat(usedWait);
+}
+
+
+function getNextExpectedProc() {
+  const usedCount = getUsedListOrdered().length;
+  // Gunakan variabel global 'currentDragProcs'
+  return currentDragProcs[usedCount]?.name || null;
+}
+
+
+function allPlaced() {
+  const used = getUsedListOrdered();
+  // Gunakan variabel global 'currentDragTotal'
+  return used.length === currentDragTotal;
+}
+
+function showToastHint(message, type = 'info') {
+      const toastContainer = document.getElementById('globalToastContainer');
+      if (!toastContainer) {
+        console.error("Toast container not found.");
+        return;
+      }
+
+      // Tentukan ikon dan style
+      let iconClass, toastClass, title;
+      if (type === 'warning') {
+        iconClass = 'bi-exclamation-triangle-fill';
+        toastClass = 'toast-warning-dark';
+        title = 'Peringatan';
+      } else { // default to 'info'
+        iconClass = 'bi-lightbulb-fill';
+        toastClass = 'toast-info-dark';
+        title = 'Petunjuk';
+      }
+
+      // Buat elemen toast
+      const toastEl = document.createElement('div');
+      toastEl.className = `toast ${toastClass}`;
+      toastEl.setAttribute('role', 'alert');
+      toastEl.setAttribute('aria-live', 'assertive');
+      toastEl.setAttribute('aria-atomic', 'true');
+      toastEl.setAttribute('data-bs-delay', '3000'); // Durasi 3 detik
+
+      toastEl.innerHTML = `
+        <div class="toast-header">
+          <i class="bi ${iconClass} status-icon me-2"></i>
+          <strong class="me-auto">${title}</strong>
+          <small class="text-muted">Baru saja</small>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          ${message} 
+        </div>
+      `;
+      // Catatan: Ikon sekarang ada di header, jadi kita hapus dari 'message'
+
+      // Tambahkan ke container
+      toastContainer.appendChild(toastEl);
+
+      // Inisialisasi dan tampilkan Bootstrap Toast
+      const toast = new bootstrap.Toast(toastEl);
+      toast.show();
+
+      // Hapus elemen dari DOM setelah toast hilang
+      toastEl.addEventListener('hidden.bs.toast', () => {
+        toastEl.remove();
+      });
+    }
+
+function updateAdminButtonUI() {
+  const adminBtn = document.getElementById("adminBtn");
+  if (!adminBtn) return;
+  const adminIcon = adminBtn.querySelector('i'); 
+  if (!adminIcon) return; 
+
+  if (isAdminLoggedIn) {
+    // Mode Admin Aktif (Petunjuk)
+    adminIcon.classList.remove('bi-shield-lock-fill');
+    adminIcon.classList.add('bi-lightbulb-fill'); 
+    adminBtn.title = "Tampilkan Petunjuk";
+    
+    // (BARU) Gunakan class, BUKAN inline style
+    adminBtn.classList.add('admin-active'); 
+
+  } else {
+    // Mode Admin Nonaktif (Login)
+    adminIcon.classList.remove('bi-lightbulb-fill');
+    adminIcon.classList.add('bi-shield-lock-fill'); 
+    adminBtn.title = "Aktifkan Mode Petunjuk";
+    
+    // (BARU) Gunakan class, BUKAN inline style
+    adminBtn.classList.remove('admin-active');
+  }
+}
+
+
+function showAdminHint() {
+  // Pastikan kita masih dalam mode admin
+  if (!isAdminLoggedIn) return; 
+  
+  const q = allQuestions[index];
+  
+  // Helper untuk membersihkan hint sebelumnya
+  document.querySelectorAll('.admin-hint-pulse').forEach(el => {
+    el.classList.remove('admin-hint-pulse');
+  });
+  
+  const HINT_DURATION = 2500; // 2.5 detik
+
+  if (q.type === 'mcq') {
+    const correctIndex = q.answer;
+    const targetButton = root.querySelectorAll('.option-btn')[correctIndex];
+    
+    if (targetButton) {
+      targetButton.classList.add('admin-hint-pulse');
+      targetButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      setTimeout(() => {
+        targetButton.classList.remove('admin-hint-pulse');
+      }, HINT_DURATION);
+    }
+
+  } else if (q.type === 'drag') {
+    const nextCorrectProcName = getNextExpectedProc(); 
+
+    if (!nextCorrectProcName) {
+      if (allPlaced()) {
+         nextBtn.classList.add('admin-hint-pulse');
+         setTimeout(() => nextBtn.classList.remove('admin-hint-pulse'), HINT_DURATION);
+      }
+      return;
+    }
+    
+    const { partitions, processes, algo } = q;
+    const { assign, waiting } = computeExpected(partitions, processes, algo);
+
+    let targetElement = null;
+
+    if (waiting.includes(nextCorrectProcName)) {
+      targetElement = document.getElementById('waitingBody');
+    } else {
+      for (const slotIndex in assign) {
+        if (assign[slotIndex] === nextCorrectProcName) {
+          targetElement = document.getElementById(`slot-${slotIndex}`);
+          break;
+        }
+      }
+    }
+
+    if (targetElement) {
+      targetElement.classList.add('admin-hint-pulse');
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      setTimeout(() => {
+        if (targetElement) {
+           targetElement.classList.remove('admin-hint-pulse');
+        }
+      }, HINT_DURATION);
+    }
+  }
+}
+
+
+const adminBtn = document.getElementById("adminBtn");
+
+if (adminBtn) {
+  // Ambil referensi elemen modal dari HTML
+  const adminBtn = document.getElementById("adminBtn");
+  const adminIcon = adminBtn.querySelector('i');
+  const modalOverlay = document.getElementById("adminModalOverlay");
+  const modalBox = document.getElementById("adminModalBox");
+  const loginBtn = document.getElementById("adminLoginBtn");
+  const batalBtn = document.getElementById("adminBatalBtn");
+  const userInput = document.getElementById("adminUsername");
+  const passInput = document.getElementById("adminPassword");
+  const messageBox = document.getElementById("adminModalMessage");
+  const togglePassword = document.getElementById("togglePassword");
+
+  // Fungsi untuk menampilkan modal
+  function showLoginModal() {
+    messageBox.style.display = 'none'; // Sembunyikan pesan
+    messageBox.textContent = '';
+    messageBox.className = ''; // Hapus class error/success
+    userInput.value = '';
+    passInput.value = '';
+
+    passInput.setAttribute('type', 'password');
+    if (togglePassword) {
+      togglePassword.classList.remove('bi-eye-slash-fill');
+      togglePassword.classList.add('bi-eye-fill');
+      togglePassword.title = "Tampilkan password";
+    }
+
+    modalOverlay.classList.add('visible');
+    userInput.focus(); // Langsung fokus ke username
+  }
+
+  // Fungsi untuk menyembunyikan modal
+  function hideLoginModal() {
+    modalOverlay.classList.remove('visible');
+  }
+
+  adminBtn.addEventListener("click", () => {
+    
+    // --- Jika sudah login, klik tombol ini akan MENUNJUKKAN HINT ---
+    if (isAdminLoggedIn) {
+      showAdminHint();
+      return;
+    }
+
+    // --- Jika belum login, tampilkan MODAL LOGIN ---
+    showLoginModal();
+  });
+
+  // (BARU) Event listener untuk show/hide password
+  if (togglePassword) {
+    togglePassword.addEventListener("click", () => {
+      // Cek tipe input saat ini
+      const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passInput.setAttribute('type', type);
+
+      // Ubah ikon mata
+      if (type === 'text') {
+        togglePassword.classList.remove('bi-eye-fill');
+        togglePassword.classList.add('bi-eye-slash-fill');
+        togglePassword.title = "Sembunyikan password";
+      } else {
+        togglePassword.classList.remove('bi-eye-slash-fill');
+        togglePassword.classList.add('bi-eye-fill');
+        togglePassword.title = "Tampilkan password";
+      }
+    });
+  }
+
+  // --- Event Listener Tombol "Login" di Dalam Modal ---
+  loginBtn.addEventListener("click", () => {
+    // Ambil nilai dari input
+    const user = userInput.value;
+    const pass = passInput.value;
+
+    // --- Tentukan login di sini ---
+    const ADMIN_USER = "admin";
+    const ADMIN_PASS = "admin123";
+    
+    if (user === ADMIN_USER && pass === ADMIN_PASS) {
+      // --- Login Sukses ---
+      messageBox.textContent = "Login Berhasil. Mode Petunjuk diaktifkan.";
+      messageBox.className = 'success'; // Terapkan class sukses
+      messageBox.style.display = 'block';
+
+      // Nonaktifkan tombol sementara
+      loginBtn.disabled = true;
+
+      // Tutup modal setelah jeda singkat agar pesan terbaca
+      setTimeout(() => {
+        hideLoginModal();
+        isAdminLoggedIn = true;
+        updateAdminButtonUI(); 
+        showAdminHint();
+
+        // Aktifkan tombol lagi untuk penggunaan di masa depan
+        loginBtn.disabled = false; 
+      }, 1200); // Jeda 1.2 detik
+
+    } else {
+      // --- Login Gagal ---
+      messageBox.textContent = "Login Gagal. Username atau Password salah.";
+      messageBox.className = 'error'; // Terapkan class error
+      messageBox.style.display = 'block';
+    }
+  });
+
+  // (BARU) Izinkan 'Enter' untuk login
+  passInput.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+          loginBtn.click(); // Simulasikan klik tombol login
+      }
+  });
+  
+  userInput.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+          passInput.focus(); // Pindah ke password
+      }
+  });
+
+  // --- Event Listener Tombol "Batal" dan Klik Latar ---
+  batalBtn.addEventListener("click", hideLoginModal);
+  modalOverlay.addEventListener("click", (e) => {
+    // Hanya tutup jika klik di overlay (latar), bukan di kotak modal
+    if (e.target === modalOverlay) {
+      hideLoginModal();
+    }
+  });
+}
 
 // initial
 setupQuiz();
