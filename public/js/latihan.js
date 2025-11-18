@@ -1450,9 +1450,8 @@ if (adminBtn) {
     const user = userInput.value;
     const pass = passInput.value;
 
-    // --- Tentukan login di sini ---
-    const ADMIN_USER = "admin";
-    const ADMIN_PASS = "admin123";
+    const ADMIN_USER = atob("YWRtaW4="); // "admin"
+    const ADMIN_PASS = atob("YWRtaW4xMjM="); // "admin123"
     
     if (user === ADMIN_USER && pass === ADMIN_PASS) {
       // --- Login Sukses ---
