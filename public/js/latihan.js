@@ -404,7 +404,16 @@ function renderDrag(q) {
     el.draggable = true;
     el.dataset.proc = proc.name;
     el.textContent = `${proc.name} (${proc.size} KB)`;
-    el.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain', proc.name));
+    el.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', proc.name);
+    
+        setTimeout(() => el.style.opacity = '0.4', 0); 
+    });
+
+    el.addEventListener('dragend', () => {
+        el.style.opacity = '1';
+    });
+    
     pool.appendChild(el);
   });
 
@@ -937,13 +946,39 @@ function renderDrag(q) {
   }
 
       // attach slot events
-      for (let i=0;i<totalSlots;i++){
-        const slot = document.getElementById(`slot-${i}`);
-        slot.addEventListener('dragover', e=> e.preventDefault());
-        slot.addEventListener('dragenter', ()=> slot.classList.add('drop-hover'));
-        slot.addEventListener('dragleave', ()=> slot.classList.remove('drop-hover'));
-        slot.addEventListener('drop', onDropHandler);
-      }
+      for (let i = 0; i < totalSlots; i++) {
+          const slot = document.getElementById(`slot-${i}`);
+
+          // 1. DRAG OVER (Wajib ada e.preventDefault() agar bisa didrop)
+          slot.addEventListener('dragover', e => {
+            e.preventDefault(); // Izinkan drop
+            e.dataTransfer.dropEffect = 'move';
+            
+            // Tambahkan kelas visual
+            slot.classList.add('drop-hover');
+          });
+
+          // 2. DRAG ENTER (Visual tambahan)
+          slot.addEventListener('dragenter', e => {
+            e.preventDefault();
+            slot.classList.add('drop-hover');
+          });
+
+          // 3. DRAG LEAVE (Hapus visual saat keluar)
+          slot.addEventListener('dragleave', e => {
+            // Cek apakah benar-benar keluar dari elemen slot (bukan masuk ke anak elemennya)
+            if (e.relatedTarget && !slot.contains(e.relatedTarget)) {
+              slot.classList.remove('drop-hover');
+            }
+          });
+
+          // 4. DROP (Tangani logika penempatan)
+          slot.addEventListener('drop', (e) => {
+            e.preventDefault(); // Stop default behavior browser
+            slot.classList.remove('drop-hover'); // Hapus highlight
+            onDropHandler(e); // Panggil fungsi handler utama Anda
+          });
+        }
 
       // waiting drop zone events
           waitingBody.addEventListener('dragenter', e => {

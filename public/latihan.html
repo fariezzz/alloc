@@ -74,6 +74,38 @@
   <script src="js/template.js"></script>
   <script src="js/soal.js"></script>
   <script src="js/latihan.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/index.min.js"></script>
+
+<script>
+  // Cek apakah library berhasil dimuat
+  if (typeof MobileDragDrop !== 'undefined') {
+    
+    MobileDragDrop.polyfill({
+      // PENTING: Mengatur agar elemen yang didrag mengikuti jari dengan posisi yang pas
+      dragImageTranslateOverride: function(event, element) {
+        var offsetX = element.offsetWidth / 2;
+        var offsetY = element.offsetHeight / 2;
+        
+        // Mengangkat elemen sedikit ke atas jari agar tidak tertutup jempol
+        return {
+          x: event.pageX - offsetX,
+          y: event.pageY - offsetY - 50 // -50 pixel ke atas
+        };
+      }
+    });
+
+    // Mencegah layar ikut ter-scroll saat sedang men-drag elemen
+    // Ini wajib agar saat user geser proses, layarnya diam
+    window.addEventListener('touchmove', function(e) {
+      // Jika sedang ada elemen yang didrag (class dnd-poly-...)
+      if (document.querySelector('.dnd-poly-drag-image')) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  }
+</script>
+
 </body>
 
 </html>

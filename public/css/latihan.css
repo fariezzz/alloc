@@ -16,6 +16,7 @@ body {
   padding: 40px 0;
 }
 
+
 /* ===== TITLE CLEAN & MINIMAL ===== */
 .quiz-title-clean {
   font-size: 1.45rem;
@@ -233,17 +234,7 @@ body {
   opacity: 0.5;
 }
 
-@media (max-width:900px) {
 
-  .left-area,
-  .right-area {
-    width: 100%;
-  }
-
-  .tables-wrap {
-    gap: 12px;
-  }
-}
 
 /* Tombol animasi & loading */
 .loading-anim {
@@ -263,18 +254,6 @@ button#nextBtn.processing {
   opacity: 0;
   transform: translateY(8px);
   animation: fadeInExplain 0.5s ease forwards;
-}
-
-@keyframes fadeInExplain {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* Animasi loading blink */
@@ -682,17 +661,7 @@ button#nextBtn.processing {
   border-top: 1px dashed rgba(255, 180, 180, 0.3);
 }
 
-/* Kelas 'neutral' untuk box 'explain' (belum ada) */
-.explain.neutral {
-  background: rgba(120, 120, 120, 0.14);
-  border: 1px solid rgba(120, 120, 120, 0.25);
-  color: #e0e0e0;
-}
 
-/* Sembunyikan style lama yang tidak dipakai lagi */
-.waiting-box, .waiting-indicator-missed {
-  display: none;
-}
 
 /* ============ TAMBAHKAN INI DI AKHIR FILE CSS ============ */
 
@@ -1264,3 +1233,216 @@ button#nextBtn.processing {
   background-color: rgba(100, 255, 218, 0.15); /* Background redup */
   box-shadow: 0 0 15px rgba(100, 255, 218, 0.2); /* Sedikit efek glow */
 }
+
+
+@media (max-width: 768px) {
+
+  .card-quiz {
+    width: 95%; /* Lebarkan card hampir penuh layar */
+    padding: 16px; /* Kurangi padding dalam */
+    border-radius: 12px;
+  }
+
+  .top-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .quiz-title-clean {
+    font-size: 1.2rem; /* Kecilkan judul */
+    margin-bottom: 5px;
+  }
+
+  /* 2. Progress Bar */
+  .progress-wrapper {
+    width: 100%; /* Progress bar penuh lebar */
+    text-align: left;
+  }
+  
+  /* 3. Area Drag & Drop (PENTING) */
+  .tables-wrap {
+    display: flex;
+    flex-direction: column; /* Susun atas-bawah */
+    gap: 20px;
+  }
+
+  .left-area {
+    width: 100%;
+    order: 1; /* Tabel partisi di atas */
+  }
+
+  /* Panel Daftar Proses (Sticky di Bawah) */
+  .right-area {
+    width: 100%;
+    position: fixed; /* Menempel di layar */
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    background: #24242a; /* Warna latar solid */
+    border-top: 2px solid #64ffda;
+    padding: 10px 16px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.6);
+    border-radius: 16px 16px 0 0;
+    
+    order: 2;
+    
+    /* Agar bisa discroll horizontal jika proses banyak */
+    display: flex;
+    flex-direction: column;
+    max-height: 150px; /* Batasi tinggi */
+  }
+
+  /* Judul 'Daftar Proses' di panel bawah */
+  .right-area .small-muted {
+    text-align: center;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: #64ffda;
+  }
+
+  /* Container pool agar proses berjejer kesamping (Horizontal Scroll) */
+  #procPool {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 10px;
+    padding-bottom: 5px;
+    /* Sembunyikan scrollbar tapi tetap bisa scroll */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Kotak Proses yang bisa didrag */
+  .draggable-process {
+    flex: 0 0 auto; /* Jangan mengecil */
+    margin: 0;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    background: #2f6f8a;
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  }
+
+  /* 4. Tabel Partisi & Slot */
+  .partition-table th, 
+  .partition-table td {
+    font-size: 0.85rem; /* Kecilkan font tabel */
+    padding: 6px;
+  }
+
+  /* Perbesar area drop agar mudah kena jari */
+  process-slot .remove-btn {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 16px;
+    background: rgba(255, 100, 100, 0.2); /* Beri background merah tipis */
+  }
+  
+  
+  /* Tampilkan tombol hapus (X) selalu di HP (karena tidak ada hover) */
+  .remove-btn {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+    background: rgba(255, 255, 255, 0.15);
+    width: 24px;
+    height: 24px;
+    margin-left: 8px;
+  }
+
+  /* 5. Tombol Pilihan Ganda (MCQ) */
+  .option-btn {
+    padding: 14px; /* Area sentuh lebih besar */
+    font-size: 1rem;
+    margin: 10px 0;
+  }
+
+  /* 6. Tombol Navigasi (Next/Admin) */
+  .mt-3.d-flex {
+    flex-direction: row; /* Tetap sejajar */
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 140px; /* Jarak extra agar tidak tertutup panel bawah */
+  }
+
+  #nextBtn {
+    width: auto;
+    flex-grow: 1; /* Tombol next memenuhi sisa ruang */
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  .admin-btn-minimal {
+    width: 44px; /* Sedikit lebih besar */
+    height: 44px;
+    font-size: 1.3rem;
+    background: rgba(255,255,255,0.05);
+  }
+
+ #globalToastContainer {
+    top: 15px !important;
+    bottom: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    
+    width: auto !important;      /* Lebar menyesuaikan isi */
+    max-width: 300px !important; /* Batasi lebar maksimal */
+    padding: 0 !important;
+  }
+
+  /* 2. Perkecil Box Toast */
+  .toast {
+    font-size: 0.8rem !important; /* Huruf lebih kecil */
+    border-radius: 8px !important;
+    margin-bottom: 8px;
+  }
+
+  /* 3. Perkecil Header (Bagian Judul) */
+  .toast-header {
+    padding: 4px 8px !important; /* Sangat rapat */
+    min-height: 28px;            /* Tinggi header dipendekkan */
+  }
+
+  .toast-header strong {
+    font-size: 0.85rem;
+  }
+
+  /* Kecilkan Ikon Info/Warning */
+  .toast-header .status-icon {
+    font-size: 0.9rem !important;
+    margin-right: 6px !important;
+  }
+
+  /* Kecilkan Tombol Close (X) */
+  .toast-header .btn-close {
+    padding: 4px !important;
+    width: 0.5em;
+    height: 0.5em;
+    background-size: 0.6em;
+    margin-right: -2px !important;
+  }
+
+  /* 4. Perkecil Body (Bagian Pesan) */
+  .toast-body {
+    padding: 6px 10px !important; /* Rapatkan jarak pesan */
+    line-height: 1.25;            /* Rapatkan jarak antar baris */
+  }
+
+  
+
+}
+
+
+.dnd-poly-drag-image {
+  opacity: 0.9 !important;
+  position: absolute !important;
+  z-index: 9999 !important;
+  transform: scale(1.1); /* Sedikit membesar saat diangkat */
+  pointer-events: none;  /* Agar sentuhan tembus ke elemen di bawahnya */
+}
+
+/* Agar ikon status (dilarang/boleh) dari library terlihat bagus */
+.dnd-poly-drag-icon {
+  display: none !important; /* Sembunyikan ikon default browser yang jelek */
+}
+
