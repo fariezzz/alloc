@@ -966,22 +966,6 @@ function renderDrag(q) {
     placeIntoSlot(td, procName);
   }
 
-  // show small hint message
-  function showHint(msg) {
-    let hintBox = document.getElementById('drag-hint');
-    if (!hintBox) {
-      hintBox = document.createElement('div');
-      hintBox.id = 'drag-hint';
-      hintBox.style.marginTop = '10px';
-      hintBox.style.color = '#ffd580';
-      hintBox.style.fontStyle = 'italic';
-      wrapper.insertBefore(hintBox, feedback);
-    }
-    hintBox.innerHTML = msg;
-    hintBox.style.opacity = '1';
-    setTimeout(()=>{ hintBox.style.opacity = '0'; }, 1500);
-  }
-
       // attach slot events
       for (let i = 0; i < totalSlots; i++) {
           const slot = document.getElementById(`slot-${i}`);
