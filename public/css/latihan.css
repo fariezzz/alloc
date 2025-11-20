@@ -1,9 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+
 @property --score-angle {
   syntax: '<angle>';
   inherits: false;
   initial-value: 0deg;
 }
-@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 
 body {
   background-color: #2b2b35;
@@ -1446,3 +1447,115 @@ button#nextBtn.processing {
   display: none !important; /* Sembunyikan ikon default browser yang jelek */
 }
 
+
+.icon-box {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 1.4rem;
+  flex-shrink: 0; /* Agar ikon tidak gepeng di layar kecil */
+}
+
+/* Warna Khusus Ikon MCQ (Misal: Biru/Ungu) */
+.mcq-icon {
+  background: rgba(92, 107, 192, 0.2);
+  color: #9fa8da;
+  border: 1px solid rgba(92, 107, 192, 0.3);
+}
+
+/* Warna Khusus Ikon Drag (Misal: Cyan/Hijau sesuai tema memori) */
+.drag-icon {
+  background: rgba(100, 255, 218, 0.15);
+  color: #64ffda;
+  border: 1px solid rgba(100, 255, 218, 0.3);
+}
+
+/* Penyesuaian Flexbox untuk breakdown-box */
+.breakdown-box {
+  /* Pastikan konten di dalam box rata tengah secara vertikal */
+  display: flex; 
+  align-items: center;
+}
+
+.score-bg-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Memastikan ikon tepat di tengah sentral */
+  
+  font-size: 4rem;    /* Ukuran besar agar memenuhi tengah ring */
+  color: #ffd700;     /* Warna Emas (Gold) */
+  opacity: 0.15;      /* Transparan (samar) agar teks angka tetap terbaca jelas */
+  z-index: 1;         /* Layer di atas background hitam ring */
+  
+  /* Sedikit efek glow emas opsional */
+  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.3));
+}
+
+/* Pastikan teks angka muncul DI ATAS ikon piala */
+.score-text {
+  z-index: 2; /* Layer lebih tinggi dari ikon */
+  position: absolute;
+  /* (Style lain seperti color, font-weight sudah ada di style sebelumnya) */
+}
+
+
+/* ============ ALERT KHUSUS ADMIN ============ */
+
+/* Style dasar untuk Toast Admin */
+.toast-admin {
+  background: rgba(15, 23, 42, 0.95) !important; /* Latar sangat gelap */
+  border: 1px solid #64ffda !important;           /* Border Neon Cyan */
+  box-shadow: 0 0 20px rgba(100, 255, 218, 0.15); /* Efek Glow */
+  overflow: hidden;
+  position: relative;
+}
+
+/* Header Toast Admin */
+.toast-admin .toast-header {
+  background: rgba(100, 255, 218, 0.15) !important;
+  color: #64ffda !important;
+  border-bottom: 1px solid rgba(100, 255, 218, 0.3) !important;
+  font-weight: 600;
+}
+
+/* Body Toast Admin */
+.toast-admin .toast-body {
+  color: #e2e8f0 !important; /* Teks putih terang */
+  font-family: 'Courier New', Courier, monospace; /* Font ala terminal hacker */
+  font-size: 0.9rem;
+}
+
+/* Ikon di dalam header */
+.toast-admin .status-icon {
+  color: #64ffda;
+  animation: pulseAdmin 2s infinite;
+}
+
+/* Efek garis scan berjalan (Opsional, biar keren) */
+.toast-admin::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(100, 255, 218, 0.1), transparent);
+  transform: skewX(-20deg);
+  animation: scanLight 3s infinite linear;
+  pointer-events: none;
+}
+
+@keyframes pulseAdmin {
+  0% { opacity: 0.7; text-shadow: 0 0 5px #64ffda; }
+  50% { opacity: 1; text-shadow: 0 0 15px #64ffda; }
+  100% { opacity: 0.7; text-shadow: 0 0 5px #64ffda; }
+}
+
+@keyframes scanLight {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}

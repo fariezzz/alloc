@@ -153,7 +153,7 @@ function renderCurrent() {
   const adminBtn = document.getElementById("adminBtn");
   if (adminBtn) {
     if (isAdminLoggedIn) {
-      adminBtn.style.display = 'inline-flex';
+      adminBtn.style.display = 'none';
     } else {
       if (index === 0) {
         adminBtn.style.display = 'inline-flex';
@@ -352,7 +352,7 @@ function renderDrag(q) {
 
   const pTitle = document.createElement('div'); pTitle.className='small-muted mb-1'; pTitle.textContent = 'Partisi';
   const pTable = document.createElement('table'); pTable.className='partition-table';
-  pTable.innerHTML = '<thead><tr><th>Nama</th><th>Ukuran (KB)</th><th>Process</th></tr></thead><tbody></tbody>';
+  pTable.innerHTML = '<thead><tr><th>Nama</th><th>Ukuran (KB)</th><th>Proses</th></tr></thead><tbody></tbody>';
   const pBody = pTable.querySelector('tbody');
 
   const poolTitle = document.createElement('div'); poolTitle.className='small-muted mb-2'; poolTitle.textContent='Daftar Proses';
@@ -424,16 +424,52 @@ function renderDrag(q) {
 
   // add back to pool if not present
   function addToPool(name) {
+    // 1. Cek jika sudah ada, jangan duplikat
     if (pool.querySelector(`[data-proc="${name}"]`)) return;
-    const procObj = PROCS.find(p=>p.name===name);
+
+    const procObj = PROCS.find(p => p.name === name);
     if (!procObj) return;
+
+    // 2. Buat elemen elemen visual
     const el = document.createElement('div');
     el.className = 'draggable-process';
     el.draggable = true;
     el.dataset.proc = procObj.name;
     el.textContent = `${procObj.name} (${procObj.size} KB)`;
-    el.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain', procObj.name));
-    pool.appendChild(el);
+
+    // Event listener Drag & Drop
+    el.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', procObj.name);
+      setTimeout(() => el.style.opacity = '0.4', 0);
+    });
+    el.addEventListener('dragend', () => {
+      el.style.opacity = '1';
+    });
+
+    // === LOGIKA PENGURUTAN (SORTING) ===
+    // Ambil angka dari nama proses, misal "P2" -> 2
+    const newNum = parseInt(name.substring(1)); 
+    
+    const children = Array.from(pool.children);
+    let inserted = false;
+
+    // Loop semua anak yang ada di pool saat ini
+    for (let child of children) {
+      const childNum = parseInt(child.dataset.proc.substring(1));
+      
+      // Jika nomor proses baru LEBIH KECIL dari proses yang ada di pool,
+      // sisipkan SEBELUM proses tersebut.
+      if (newNum < childNum) {
+        pool.insertBefore(el, child);
+        inserted = true;
+        break;
+      }
+    }
+
+    // Jika pool kosong atau ini adalah angka terbesar, taruh di paling belakang
+    if (!inserted) {
+      pool.appendChild(el);
+    }
   }
 
   // add to waiting (supports multiple) with remove button which triggers cascading removal
@@ -919,10 +955,11 @@ function renderDrag(q) {
     const partSize = PARTS[slotIndex];
 
     if (procObj.size > partSize) {
-      // not fit -> directly to waiting
-      addToWaiting(procName);
-      refreshNextButtonState();
-      return;
+      // Tampilkan pesan warning bahwa partisi tidak cukup
+      showToastHint(`Proses <strong>${procName}</strong> (${procObj.size} KB) terlalu besar untuk partisi ini (${partSize} KB).`, 'warning');
+      
+      // Hentikan proses (jangan masukkan ke waiting list otomatis, biarkan user berpikir)
+      return; 
     }
 
     // place into slot
@@ -1098,6 +1135,7 @@ nextBtn.addEventListener('click', () => {
 
       // Sembunyikan tombol 'Jawab' & tampilkan loading
       nextBtn.style.display = 'none';
+      adminBtn.style.display = 'none';
       const explainWrap = root.querySelector('#explainWrap');
       if (explainWrap) {
         explainWrap.innerHTML = `<div class="loading-anim"><i class="bi bi-arrow-repeat spin-icon"></i> Memeriksa jawaban...</div>`;
@@ -1182,27 +1220,45 @@ function showSummary() {
   const percent = totalPossible ? Math.round((totalCorrect/totalPossible)*100) : 0;
   const angle = (percent / 100) * 360;
 
-  // (DIUBAH) Render HTML dengan ID baru dan nilai awal 0
   root.innerHTML = `
     <div class="result-wrapper">
       <div class="result-title">Hasil Akhir Latihan</div>
       <div class="result-subtitle">Berikut ringkasan performa Anda</div>
 
       <div class="score-ring" id="finalScoreRing" style="--score-angle: 0deg;">
+        
+        <i class="bi bi-trophy-fill score-bg-icon"></i>
+        
         <div class="score-text" id="finalScoreText">0%</div>
+      
+      </div>
+      <div class="breakdown-box">
+        <div class="d-flex align-items-center gap-3">
+          <div class="icon-box mcq-icon">
+            <i class="bi bi-list-check"></i>
+          </div>
+          <div>
+            <strong>Soal Pilihan Ganda</strong>
+            <div class="breakdown-small">${mcqCorrect} benar dari ${numMcqToSelect} soal</div>
+          </div>
+        </div>
       </div>
 
       <div class="breakdown-box">
-        <strong>📝 Soal Pilihan Ganda</strong>
-        <div class="breakdown-small">${mcqCorrect} benar dari ${numMcqToSelect} soal</div>
+        <div class="d-flex align-items-center gap-3">
+          <div class="icon-box drag-icon">
+            <i class="bi bi-puzzle-fill"></i>
+          </div>
+          <div>
+            <strong>Soal Drag & Drop</strong>
+            <div class="breakdown-small">${dragCorrectSlots} benar dari ${dragTotalSlots} slot</div>
+          </div>
+        </div>
       </div>
 
-      <div class="breakdown-box">
-        <strong>🧩 Soal Drag & Drop</strong>
-        <div class="breakdown-small">${dragCorrectSlots} benar dari ${dragTotalSlots} slot</div>
-      </div>
-
-      <button id="restartBtn" class="btn-restart">Ulangi Latihan</button>
+      <button id="restartBtn" class="btn-restart">
+        <i class="bi bi-arrow-counterclockwise me-2"></i> Ulangi Latihan
+      </button>
     </div>
   `;
 
@@ -1358,6 +1414,44 @@ function showToastHint(message, type = 'info') {
       });
     }
 
+
+function showAdminAlert(message, title = "SYSTEM OVERRIDE") {
+  const toastContainer = document.getElementById('globalToastContainer');
+  if (!toastContainer) return;
+
+  // Buat elemen toast
+  const toastEl = document.createElement('div');
+  
+  // Gunakan class khusus 'toast-admin'
+  toastEl.className = `toast toast-admin`; 
+  toastEl.setAttribute('role', 'alert');
+  toastEl.setAttribute('aria-live', 'assertive');
+  toastEl.setAttribute('aria-atomic', 'true');
+  toastEl.setAttribute('data-bs-delay', '4000'); // Durasi 4 detik
+
+  toastEl.innerHTML = `
+    <div class="toast-header">
+      <i class="bi bi-terminal-fill status-icon me-2"></i>
+      <strong class="me-auto">${title}</strong>
+      <small>ADMIN_MODE</small>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+      ${message}
+    </div>
+  `;
+
+  toastContainer.appendChild(toastEl);
+
+  const toast = new bootstrap.Toast(toastEl);
+  toast.show();
+
+  toastEl.addEventListener('hidden.bs.toast', () => {
+    toastEl.remove();
+  });
+}
+
+
 function updateAdminButtonUI() {
   const adminBtn = document.getElementById("adminBtn");
   if (!adminBtn) return;
@@ -1415,7 +1509,7 @@ function adminLogout() {
   const toolbar = document.getElementById('adminToolbar');
   if (toolbar) toolbar.remove();
   
-  showToastHint("Anda telah keluar dari Mode Admin.", "info");
+  showAdminAlert("Sesi Admin diakhiri. Kembali ke mode pengguna.", "LOGOUT");
   updateAdminButtonUI();
   renderCurrent();
 }
@@ -1425,7 +1519,6 @@ function adminResetQuestion() {
   userSelected[index] = null;
   renderCurrent();
   adminBtn.style.display = 'none';
-  showToastHint("Soal berhasil direset.", "info");
 }
 
 function adminForceNext() {
@@ -1593,7 +1686,7 @@ if (adminBtn) {
     
     if (user === ADMIN_USER && pass === ADMIN_PASS) {
       // --- Login Sukses ---
-      messageBox.textContent = "Login Berhasil. Mode Admin diaktifkan.";
+      messageBox.textContent = "Login Berhasil.";
       messageBox.className = 'success'; // Terapkan class sukses
       messageBox.style.display = 'block';
 
@@ -1605,9 +1698,10 @@ if (adminBtn) {
         hideLoginModal();
         isAdminLoggedIn = true;
         updateAdminButtonUI(); 
-
-        // Aktifkan tombol lagi untuk penggunaan di masa depan
         loginBtn.disabled = false; 
+
+
+        showAdminAlert("Akses Admin diberikan. Toolbar diaktifkan.", "LOGIN SUCCESS");
       }, 1200); // Jeda 1.2 detik
 
     } else {
