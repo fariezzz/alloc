@@ -281,14 +281,14 @@ td input.form-control-sm:focus {
 
 /* ===== MAIN CARD CONTAINER ===== */
 main.materi-container {
-  background: rgba(46, 48, 55, 0.78);
+  /* background: rgba(46, 48, 55, 0.78); */
+  background-color: #1c1f2b;
   border-radius: 20px;
   padding: 40px 60px;
   width: 85%;
   max-width: 1100px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
   margin: 60px auto 0;
-  /* ⬅️ INI YANG MENAMBAHKAN JARAK DARI NAVBAR */
 }
 
 /* ===== SECTION STYLE ===== */
@@ -406,8 +406,9 @@ main.materi-container {
 
 /* ===== NAV-PILLS (TAB MATERI) ===== */
 .nav-pills .nav-link {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: #e0e0e0;
+  /* background-color: rgba(255, 255, 255, 0.08); */
+  background: #7c5cff;
+  color: #F0F5F9;
   border-radius: 10px;
   margin: 4px;
   padding: 10px 18px;
@@ -425,16 +426,20 @@ main.materi-container {
 }
 
 .nav-pills .nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.15);
+  /* background-color: rgba(255, 255, 255, 0.15); */
+  background: #9a7fff;
+  box-shadow: 0 10px 25px rgba(124, 92, 255, 0.3);
   transform: scale(1.05);
 }
 
 .nav-pills .nav-link.active {
-  background-color: #52616B !important;
+  /* background-color: #52616B !important; */
+  background-color: #7c5cff;
+  box-shadow: 0 10px 25px rgba(124, 92, 255, 0.3);
   color: #F0F5F9 !important;
   font-weight: 600;
   transform: scale(1.08);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+  /* box-shadow: 0 0 8px rgba(255, 255, 255, 0.15); */
 }
 
 /* ===== TOMBOL UTAMA ===== */
