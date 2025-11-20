@@ -352,7 +352,7 @@ function renderDrag(q) {
 
   const pTitle = document.createElement('div'); pTitle.className='small-muted mb-1'; pTitle.textContent = 'Partisi';
   const pTable = document.createElement('table'); pTable.className='partition-table';
-  pTable.innerHTML = '<thead><tr><th>Nama</th><th>Ukuran (KB)</th><th>Process</th></tr></thead><tbody></tbody>';
+  pTable.innerHTML = '<thead><tr><th>Nama</th><th>Ukuran (KB)</th><th>Proses</th></tr></thead><tbody></tbody>';
   const pBody = pTable.querySelector('tbody');
 
   const poolTitle = document.createElement('div'); poolTitle.className='small-muted mb-2'; poolTitle.textContent='Daftar Proses';
@@ -424,16 +424,52 @@ function renderDrag(q) {
 
   // add back to pool if not present
   function addToPool(name) {
+    // 1. Cek jika sudah ada, jangan duplikat
     if (pool.querySelector(`[data-proc="${name}"]`)) return;
-    const procObj = PROCS.find(p=>p.name===name);
+
+    const procObj = PROCS.find(p => p.name === name);
     if (!procObj) return;
+
+    // 2. Buat elemen elemen visual
     const el = document.createElement('div');
     el.className = 'draggable-process';
     el.draggable = true;
     el.dataset.proc = procObj.name;
     el.textContent = `${procObj.name} (${procObj.size} KB)`;
-    el.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain', procObj.name));
-    pool.appendChild(el);
+
+    // Event listener Drag & Drop
+    el.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', procObj.name);
+      setTimeout(() => el.style.opacity = '0.4', 0);
+    });
+    el.addEventListener('dragend', () => {
+      el.style.opacity = '1';
+    });
+
+    // === LOGIKA PENGURUTAN (SORTING) ===
+    // Ambil angka dari nama proses, misal "P2" -> 2
+    const newNum = parseInt(name.substring(1)); 
+    
+    const children = Array.from(pool.children);
+    let inserted = false;
+
+    // Loop semua anak yang ada di pool saat ini
+    for (let child of children) {
+      const childNum = parseInt(child.dataset.proc.substring(1));
+      
+      // Jika nomor proses baru LEBIH KECIL dari proses yang ada di pool,
+      // sisipkan SEBELUM proses tersebut.
+      if (newNum < childNum) {
+        pool.insertBefore(el, child);
+        inserted = true;
+        break;
+      }
+    }
+
+    // Jika pool kosong atau ini adalah angka terbesar, taruh di paling belakang
+    if (!inserted) {
+      pool.appendChild(el);
+    }
   }
 
   // add to waiting (supports multiple) with remove button which triggers cascading removal
@@ -919,10 +955,11 @@ function renderDrag(q) {
     const partSize = PARTS[slotIndex];
 
     if (procObj.size > partSize) {
-      // not fit -> directly to waiting
-      addToWaiting(procName);
-      refreshNextButtonState();
-      return;
+      // Tampilkan pesan warning bahwa partisi tidak cukup
+      showToastHint(`Gagal! Proses <strong>${procName}</strong> (${procObj.size} KB) terlalu besar untuk partisi ini (${partSize} KB).`, 'warning');
+      
+      // Hentikan proses (jangan masukkan ke waiting list otomatis, biarkan user berpikir)
+      return; 
     }
 
     // place into slot
