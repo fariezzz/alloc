@@ -1,9 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+
 @property --score-angle {
   syntax: '<angle>';
   inherits: false;
   initial-value: 0deg;
 }
-@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 
 body {
   background-color: #2b2b35;
