@@ -1,0 +1,399 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    background: #1c1f2b;
+    color: #fff;
+}
+
+html,
+body {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
+/* Header */
+.brand {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+}
+
+/* header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: #1c1f2b;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+}
+
+nav {
+    display: flex;
+    gap: 10px;
+}
+
+nav a {
+    color: #a0aec0;
+    text-decoration: none;
+    font-size: 15px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+nav a:hover,
+nav a.active {
+    color: #fff;
+    background: rgba(124, 92, 255, 0.1);
+} */
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: #1c1f2b;
+    /* Background disamakan dengan background web */
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    /* Opsional untuk estetika */
+}
+
+.mobile-menu-toggle span {
+    width: 24px;
+    height: 2px;
+    background: #fff;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-toggle.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.mobile-menu-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu-toggle.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Close Button (X) */
+.close-btn {
+    display: none;
+    /* Default hidden, shown when menu active */
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1002;
+}
+
+/* nav.active .close-btn {
+    display: block;
+} */
+
+/* CTA Section */
+.cta-section {
+    background: #1c1f2b;
+    padding: 80px 20px;
+    text-align: center;
+    margin-top: 8rem;
+}
+
+.cta-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.cta-text h2 {
+    font-size: clamp(28px, 5vw, 42px);
+    margin-bottom: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.cta-text p {
+    font-size: clamp(15px, 2vw, 18px);
+    opacity: 0.85;
+    line-height: 1.6;
+    margin-bottom: 40px;
+    color: #cbd5e0;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: #7c5cff;
+    color: #fff;
+    font-weight: 600;
+    font-size: 15px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cta-btn:hover {
+    transform: translateY(-2px);
+    background: #9a7fff;
+    box-shadow: 0 10px 25px rgba(124, 92, 255, 0.3);
+}
+
+/* Hero Section - About Memory */
+.hero {
+    background: #1c1f2b;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.hero h2 {
+    font-size: clamp(28px, 4vw, 36px);
+    margin-bottom: 30px;
+    font-weight: 700;
+}
+
+.info-box {
+    max-width: 750px;
+    margin: 30px auto;
+    padding: 30px;
+    border-radius: 15px;
+    background: #1a202c;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    text-align: left;
+}
+
+.info-box p {
+    font-size: 17px;
+    line-height: 1.7;
+    color: #cbd5e0;
+}
+
+.info-box.flex {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.info-box .icon-wrapper {
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+}
+
+/* Algorithms Section */
+.algorithms-section {
+    background: #1c1f2b;
+    padding: 80px 20px;
+}
+
+.algorithms-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.algorithms-container h2 {
+    font-size: clamp(28px, 4vw, 36px);
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.algorithms-container>p {
+    font-size: 17px;
+    color: #cbd5e0;
+    margin-bottom: 50px;
+}
+
+.algorithms-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+/* Algorithm Cards */
+.algorithm-card {
+    background: #1a202c;
+    padding: 30px 25px;
+    border-radius: 15px;
+    text-align: center;
+    border: 2px solid transparent;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.algorithm-card:hover {
+    border: 2px solid #7c5cff;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+.algorithm-card h3 {
+    margin-bottom: 1em;
+}
+
+.algorithm-card .algorithm-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 20px;
+    background: rgba(124, 92, 255, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.algorithm-card:hover .algorithm-icon {
+    background: transparent;
+}
+
+.algorithm-card p {
+    font-size: 17px;
+    line-height: 1.7;
+    color: #cbd5e0;
+    margin: 0;
+    text-align: left;
+}
+
+/* Icon di dalam card */
+.algorithm-card .algorithm-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 20px;
+    background: transparent;
+    /* default kotak ungu */
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.algorithm-icon svg {
+    width: 35px;
+    height: 35px;
+}
+
+footer {
+    text-align: center;
+    padding: 40px 20px;
+    background: #1c1f2b;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+footer p {
+    font-size: 14px;
+    color: #a0aec0;
+}
+
+/* Responsive Design */
+@media (max-width:768px) {
+    header {
+        padding: 15px 20px;
+    }
+
+    .mobile-menu-toggle {
+        display: flex;
+    }
+
+    /* nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100vh;
+        background: #1a202c;
+        flex-direction: column;
+        padding: 80px 20px 20px;
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+        transition: right 0.3s ease;
+        gap: 20px;
+        z-index: 1001;
+        justify-content: flex-start;
+    } */
+
+    /* nav.active {
+        right: 0;
+    }
+
+    nav a {
+        width: 100%;
+        padding: 15px 20px;
+        text-align: left;
+        font-size: 18px;
+    } */
+
+    .cta-section, .hero,
+    .algorithms-section {
+        padding: 50px 20px;
+    }
+
+    .cta-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .cta-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .info-box.flex {
+        flex-direction: column;
+    }
+
+    .algorithms-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width:480px) {
+    header h1 {
+        font-size: 20px;
+    }
+}

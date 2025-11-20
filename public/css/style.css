@@ -1,7 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 body {
-  background-color: #2b2b35;
+  /* background-color: #2b2b35; */
+  background-color: #1c1f2b;
   font-family: "Poppins", sans-serif;
   display: flex;
   justify-content: center;
@@ -57,8 +59,9 @@ body {
 }
 
 .btn-pink {
-  background-color: #52616B;
-  color: #d0d0d0;
+  /* background-color: #52616B; */
+  background: #7c5cff;
+  color: #ffffff;
   font-weight: 600;
   border: none;
   width: 100%;
@@ -68,8 +71,10 @@ body {
 
 .btn-pink:hover,
 .btn-add:hover {
-  background-color: #F0F5F9;
-  color: #2b2b35;
+  /* background-color: #F0F5F9;
+  color: #2b2b35; */
+  background: #9a7fff;
+  box-shadow: 0 10px 25px rgba(124, 92, 255, 0.3);
 }
 
 .circle-btn {
@@ -87,7 +92,8 @@ body {
 }
 
 .btn-add {
-  background-color: #52616B;
+  /* background-color: #52616B; */
+  background: #7c5cff;
   margin-right: 0.5rem;
 }
 
@@ -109,6 +115,11 @@ body {
 .btn-remove:hover,
 .btn-danger.rounded-circle:hover {
   background-color: #e14a4a !important;
+}
+
+.text-muted {
+  color: white !important;
+  opacity: 70%;
 }
 
 .table {
@@ -276,7 +287,8 @@ main.materi-container {
   width: 85%;
   max-width: 1100px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-  margin: 60px auto 0; /* ⬅️ INI YANG MENAMBAHKAN JARAK DARI NAVBAR */
+  margin: 60px auto 0;
+  /* ⬅️ INI YANG MENAMBAHKAN JARAK DARI NAVBAR */
 }
 
 /* ===== SECTION STYLE ===== */
@@ -537,7 +549,8 @@ footer.materi-footer {
   transform: rotateY(180deg);
 }
 
-html, body {
+html,
+body {
   overflow-y: scroll;
   overflow-x: hidden;
   -ms-overflow-style: none;
@@ -552,4 +565,3 @@ body::-webkit-scrollbar {
 *::-webkit-scrollbar {
   display: none;
 }
-
