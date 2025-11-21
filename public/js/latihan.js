@@ -192,7 +192,7 @@ function renderCurrent() {
 // ----- MCQ renderer -----
 function renderMCQ(q) {
   const container = document.createElement('div');
-  container.innerHTML = `<h4>Soal ${index+1}:</h4><div style="margin-top:8px;font-weight:600;">${q.question}</div>`;
+  container.innerHTML = `<h4>Soal ${index+1} :</h4><div style="margin-top:8px;font-weight:600;">${q.question}</div>`;
   const opts = document.createElement('div');
   opts.style.marginTop = '12px';
 
