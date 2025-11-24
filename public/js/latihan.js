@@ -939,13 +939,13 @@ function renderDrag(q) {
 
     const expected = getNextExpectedProc();
     if (procName !== expected) {
-      showToastHint(`Harap masukkan <strong>${expected}</strong> terlebih dahulu sebelum ${procName}.`, 'info');
+      showToast(`Harap masukkan <strong>${expected}</strong> terlebih dahulu sebelum ${procName}.`, 'info');
       return;
     }
 
     // if already filled
     if (td.dataset.proc) {
-      showToastHint(`Slot ini sudah diisi (<strong>${td.dataset.proc}</strong>). Hapus dulu sebelum mengganti.`, 'warning');
+      showToast(`Slot ini sudah diisi (<strong>${td.dataset.proc}</strong>). Hapus dulu sebelum mengganti.`, 'warning');
       return;
     }
 
@@ -956,7 +956,7 @@ function renderDrag(q) {
 
     if (procObj.size > partSize) {
       // Tampilkan pesan warning bahwa partisi tidak cukup
-      showToastHint(`Proses <strong>${procName}</strong> (${procObj.size} KB) terlalu besar untuk partisi ini (${partSize} KB).`, 'warning');
+      showToast(`Proses <strong>${procName}</strong> (${procObj.size} KB) terlalu besar untuk partisi ini (${partSize} KB).`, 'warning');
       
       // Hentikan proses (jangan masukkan ke waiting list otomatis, biarkan user berpikir)
       return; 
@@ -1039,7 +1039,7 @@ function renderDrag(q) {
     
     // Validasi urutan
     if (procName !== expected) {
-      showToastHint(`Harap masukkan <strong>${expected}</strong> terlebih dahulu.`, 'info');
+      showToast(`Harap masukkan <strong>${expected}</strong> terlebih dahulu.`, 'info');
       return;
     }
     
@@ -1088,7 +1088,84 @@ function renderDrag(q) {
   }
 }
 
+function ensureToastContainer() {
+    if (document.getElementById("toast-container")) return;
+    
+    // 1. Buat Container
+    const container = document.createElement("div");
+    container.id = "toast-container";
+    container.style.position = "fixed";
+    container.style.right = "20px";
+    container.style.bottom = "20px";
+    container.style.zIndex = "2000"; // Z-index tinggi agar di atas modal admin
+    container.style.display = "flex";
+    container.style.flexDirection = "column";
+    container.style.gap = "10px";
+    document.body.appendChild(container);
 
+    // 2. Inject CSS Sederhana (Dark Theme Friendly)
+    const style = document.createElement("style");
+    style.innerHTML = `
+        #toast-container .toast { min-width: 250px; max-width: 360px; border-radius: 8px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        #toast-container .toast .toast-body { font-size: 0.95rem; color: #fff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+    `;
+    document.head.appendChild(style);
+}
+
+/**
+ * type: 'success' | 'info' | 'warning' | 'danger'
+ */
+function showToast(message, type = "info", delay = 3500) {
+    ensureToastContainer();
+    const container = document.getElementById("toast-container");
+
+    const toast = document.createElement("div");
+    
+    // Tentukan warna background ala Bootstrap
+    let bgClass = "bg-secondary";
+    let closeBtnClass = "btn-close-white"; // Tombol close putih default
+    
+    if (type === "success") bgClass = "bg-success";
+    else if (type === "danger") bgClass = "bg-danger";
+    else if (type === "warning") {
+        bgClass = "bg-warning";
+        closeBtnClass = ""; // Tombol close hitam untuk background kuning
+    } else if (type === "info") {
+        bgClass = "bg-info";
+        closeBtnClass = ""; // Tombol close hitam untuk background biru muda
+    }
+
+    toast.className = `toast align-items-center text-white ${bgClass}`;
+    toast.setAttribute("role", "alert");
+    toast.setAttribute("aria-live", "assertive");
+    toast.setAttribute("aria-atomic", "true");
+
+    // Jika background kuning/info, teks harus hitam agar terbaca
+    const textClass = (type === "warning" || type === "info") ? "text-dark" : "text-white";
+    
+    // Ikon opsional berdasarkan tipe
+    let icon = "";
+
+    toast.innerHTML = `
+        <div class="d-flex w-100">
+            <div class="toast-body w-100 ${textClass}">
+                <div>${icon} ${message}</div>
+                <button type="button" class="btn-close ${closeBtnClass} ms-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `;
+
+    container.appendChild(toast);
+
+    // Init Bootstrap Toast
+    const bsToast = new bootstrap.Toast(toast, { autohide: true, delay });
+    bsToast.show();
+
+    // Bersihkan dari DOM saat hidden
+    toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+    });
+}
 
 
 
@@ -1345,95 +1422,6 @@ function allPlaced() {
   return used.length === currentDragTotal;
 }
 
-function showToastHint(message, type = 'info') {
-      const toastContainer = document.getElementById('globalToastContainer');
-      if (!toastContainer) {
-        console.error("Toast container not found.");
-        return;
-      }
-
-      // Tentukan ikon dan style
-      let iconClass, toastClass, title;
-      if (type === 'warning') {
-        iconClass = 'bi-exclamation-triangle-fill';
-        toastClass = 'toast-warning-dark';
-        title = 'Peringatan';
-      } else { // default to 'info'
-        iconClass = 'bi-lightbulb-fill';
-        toastClass = 'toast-info-dark';
-        title = 'Petunjuk';
-      }
-
-      // Buat elemen toast
-      const toastEl = document.createElement('div');
-      toastEl.className = `toast ${toastClass}`;
-      toastEl.setAttribute('role', 'alert');
-      toastEl.setAttribute('aria-live', 'assertive');
-      toastEl.setAttribute('aria-atomic', 'true');
-      toastEl.setAttribute('data-bs-delay', '3000'); // Durasi 3 detik
-
-      toastEl.innerHTML = `
-        <div class="toast-header">
-          <i class="bi ${iconClass} status-icon me-2"></i>
-          <strong class="me-auto">${title}</strong>
-          <small class="text-muted">Baru saja</small>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-          ${message} 
-        </div>
-      `;
-      // Catatan: Ikon sekarang ada di header, jadi kita hapus dari 'message'
-
-      // Tambahkan ke container
-      toastContainer.appendChild(toastEl);
-
-      // Inisialisasi dan tampilkan Bootstrap Toast
-      const toast = new bootstrap.Toast(toastEl);
-      toast.show();
-
-      // Hapus elemen dari DOM setelah toast hilang
-      toastEl.addEventListener('hidden.bs.toast', () => {
-        toastEl.remove();
-      });
-    }
-
-
-function showAdminAlert(message, title = "SYSTEM OVERRIDE") {
-  const toastContainer = document.getElementById('globalToastContainer');
-  if (!toastContainer) return;
-
-  // Buat elemen toast
-  const toastEl = document.createElement('div');
-  
-  // Gunakan class khusus 'toast-admin'
-  toastEl.className = `toast toast-admin`; 
-  toastEl.setAttribute('role', 'alert');
-  toastEl.setAttribute('aria-live', 'assertive');
-  toastEl.setAttribute('aria-atomic', 'true');
-  toastEl.setAttribute('data-bs-delay', '4000'); // Durasi 4 detik
-
-  toastEl.innerHTML = `
-    <div class="toast-header">
-      <i class="bi bi-terminal-fill status-icon me-2"></i>
-      <strong class="me-auto">${title}</strong>
-      <small>ADMIN_MODE</small>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-    <div class="toast-body">
-      ${message}
-    </div>
-  `;
-
-  toastContainer.appendChild(toastEl);
-
-  const toast = new bootstrap.Toast(toastEl);
-  toast.show();
-
-  toastEl.addEventListener('hidden.bs.toast', () => {
-    toastEl.remove();
-  });
-}
 
 
 function updateAdminButtonUI() {
@@ -1493,7 +1481,7 @@ function adminLogout() {
   const toolbar = document.getElementById('adminToolbar');
   if (toolbar) toolbar.remove();
   
-  showAdminAlert("Sesi Admin diakhiri. Kembali ke mode pengguna.", "LOGOUT");
+  showToast("Sesi Admin diakhiri. Kembali ke mode pengguna.", "info");
   updateAdminButtonUI();
   renderCurrent();
 }
@@ -1685,7 +1673,7 @@ if (adminBtn) {
         loginBtn.disabled = false; 
 
 
-        showAdminAlert("Akses Admin diberikan. Toolbar diaktifkan.", "LOGIN SUCCESS");
+        showToast("<b>[ADMIN]</b> Akses diberikan. Toolbar diaktifkan.", "success");
       }, 1200); // Jeda 1.2 detik
 
     } else {

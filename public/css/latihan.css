@@ -1163,64 +1163,6 @@ button#nextBtn.processing {
   font-size: 0.9em; /* Sedikit lebih kecil agar pas */
 }
 
-.card-quiz .toast-container {
-      max-width: 100%;
-    }
-
-    /* Ganti style default Bootstrap toast agar pas dengan tema */
-    .toast {
-      background-color: rgba(60, 63, 73, 0.95); /* Latar belakang toast */
-      color: #f0f0f0; /* Teks putih */
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(5px);
-      border-radius: 8px;
-    }
-
-    .toast-header {
-      background-color: rgba(70, 73, 83, 0.9);
-      color: #fff;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    /* Tombol close 'x' */
-    .toast-header .btn-close {
-      filter: invert(1) grayscale(100%) brightness(200%);
-    }
-
-    /* --- Varian Warna --- */
-
-    /* Kuning (Info/Hint) */
-    .toast.toast-info-dark .toast-header {
-      background-color: rgba(255, 193, 7, 0.2);
-      color: #ffd580;
-      border-bottom-color: rgba(255, 193, 7, 0.3);
-    }
-    .toast.toast-info-dark .toast-body {
-      color: #ffe9a1;
-      font-weight: 500;
-    }
-
-    /* Merah (Warning/Error) */
-    .toast.toast-warning-dark .toast-header {
-      background-color: rgba(220, 53, 69, 0.2);
-      color: #f8d7da;
-      border-bottom-color: rgba(220, 53, 69, 0.3);
-    }
-    .toast.toast-warning-dark .toast-body {
-      color: #ffe6e6;
-      font-weight: 500;
-    }
-
-    /* Ikon di dalam toast header */
-    .toast-header .status-icon {
-       margin-right: 0px;
-       font-size: 0.9rem;
-    }
-
-    #globalToastContainer {
-      max-width: 100%;
-    }
-
 
 .waiting-dropzone {
   transition: all 0.2s ease;
@@ -1379,55 +1321,37 @@ button#nextBtn.processing {
     background: rgba(255,255,255,0.05);
   }
 
- #globalToastContainer {
-    top: 15px !important;
+
+    #toast-container {
+    /* Reset posisi desktop */
     bottom: auto !important;
+    right: auto !important;
+
+    /* Pindah ke ATAS TENGAH */
+    top: 20px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    
-    width: auto !important;      /* Lebar menyesuaikan isi */
-    max-width: 300px !important; /* Batasi lebar maksimal */
-    padding: 0 !important;
+
+    /* Lebar menyesuaikan layar HP */
+    width: 90% !important;
+    align-items: center;
   }
 
-  /* 2. Perkecil Box Toast */
-  .toast {
-    font-size: 0.8rem !important; /* Huruf lebih kecil */
-    border-radius: 8px !important;
+  #toast-container .toast {
+    width: 100%; /* Penuhi container */
+    max-width: 100%;
     margin-bottom: 8px;
+    
+    /* Ganti animasi menjadi masuk dari ATAS */
+    animation: slideDownTop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   }
 
-  /* 3. Perkecil Header (Bagian Judul) */
-  .toast-header {
-    padding: 4px 8px !important; /* Sangat rapat */
-    min-height: 28px;            /* Tinggi header dipendekkan */
-  }
 
-  .toast-header strong {
-    font-size: 0.85rem;
-  }
-
-  /* Kecilkan Ikon Info/Warning */
-  .toast-header .status-icon {
-    font-size: 0.9rem !important;
-    margin-right: 6px !important;
-  }
-
-  /* Kecilkan Tombol Close (X) */
-  .toast-header .btn-close {
-    padding: 4px !important;
-    width: 0.5em;
-    height: 0.5em;
-    background-size: 0.6em;
-    margin-right: -2px !important;
-  }
-
-  /* 4. Perkecil Body (Bagian Pesan) */
-  .toast-body {
-    padding: 6px 10px !important; /* Rapatkan jarak pesan */
-    line-height: 1.25;            /* Rapatkan jarak antar baris */
-  }
-
+/* Animasi Keyframes Mobile */
+@keyframes slideDownTop {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
   
 
 }
@@ -1499,62 +1423,4 @@ button#nextBtn.processing {
   z-index: 2; /* Layer lebih tinggi dari ikon */
   position: absolute;
   /* (Style lain seperti color, font-weight sudah ada di style sebelumnya) */
-}
-
-
-/* ============ ALERT KHUSUS ADMIN ============ */
-
-/* Style dasar untuk Toast Admin */
-.toast-admin {
-  background: rgba(15, 23, 42, 0.95) !important; /* Latar sangat gelap */
-  border: 1px solid #64ffda !important;           /* Border Neon Cyan */
-  box-shadow: 0 0 20px rgba(100, 255, 218, 0.15); /* Efek Glow */
-  overflow: hidden;
-  position: relative;
-}
-
-/* Header Toast Admin */
-.toast-admin .toast-header {
-  background: rgba(100, 255, 218, 0.15) !important;
-  color: #64ffda !important;
-  border-bottom: 1px solid rgba(100, 255, 218, 0.3) !important;
-  font-weight: 600;
-}
-
-/* Body Toast Admin */
-.toast-admin .toast-body {
-  color: #e2e8f0 !important; /* Teks putih terang */
-  font-family: 'Courier New', Courier, monospace; /* Font ala terminal hacker */
-  font-size: 0.9rem;
-}
-
-/* Ikon di dalam header */
-.toast-admin .status-icon {
-  color: #64ffda;
-  animation: pulseAdmin 2s infinite;
-}
-
-/* Efek garis scan berjalan (Opsional, biar keren) */
-.toast-admin::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(100, 255, 218, 0.1), transparent);
-  transform: skewX(-20deg);
-  animation: scanLight 3s infinite linear;
-  pointer-events: none;
-}
-
-@keyframes pulseAdmin {
-  0% { opacity: 0.7; text-shadow: 0 0 5px #64ffda; }
-  50% { opacity: 1; text-shadow: 0 0 15px #64ffda; }
-  100% { opacity: 0.7; text-shadow: 0 0 5px #64ffda; }
-}
-
-@keyframes scanLight {
-  0% { left: -100%; }
-  100% { left: 200%; }
 }
