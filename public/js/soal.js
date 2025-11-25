@@ -1,5 +1,3 @@
-// ====== Bank Data MCQ (Total 13 Soal) ======
-// Kita akan pilih 7 soal secara acak dari sini
 const mcqQuestionBank = [
   {
     type:'mcq',
