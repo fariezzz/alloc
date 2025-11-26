@@ -478,7 +478,7 @@ const mcqQuestionBank = [
   // --- SOAL BARU 31 ---
   {
     type:'mcq',
-    question: "Mengapa 'dirty bit' (Soal sebelumnya) sangat penting bagi sistem memori virtual?",
+    question: "Mengapa 'dirty bit' sangat penting bagi sistem memori virtual?",
     options: [
       "Karena OS bisa tahu 'page' mana yang harus dihapus.",
       "Agar OS tahu bahwa 'page' tersebut tidak perlu ditulis kembali ke disk jika tidak 'dirty' (belum diubah).",
@@ -504,7 +504,7 @@ const mcqQuestionBank = [
   // --- SOAL BARU 33 ---
   {
     type:'mcq',
-    question: "Mengapa algoritma Optimal (Soal sebelumnya) tidak praktis untuk diimplementasikan di sistem operasi nyata?",
+    question: "Mengapa algoritma Optimal tidak praktis untuk diimplementasikan di sistem operasi nyata?",
     options: [
       "Terlalu lambat dalam mengambil keputusan.",
       "Membutuhkan perangkat keras (hardware) yang sangat mahal.",
