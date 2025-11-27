@@ -148,6 +148,9 @@ function computeExpected(parts, procs, algo) {
 
 // render current
 function renderCurrent() {
+  window.solveCurrentDrag = null;
+
+
   root.innerHTML = '';
 
   const adminBtn = document.getElementById("adminBtn");
@@ -1086,6 +1089,40 @@ function renderDrag(q) {
     nextBtn.disabled = true;
     nextBtn.textContent = (index < total - 1) ? "Soal Selanjutnya →" : "Lihat Hasil";
   }
+
+
+  window.solveCurrentDrag = () => {
+    // 1. Hitung jawaban yang benar
+    const { assign, waiting } = computeExpected(PARTS, PROCS, q.algo);
+
+    // 2. Isi Partisi (Animasi drag otomatis)
+    // Gunakan placeIntoSlot agar logika internal berjalan
+    Object.keys(assign).forEach(idx => {
+      const procName = assign[idx];
+      const slot = document.getElementById(`slot-${idx}`);
+      
+      // Pastikan slot ada dan prosesnya belum terisi
+      if (slot && !slot.dataset.proc) {
+        placeIntoSlot(slot, procName);
+      }
+    });
+
+    // 3. Isi Waiting List
+    // Gunakan addToWaiting agar logika internal berjalan
+    waiting.forEach(procName => {
+      // Cek agar tidak duplikat di waiting list
+      const rows = Array.from(document.querySelectorAll('#waitingBody tr'));
+      const isAlreadyInWaiting = rows.some(r => r.textContent.includes(procName));
+      
+      if (!isAlreadyInWaiting) {
+        addToWaiting(procName);
+      }
+    });
+
+    // Catatan: Karena placeIntoSlot/addToWaiting memanggil refreshNextButtonState(),
+    // maka evaluateAndShow() akan otomatis terpanggil saat item terakhir dimasukkan.
+  };
+
 }
 
 function ensureToastContainer() {
@@ -1507,80 +1544,36 @@ function adminAutoSolve() {
   const q = allQuestions[index];
 
   if (q.type === 'mcq') {
-    // 1. Set jawaban yang dipilih ke jawaban yang benar
+    // === LOGIKA MCQ (Tidak Berubah) ===
     userSelected[index] = q.answer;
-    
-    // 2. Update UI visual (klik tombolnya secara programatik)
     const opts = document.querySelectorAll('.option-btn');
     if (opts[q.answer]) {
-      // Hapus seleksi lama
       opts.forEach(b => b.classList.remove('selected'));
-      // Pilih yang benar
       opts[q.answer].classList.add('selected');
     }
-
-    // 3. Trigger tombol 'Jawab'
     const nBtn = document.getElementById('nextBtn');
     if (nBtn) {
       nBtn.disabled = false;
-      nBtn.click(); // Ini akan memicu logika penilaian di event listener global
+      nBtn.click(); // Trigger penilaian
     }
 
   } else if (q.type === 'drag') {
-   
-    renderCurrent(); 
     
-    const { assign, waiting } = computeExpected(q.partitions, q.processes, q.algo);
+    // 1. Reset soal ke kondisi awal (bersih)
+    renderCurrent();
     
-    for (const slotIdx in assign) {
-      const procName = assign[slotIdx];
-      const slot = document.getElementById(`slot-${slotIdx}`);
-      
-      if (slot) {
-         const procObj = q.processes.find(p => p.name === procName);
-         // Buat tampilan slot terisi
-         slot.dataset.proc = procName;
-         slot.innerHTML = `<div class="slot-content">
-            <span class="proc-label">${procName} (${procObj.size} KB)</span>
-            <button class="remove-btn" title="Hapus">✕</button>
-          </div>`;
+    // 2. Gunakan setTimeout kecil untuk memastikan DOM sudah siap setelah renderCurrent
+    setTimeout(() => {
+      if (typeof window.solveCurrentDrag === 'function') {
+        // 3. Panggil fungsi solver internal yang sudah kita buat di renderDrag
+        window.solveCurrentDrag();
+        
+      } else {
+        showToast("Gagal melakukan auto-solve. Handler tidak ditemukan.", "danger");
       }
-    }
-
-    const waitingBody = document.getElementById('waitingBody');
-    waitingBody.innerHTML = ''; 
-    
-    waiting.forEach(procName => {
-        const procObj = q.processes.find(p => p.name === procName);
-        const row = document.createElement('tr');
-        row.innerHTML = `<td class="process-slot filled"> 
-          <div class="slot-content">
-            <span class="proc-label">${procName} (${procObj.size} KB)</span>
-            <button class="remove-btn" title="Hapus">✕</button>
-          </div>
-        </td>`;
-        waitingBody.appendChild(row);
-    });
-    
-    const rightArea = document.querySelector('.right-area');
-    if (rightArea) rightArea.style.display = 'none';
-    
-    const nBtn = document.getElementById('nextBtn');
-    nBtn.disabled = false;
-    
-    // Trik: Kita simpan manual ke state userAnswers agar logika 'click' berhasil
-    const map = {};
-    for (let i=0; i<q.partitions.length; i++){
-        map[i] = assign[i] || null;
-    }
-    map.__waiting = waiting;
-    
-    
-    nBtn.click();
+    }, 50);
   }
 }
-
-
 
 
 
@@ -1627,7 +1620,6 @@ if (adminBtn) {
     showLoginModal();
   });
 
-  // (BARU) Event listener untuk show/hide password
   if (togglePassword) {
     togglePassword.addEventListener("click", () => {
       // Cek tipe input saat ini
