@@ -18,6 +18,22 @@ body {
   padding: 40px 0;
 }
 
+html,
+body {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
 
 /* ===== TITLE CLEAN & MINIMAL ===== */
 .quiz-title-clean {
