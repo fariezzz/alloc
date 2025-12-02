@@ -1645,8 +1645,8 @@ if (adminBtn) {
     const user = userInput.value;
     const pass = passInput.value;
 
-    const ADMIN_USER = atob("YWRpbA=="); // "adil"
-    const ADMIN_PASS = atob("MjQyNTI2"); // "242526"
+    const ADMIN_USER = atob("YWRpbA=="); 
+    const ADMIN_PASS = atob("MjQyNTI2");
     
     if (user === ADMIN_USER && pass === ADMIN_PASS) {
       // --- Login Sukses ---
