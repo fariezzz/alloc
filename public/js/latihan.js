@@ -1042,7 +1042,7 @@ function renderDrag(q) {
     
     // Validasi urutan
     if (procName !== expected) {
-      showToast(`Harap masukkan <strong>${expected}</strong> terlebih dahulu.`, 'info');
+       showToast(`Harap masukkan <strong>${expected}</strong> terlebih dahulu sebelum ${procName}.`, 'info');
       return;
     }
     
