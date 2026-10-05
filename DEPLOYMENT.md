@@ -87,6 +87,8 @@ sudo nano /etc/nginx/sites-available/alloc
 *Ganti `example.com www.example.com` pada baris `server_name` dengan domain atau IP publik VPS Anda.*
 *Pastikan path `root /var/www/alloc/public;` sesuai dengan lokasi project.*
 
+Server 2: 114.122.70.65
+
 Aktifkan konfigurasi dengan membuat symlink ke `sites-enabled`:
 ```bash
 sudo ln -s /etc/nginx/sites-available/alloc /etc/nginx/sites-enabled/
